@@ -9,7 +9,7 @@ const Message = new mongoose.Schema({
 }, { timestamps: true, versionKey: false })
 
 Message.post('deleteOne', { document: true, query: false }, async function (doc) {
-  Promise.all(doc.files.map(e => File.findByIdAndDelete(e)))
+  Promise.all(doc.files.map(e => File.findByIdAndDelete(e))).catch(console.error)
 })
 
 module.exports = mongoose.model('Message', Message)

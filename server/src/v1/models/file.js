@@ -22,8 +22,8 @@ File.statics = {
   async findByIdAndDelete (id) {
     const file = await this.findById(id)
     if (file._system.need_to_delete) {
-      v2.uploader.destroy(file._system.cloudinary_public_id)
-      return file.deleteOne()
+      v2.uploader.destroy(file._system.cloudinary_public_id).catch(console.error)
+      return file.deleteOne().catch(console.error)
     }
   },
 }

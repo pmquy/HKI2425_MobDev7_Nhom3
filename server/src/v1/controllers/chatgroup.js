@@ -72,20 +72,20 @@ class Controller {
   }
 
   #getAllSchema = JOI.object({
-    page: JOI.number().default(0),
+    offset: JOI.number().default(0),
     limit: JOI.number().default(10),
     q: JOI.string().default('{}')
   }).unknown(false).required()
 
   async getAll(req, res, next) {
     try {
-      const { page, limit, q } = await this.#getAllSchema.validateAsync(req.query)
+      const { offset, limit, q } = await this.#getAllSchema.validateAsync(req.query)
       const query = { ...JSON.parse(q), users: { $elemMatch: { user: req.user._id } } }
       const count = await this.model.countDocuments(query)
-      const groups = await this.model.find(query).skip(page * limit).limit(limit).select('-users')
+      const groups = await this.model.find(query).skip(offset).limit(limit).select('-users')
       res.json({
         data: groups,
-        hasMore: count > (page + 1) * limit
+        hasMore: count > offset + limit
       })
     } catch (error) {
       next(error)

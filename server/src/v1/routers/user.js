@@ -4,6 +4,7 @@ const { single } = require('../middlewares/multer');
 const auth = require('../middlewares/auth');
 
 router.post('/login', controller.login);
+router.post('/otp', controller.otp);
 router.post('/logout', auth({ required: true }), controller.logout);
 router.get('/auth', auth({ required: true }), controller.auth);
 router.get('/:id', controller.getById);
@@ -83,7 +84,7 @@ Response:
 URL: /
 Method: GET
 Query:
-  - page: number, mặc định là 0
+  - offset: number, mặc định là 0
   - limit: number, mặc định là 10
   - q: string, mặc định là '{}'
 Response:

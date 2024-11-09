@@ -41,7 +41,7 @@ ChatGroup.statics = {
 }
 
 ChatGroup.post("deleteOne", { document: true, query: false }, async function (doc) {
-  Message.find({ chatgroup: doc._id }).then(messages => Promise.all(messages.map(e => e.deleteOne())))
+  Message.find({ chatgroup: doc._id }).then(messages => Promise.all(messages.map(e => e.deleteOne()))).catch(console.error)
 })
 
 

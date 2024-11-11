@@ -45,8 +45,6 @@ const IMAGE_PROCESSING = 'IMAGE_PROCESSING';
         body: fs.readFileSync(path)
       }).then(res => res.json());
 
-      console.log(res1.results.channels[0].alternatives[0].transcript)
-
       const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBQm4dj0r3MaXTbhzHoZ6jLQVvbE448Pzc', {
         headers: {
           'Content-Type': 'application/json',
@@ -137,7 +135,6 @@ async function getFile(f) {
     type: f.mimetype,
     name: f.originalname,
   })
-  console.log(f)
   RabbitMQ.channel.sendToQueue(FILE_CREATING, Buffer.from(JSON.stringify({ _id: file._id, path: `./uploads/${f.filename}`, mimetype: f.mimetype })))
   return file._id.toString()
 }

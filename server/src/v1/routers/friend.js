@@ -6,6 +6,7 @@ router.post('/accept', controller.accept);
 router.post('/revoke', controller.revoke);
 router.post('/decline', controller.decline);
 router.post('/disfriend', controller.disfriend);
+router.get('/suggestions', controller.getSuggestions);
 router.get('/', controller.getAll);
 
 /*
@@ -63,6 +64,16 @@ Response:
   - 200: Object { message: string }
   - 500: Object { message: string }
 
+6. Lấy danh sách bạn bè
+URL: /
+Method: GET
+Query:
+- offset: number mặc định 0
+- limit: number, mặc định 10
+- q: string, query tìm kiếm, mặc định {}
+Response:
+  - 200: Array [{ _id: string, from: string, to: string, status: string }]
+  - 500: Object { message: string }
 
 */
 

@@ -2,9 +2,9 @@ package com.example.facebook.data
 
 import android.content.Context
 import android.content.SharedPreferences
-import com.example.facebook.model.User
 import com.example.facebook.network.ChatgroupApiService
 import com.example.facebook.network.FileApiService
+import com.example.facebook.network.FriendApiService
 import com.example.facebook.network.MessageApiService
 import com.example.facebook.network.UserApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -26,7 +26,9 @@ interface AppContainer {
     val fileRepository: FileRepository
     val chatGroupRepository: ChatGroupRepository
     val messageRepository: MessageRepository
-    val user: User?
+    val userPreferenceRepository: UserPreferenceRepository
+    val friendRepository: FriendRepository
+
 }
 
 class AppCookieJar(context: Context) : CookieJar {
@@ -66,7 +68,7 @@ class AppCookieJar(context: Context) : CookieJar {
 }
 
 class DefaultAppContainer(context: Context) : AppContainer {
-    private val baseUrl = "http://192.168.44.102:3000/"
+    private val baseUrl = "http://192.168.44.101:3000/"
     private val cookieJar = AppCookieJar(context)
 
     private val okHttpClient = OkHttpClient.Builder()
@@ -94,6 +96,10 @@ class DefaultAppContainer(context: Context) : AppContainer {
         SocketRepository(socket)
     }
 
+    override val userPreferenceRepository: UserPreferenceRepository by lazy {
+        UserPreferenceRepository(context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE))
+    }
+
     override val userRepository: UserRepository by lazy {
         NetworkUserRepository(retrofit.create(UserApiService::class.java))
     }
@@ -110,5 +116,8 @@ class DefaultAppContainer(context: Context) : AppContainer {
         NetworkFileRepository(retrofit.create(FileApiService::class.java))
     }
 
-    override val user = null
+    override val friendRepository: FriendRepository by lazy {
+        NetworkFriendRepository(retrofit.create(FriendApiService::class.java))
+    }
+
 }

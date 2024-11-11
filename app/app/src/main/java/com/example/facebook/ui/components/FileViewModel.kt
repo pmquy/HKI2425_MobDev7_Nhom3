@@ -15,29 +15,26 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.json.JSONObject
-import retrofit2.Response
 
 class FileViewModel(
     private val fileRepository: FileRepository,
     private val socketRepository: SocketRepository
 ) : ViewModel() {
 
-    private val files = mutableMapOf<String, MutableStateFlow<File>>()
+    private val files = mutableMapOf<String, MutableStateFlow<File?>>()
 
-    fun getFileById(id: String): MutableStateFlow<File> {
+    fun getFileById(id: String): MutableStateFlow<File?> {
         return files.getOrPut(id) {
-            MutableStateFlow(File()).also { flow ->
+            MutableStateFlow<File?>(null).also { flow ->
                 viewModelScope.launch {
-                    val response = getById(id)
+                    val response = fileRepository.getById(id)
                     if (response.isSuccessful) {
-                        flow.value = response.body()!!
+                        flow.value = response.body()
                     }
                 }
             }
         }
     }
-
-    suspend fun getById(id: String): Response<File> = fileRepository.getById(id)
 
     init {
         socketRepository.addEventListener("file_update") { it ->
@@ -45,7 +42,7 @@ class FileViewModel(
             val update = it[1] as JSONObject
             Log.d("FileViewModel", "Received update for file $id: $update")
             files[id]?.update {
-                it.copy(
+                it?.copy(
                     url = update.optString("url", it.url),
                     status = update.optString("status", it.status),
                     description = update.optString("description", it.description),

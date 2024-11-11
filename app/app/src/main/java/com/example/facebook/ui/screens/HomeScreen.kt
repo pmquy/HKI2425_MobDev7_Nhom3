@@ -1,24 +1,25 @@
 package com.example.facebook.ui.screens
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,12 +50,8 @@ fun HomeScreen(
 ) {
     val uiState by homeViewModel.uiState.collectAsState()
 
-    LaunchedEffect(true) {
-        try {
-            homeViewModel.getAll()
-        } catch (e: Exception) {
-            Log.e("HomeScreen", "Error getting chat groups", e)
-        }
+    LaunchedEffect(Unit) {
+        homeViewModel.init()
     }
 
     Scaffold(
@@ -74,14 +71,11 @@ fun HomeScreen(
                         IconButton({}) {
                             Icon(Icons.Default.Home, contentDescription = "Home")
                         }
-                        IconButton({}) {
+                        IconButton({ navController.navigate(FacebookScreen.FRIENDS.name) }) {
                             Icon(Icons.Default.Person, contentDescription = "Friends")
                         }
-                        IconButton({}) {
+                        IconButton({ navController.navigate(FacebookScreen.MY_ACCOUNT.name) }) {
                             Icon(Icons.Default.Settings, contentDescription = "Settings")
-                        }
-                        IconButton({}) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
                         }
 
                     }
@@ -92,17 +86,31 @@ fun HomeScreen(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
             )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { navController.navigate(FacebookScreen.CREATE_CHAT_GROUP.name) },
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
         }
     ) {
-        LazyColumn(contentPadding = it) {
-            items(uiState.chatGroups) { chatGroup ->
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .padding(8.dp)
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            uiState.chatGroups.forEach { chatGroup ->
                 key(chatGroup._id) {
                     ChatGroup(
                         chatGroup = chatGroup,
                         onClick = { navController.navigate("${FacebookScreen.CHAT_GROUP.name}/$it") },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(8.dp)
                     )
                 }
             }

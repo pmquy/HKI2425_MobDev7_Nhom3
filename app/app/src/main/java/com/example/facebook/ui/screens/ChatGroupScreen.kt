@@ -1,8 +1,5 @@
 package com.example.facebook.ui.screens
 
-import android.content.Context
-import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,8 +15,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -54,15 +53,15 @@ import com.example.facebook.model.User
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.components.File
 import com.example.facebook.ui.components.MediaPicker
+import com.example.facebook.util.uriToFile
 import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatGroupScreen(
     chatGroupViewModel: ChatGroupViewModel = viewModel(factory = ChatGroupViewModel.Factory),
-    navController: NavHostController
+    userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory),
+    navController: NavHostController,
 ) {
     val uiState by chatGroupViewModel.uiState.collectAsState()
     val scrollState = rememberScrollState()
@@ -79,12 +78,6 @@ fun ChatGroupScreen(
         }
     }
 
-    LaunchedEffect(uiState.newMessage, uiState.page) {
-        if (uiState.newMessage > 0 || uiState.page == 1) {
-            scrollState.animateScrollTo(scrollState.maxValue)
-        }
-    }
-
     Scaffold(
         topBar = {
             TopAppBar(
@@ -93,9 +86,7 @@ fun ChatGroupScreen(
                         File(
                             uiState.chatGroup.avatar, modifier = Modifier
                                 .size(32.dp)
-                                .clip(
-                                    CircleShape
-                                )
+                                .clip(CircleShape)
                         )
                         Text(uiState.chatGroup.name)
                     }
@@ -144,11 +135,13 @@ fun ChatGroupScreen(
             ) {
                 uiState.messages.forEach { message ->
                     key(message._id) {
-                        MessageWrapper(
-                            message = message,
-                            chatGroupViewModel,
-                            isMine = chatGroupViewModel.isMine(message)
-                        )
+                        val user = userViewModel.getUserById(message.user).collectAsState().value
+                        if (user != null)
+                            MessageWrapper(
+                                message = message,
+                                user = user,
+                                isMine = chatGroupViewModel.isMine(message)
+                            )
                     }
                 }
             }
@@ -159,19 +152,10 @@ fun ChatGroupScreen(
 @Composable
 fun MessageWrapper(
     message: Message,
-    chatGroupViewModel: ChatGroupViewModel,
+    user: User,
     isMine: Boolean,
     modifier: Modifier = Modifier
 ) {
-
-    var user by remember { mutableStateOf(User(firstName = "Unknown")) }
-
-    LaunchedEffect(message.user) {
-        val response = chatGroupViewModel.getUserById(message.user)
-        if (response.isSuccessful) {
-            user = response.body()!!
-        }
-    }
 
     Row(
         modifier = modifier
@@ -215,31 +199,20 @@ fun MessageMain(user: User, message: Message) {
         message.files.forEach { file ->
             File(
                 file,
-                modifier = Modifier.sizeIn(maxWidth = 250.dp)
+                modifier = Modifier.sizeIn(maxWidth = 200.dp)
             )
         }
         if (message.message.isNotEmpty()) Text(message.message, modifier = Modifier.padding(8.dp))
     }
 }
 
-fun uriToFile(context: Context, uri: Uri): File {
-    val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
-    val fileName = "file.jpg"
-    val file = File(context.cacheDir, fileName)
-    val outputStream = FileOutputStream(file)
-    inputStream?.use { input ->
-        outputStream.use { output ->
-            input.copyTo(output)
-        }
-    }
-    Log.d("TEST", file.absolutePath)
-    return file
-}
-
 @Composable
-fun CreateMessage(modifier: Modifier = Modifier, onCreate: (message: String, files: List<File>) -> Unit) {
+fun CreateMessage(
+    modifier: Modifier = Modifier,
+    onCreate: (message: String, files: List<Pair<File, String>>) -> Unit
+) {
     var messageText by remember { mutableStateOf("") }
-    var files by remember { mutableStateOf<List<File>>(emptyList()) }
+    var files by remember { mutableStateOf<List<Pair<File, String>>>(emptyList()) }
     val context = LocalContext.current
 
     Column {
@@ -260,10 +233,11 @@ fun CreateMessage(modifier: Modifier = Modifier, onCreate: (message: String, fil
                     uriToFile(context, it)
                 }
             }
-            Button(onClick = {
-                onCreate(messageText, files)
-            }) {
-                Text("Send")
+            IconButton(
+                onClick = { onCreate(messageText, files) },
+                enabled = messageText.isNotEmpty() || files.isNotEmpty()
+            ) {
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
             }
         }
 

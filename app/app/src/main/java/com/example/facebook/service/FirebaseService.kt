@@ -22,7 +22,7 @@ class FirebaseService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         remoteMessage.notification?.let {
             Log.d("FirebaseService", "Message Notification Body: ${it.body}")
-            showNotification(it.title ?: "No Title", it.body ?: "No Body")
+            showNotification(it)
         }
     }
 
@@ -32,7 +32,7 @@ class FirebaseService : FirebaseMessagingService() {
     }
 
     @SuppressLint("MissingPermission")
-    private fun showNotification(title: String, message: String) {
+    private fun showNotification(notification: RemoteMessage.Notification) {
         val channelId = "fcm_default_channel"
         val notificationId = 1
 
@@ -59,8 +59,8 @@ class FirebaseService : FirebaseMessagingService() {
 
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle(title)
-            .setContentText(message)
+            .setContentTitle(notification.title)
+            .setContentText(notification.body)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
 
         with(NotificationManagerCompat.from(this)) {

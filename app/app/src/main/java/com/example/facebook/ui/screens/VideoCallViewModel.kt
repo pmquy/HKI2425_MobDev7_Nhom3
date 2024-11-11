@@ -71,7 +71,7 @@ class VideoCallViewModel(
         socketRepository.sendMessage("call", id, JSONObject().apply {
             put("type", "join")
             put("from", socketRepository.getID())
-            put("id", application.user._id)
+            put("id", application.user?._id)
         })
         socketRepository.addEventListener("call") { it ->
             val data = it[0] as JSONObject
@@ -172,7 +172,7 @@ class VideoCallViewModel(
                                         put("to", data.getString("from"))
                                         put("from", socketRepository.getID())
                                         put("sdp", sdp?.description)
-                                        put("id", application.user._id)
+                                        put("id", application.user?._id)
                                     })
                                 }
 

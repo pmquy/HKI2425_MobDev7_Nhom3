@@ -29,7 +29,7 @@ interface ChatgroupApiService {
     suspend fun deleteById(@Path("id") id: String): Response<Void>
 
     @GET("api/v1/chatgroup")
-    suspend fun getAll(@Query("page") page: Int, @Query("limit") limit: Int, @Query("q") query: String): Response<GetAllChatGroupsResponse>
+    suspend fun getAll(@Query("offset") page: Int, @Query("limit") limit: Int, @Query("q") query: String): Response<GetAllChatGroupsResponse>
 
     @POST("api/v1/chatgroup/{id}/member")
     suspend fun addMembers(@Path("id") id: String, @Body members: List<Member>): Response<ChatGroup>

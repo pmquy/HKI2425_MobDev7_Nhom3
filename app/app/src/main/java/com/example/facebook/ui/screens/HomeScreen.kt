@@ -74,7 +74,7 @@ fun HomeScreen(
                         IconButton({}) {
                             Icon(Icons.Default.Home, contentDescription = "Home")
                         }
-                        IconButton({}) {
+                        IconButton({navController.navigate("${FacebookScreen.FRIENDS.name}/{id}")}) {
                             Icon(Icons.Default.Person, contentDescription = "Friends")
                         }
                         IconButton({}) {

@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.example.facebook.model.User
 import com.example.facebook.network.ChatgroupApiService
 import com.example.facebook.network.FileApiService
+import com.example.facebook.network.FriendsApiService
 import com.example.facebook.network.MessageApiService
 import com.example.facebook.network.UserApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -26,6 +27,7 @@ interface AppContainer {
     val fileRepository: FileRepository
     val chatGroupRepository: ChatGroupRepository
     val messageRepository: MessageRepository
+    val friendRepository: FriendRepository
     val user: User?
 }
 
@@ -66,7 +68,7 @@ class AppCookieJar(context: Context) : CookieJar {
 }
 
 class DefaultAppContainer(context: Context) : AppContainer {
-    private val baseUrl = "http://192.168.44.102:3000/"
+    private val baseUrl = "https://hki2425-mobdev7-nhom3.onrender.com/"
     private val cookieJar = AppCookieJar(context)
 
     private val okHttpClient = OkHttpClient.Builder()
@@ -108,6 +110,10 @@ class DefaultAppContainer(context: Context) : AppContainer {
 
     override val fileRepository: FileRepository by lazy {
         NetworkFileRepository(retrofit.create(FileApiService::class.java))
+    }
+
+    override val friendRepository: FriendRepository by lazy {
+        NetworkFriendRepository(retrofit.create(FriendsApiService::class.java))
     }
 
     override val user = null

@@ -3,6 +3,7 @@ package com.example.facebook.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.facebook.FacebookApplication
@@ -11,6 +12,7 @@ import com.example.facebook.data.UserRepository
 import com.example.facebook.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 data class UIState(
     var user: User? = null
@@ -25,6 +27,20 @@ class UserViewModel(
     private val _uiState = MutableStateFlow(UIState())
     val uiState = _uiState.asStateFlow()
 
+    private val users = mutableMapOf<String, MutableStateFlow<User?>>()
+
+    fun getUserById(id: String): MutableStateFlow<User?> {
+        return users.getOrPut(id) {
+            MutableStateFlow<User?>(null).also { flow ->
+                viewModelScope.launch {
+                    val response = userRepository.getById(id)
+                    if (response.isSuccessful) {
+                        flow.value = response.body()
+                    }
+                }
+            }
+        }
+    }
 
     suspend fun login(email: String, password: String) {
         val response = userRepository.login(email, password)

@@ -22,6 +22,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.facebook.ui.screens.ChatGroupScreen
+import com.example.facebook.ui.screens.FriendsScreen
 import com.example.facebook.ui.screens.HomeScreen
 import com.example.facebook.ui.screens.LoginScreen
 import com.example.facebook.ui.screens.UserViewModel
@@ -35,6 +36,7 @@ enum class FacebookScreen {
     CHAT_GROUP,
     LOADING,
     VIDEO_CALL,
+    FRIENDS
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -55,6 +57,7 @@ fun FacebookTopBar(
                 FacebookScreen.HOME -> Text("Home")
                 FacebookScreen.LOGIN -> Text("Login")
                 FacebookScreen.CHAT_GROUP -> Text("Chat Group")
+                FacebookScreen.FRIENDS -> Text("Friends")
                 else -> Text("")
             }
         },
@@ -108,6 +111,9 @@ fun FacebookApp() {
         }
         composable("${FacebookScreen.VIDEO_CALL.name}/{id}") {
             VideoCallScreen(navController =  navController)
+        }
+        composable("${FacebookScreen.FRIENDS.name}/{id}") {
+            FriendsScreen(userViewModel, navController =  navController)
         }
     }
 

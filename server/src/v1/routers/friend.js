@@ -64,17 +64,17 @@ Response:
   - 200: Object { message: string }
   - 500: Object { message: string }
 
-6. Lấy danh sách bạn bè
-URL: /
+6. Lấy danh sách gợi ý kết bạn
+URL: /suggestions
 Method: GET
-Query:
-- offset: number mặc định 0
-- limit: number, mặc định 10
-- q: string, query tìm kiếm, mặc định {}
+Content-Type: application/json
+Body:
+- offset: number, mặc định là 0
+- limit: number, mặc định là 10
+- q: string, mặc định là '{}'
 Response:
-  - 200: Array [{ _id: string, from: string, to: string, status: string }]
-  - 500: Object { message: string }
-
+  -200 : [String] // List of user id
+  -500: Object { message: string }
 */
 
 module.exports = router;

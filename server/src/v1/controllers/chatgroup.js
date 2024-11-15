@@ -166,21 +166,21 @@ class Controller {
   }
 
   #getMessagesSchema = JOI.object({
-    page: JOI.number().default(0),
+    offset: JOI.number().default(0),
     limit: JOI.number().default(10),
     q: JOI.string().default('{}')
   }).unknown(false).required()
 
   async getMessage(req, res, next) {
     try {
-      const { page, limit, q } = await this.#getMessagesSchema.validateAsync(req.query)
+      const { offset, limit, q } = await this.#getMessagesSchema.validateAsync(req.query)
       if (!await this.model.isMember(req.params.id, req.user._id)) throw new Error('You are not a member of this group')
       const query = { ...JSON.parse(q), chatgroup: req.params.id }
       const count = await Message.countDocuments(query)
-      const messages = (await Message.find(query).skip(page * limit).limit(limit).sort({ createdAt: -1 })).reverse()
+      const messages = (await Message.find(query).skip(offset).limit(limit).sort({ createdAt: -1 })).reverse()
       res.json({
         data: messages,
-        hasMore: count > (page + 1) * limit
+        hasMore: count > offset + limit
       })
     } catch (error) {
       next(error)

@@ -20,7 +20,7 @@ class Controller {
 
 
   #createSchema = JOI.object({
-    message: JOI.string().default('').when('files', { is: Joi.array().min(1), otherwise: Joi.required() }),
+    message: JOI.when('files', { is: JOI.array().min(1), then: JOI.string().allow(''), otherwise: JOI.string()}).required(),
     chatgroup: JOI.string().required(),
     files: JOI.array().items(JOI.string()).default([]),
   }).unknown(false).required()
@@ -33,13 +33,17 @@ class Controller {
       try {
         const { message, sender, users } = JSON.parse(msg.content.toString())
         const file = message.files[0] && await File.findById(message.files[0])
-        if (file?.type === 'audio' && !file.description) throw new Error("Processing the file")
+        if (file?.type === 'audio' && file.description == undefined) throw new Error("Processing the file")
+
+        RabbitMQ.channel.ack(msg)
+       
         Firebase.sendEachForMulticast({
           title: sender.firstName + ' ' + sender.lastName,
           body: file?.type === 'image' ? 'Đã gửi một hình ảnh' : file?.type === 'audio' ? file.description : file?.type === 'video' ? 'Đã gửi một video' : file ? 'Đã gửi một tệp tin' : message.message,
           imageUrl: file?.type === 'image' ? file.url : undefined
-        }, users.map(u => u.user)).catch(e => console.error(e))
-        RabbitMQ.channel.ack(msg)
+        }, users.map(u => u.user))
+          .catch(console.error)
+
       } catch (error) {
         console.error(error)
         setTimeout(() => RabbitMQ.channel.nack(msg), 2000)

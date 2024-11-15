@@ -45,18 +45,26 @@ const IMAGE_PROCESSING = 'IMAGE_PROCESSING';
         body: fs.readFileSync(path)
       }).then(res => res.json());
 
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBQm4dj0r3MaXTbhzHoZ6jLQVvbE448Pzc', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `Tóm tắt đoạn văn ${res1.results.channels[0].alternatives[0].transcript} bằng một câu ngắn bằng ngôn ngữ gốc (Giữ nguyên nếu văn bản dưới 20 từ)` }] }]
+      let description = res1.results.channels[0].alternatives[0].transcript
+
+      console.log(description)
+
+      if(description.length > 30) {
+        description = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBQm4dj0r3MaXTbhzHoZ6jLQVvbE448Pzc', {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `Tóm tắt đoạn văn ${description} ngắn nhất có thể bằng ngôn ngữ gốc` }] }]
+          })
         })
-      })
-        .then(res => res.json())
-      SocketIO.io.emit("file_update", _id, { description: res.candidates[0].content.parts[0].text })
-      await File.findByIdAndUpdate(_id, { description: res.candidates[0].content.parts[0].text })
+          .then(res => res.json())
+          .then(res => res.candidates[0].content.parts[0].text)
+      }
+
+      SocketIO.io.emit("file_update", _id, { description })
+      await File.findByIdAndUpdate(_id, { description })
       fs.unlinkSync(path, () => { })
       RabbitMQ.channel.ack(message)
     } catch (error) {
@@ -118,7 +126,7 @@ const upload = multer({
       },
       filename: (req, file, cb) => {
         file.mimetype = file.mimetype.split('/')[0]
-        cb(null, Date.now() + file.originalname)
+        cb(null, file.originalname)
       }
     }),
   limits: 10 * 1024,

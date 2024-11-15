@@ -29,3 +29,9 @@ data class RegisterRequest(
     val firstName: String = "",
     val lastName: String = "",
 )
+
+@Serializable
+data class OtpRequest(
+    val email: String ="",
+    val otp: String= ""
+)

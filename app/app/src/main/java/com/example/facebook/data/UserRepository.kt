@@ -1,6 +1,8 @@
 package com.example.facebook.data
 
 import com.example.facebook.model.LoginRequest
+import com.example.facebook.model.OtpRequest
+import com.example.facebook.model.RegisterRequest
 import com.example.facebook.model.User
 import com.example.facebook.network.UserApiService
 import retrofit2.Response
@@ -9,6 +11,8 @@ interface UserRepository {
     suspend fun login(email: String, password: String): Response<User>
     suspend fun auth(token: String?, socketId: String?): Response<User>
     suspend fun getById(id: String): Response<User>
+    suspend fun signUp(firstName: String, lastName: String ,email: String, password: String): Response<User>
+    suspend fun verifyOtp(email: String, otp: String): Response<User>
 }
 
 class NetworkUserRepository(
@@ -22,4 +26,10 @@ class NetworkUserRepository(
         userApiService.auth(token, socketId)
 
     override suspend fun getById(id: String): Response<User> = userApiService.getById(id)
+
+    override suspend fun signUp(firstName: String, lastName: String, email: String, password: String): Response<User> =
+        userApiService.signUp(RegisterRequest(firstName = firstName, lastName = lastName, email = email, password = password))
+
+    override suspend fun verifyOtp(email: String, otp: String): Response<User> =
+        userApiService.verifyOtp(OtpRequest(email = email, otp = otp))
 }

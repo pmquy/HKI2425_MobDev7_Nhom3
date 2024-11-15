@@ -48,6 +48,18 @@ class UserViewModel(
         application.user = response.body()!!
     }
 
+    suspend fun signUp(firstName: String, lastName: String, email: String, password: String) {
+        val response = userRepository.signUp(firstName, lastName, email, password)
+        if (!response.isSuccessful) throw Exception("Error signing up")
+        application.user = response.body()!!
+    }
+
+    suspend fun verifyOtp(email: String, otp: String) {
+        val response = userRepository.verifyOtp(email, otp)
+        if (!response.isSuccessful) throw Exception("Error signing up")
+        application.user = response.body()!!
+    }
+
     suspend fun auth(token: String): Boolean {
         val response = userRepository.auth(token, socketRepository.getID())
         if (!response.isSuccessful) return false

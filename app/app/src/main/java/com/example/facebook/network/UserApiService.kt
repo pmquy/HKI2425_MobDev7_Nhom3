@@ -1,6 +1,8 @@
 package com.example.facebook.network
 
 import com.example.facebook.model.LoginRequest
+import com.example.facebook.model.OtpRequest
+import com.example.facebook.model.RegisterRequest
 import com.example.facebook.model.User
 import retrofit2.Response
 import retrofit2.http.Body
@@ -27,4 +29,9 @@ interface UserApiService {
         @Path("id") id: String
     ): Response<User>
 
+    @POST("api/v1/user")
+    suspend fun signUp(@Body signUpRequest: RegisterRequest): Response<User>
+
+    @POST("api/v1/user/otp")
+    suspend fun verifyOtp(@Body otpRequest: OtpRequest): Response<User>
 }

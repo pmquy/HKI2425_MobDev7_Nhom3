@@ -21,14 +21,6 @@ data class LoginRequest(
     val password: String = "",
 )
 
-@Serializable
-data class RegisterRequest(
-    val phoneNumber: String = "",
-    val email: String = "",
-    val password: String = "",
-    val firstName: String = "",
-    val lastName: String = "",
-)
 
 @Serializable
 data class OtpRequest(

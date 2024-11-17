@@ -1,11 +1,16 @@
 package com.example.facebook.network
 
 import com.example.facebook.model.LoginRequest
+import com.example.facebook.model.OtpRequest
 import com.example.facebook.model.User
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -27,4 +32,17 @@ interface UserApiService {
         @Path("id") id: String
     ): Response<User>
 
+    @Multipart
+    @POST("api/v1/user")
+    suspend fun register(
+        @Part("firstName") firstName: RequestBody,
+        @Part("lastName") lastName: RequestBody,
+        @Part("email") email: RequestBody,
+        @Part("password") password: RequestBody,
+        @Part("phoneNumber") phoneNumber: RequestBody,
+        @Part avatar: MultipartBody.Part
+    ): Response<User>
+
+    @POST("api/v1/user/otp")
+    suspend fun verifyOtp(@Body otpRequest: OtpRequest): Response<User>
 }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,6 +26,7 @@ import com.example.facebook.ui.screens.ChatGroupScreen
 import com.example.facebook.ui.screens.FriendsScreen
 import com.example.facebook.ui.screens.HomeScreen
 import com.example.facebook.ui.screens.LoginScreen
+import com.example.facebook.ui.screens.SignUpScreen
 import com.example.facebook.ui.screens.UserViewModel
 import com.example.facebook.ui.screens.VideoCallScreen
 import com.google.firebase.messaging.FirebaseMessaging
@@ -33,6 +35,7 @@ import kotlinx.coroutines.launch
 enum class FacebookScreen {
     HOME,
     LOGIN,
+    SIGNUP,
     CHAT_GROUP,
     LOADING,
     VIDEO_CALL,
@@ -102,6 +105,9 @@ fun FacebookApp() {
         }
         composable(FacebookScreen.HOME.name) {
             HomeScreen(navController = navController)
+        }
+        composable(FacebookScreen.SIGNUP.name) {
+            SignUpScreen(navController = navController)
         }
         composable(FacebookScreen.LOGIN.name) {
             LoginScreen(navController =  navController)

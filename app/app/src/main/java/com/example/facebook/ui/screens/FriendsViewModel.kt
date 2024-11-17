@@ -10,6 +10,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.facebook.FacebookApplication
 import com.example.facebook.data.FriendRepository
 import com.example.facebook.model.Friend
+import com.example.facebook.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -86,7 +87,7 @@ class FriendsViewModel(
                 if (!response.isSuccessful) throw Exception("Error getting requests")
                 _uiState.update {
                     it.copy(
-                        requests = it.requests + response.body()!!.data,
+                        requests = response.body()!!.data,
                     )
                 }
             }
@@ -121,8 +122,7 @@ class FriendsViewModel(
         }
     }
 
-    suspend fun getFriends() {
-
+    fun getFriends() {
         try {
             viewModelScope.launch {
                 val response = friendRepository.getAll(
@@ -136,7 +136,7 @@ class FriendsViewModel(
 
                 _uiState.update {
                     it.copy(
-                        friends = it.friends + friends.data
+                        friends = friends.data
                     )
                 }
             }
@@ -157,7 +157,7 @@ class FriendsViewModel(
                 if (!response.isSuccessful) throw Exception("Error getting suggestions")
                 _uiState.update {
                     it.copy(
-                        suggestions = it.suggestions + response.body()!!.data,
+                        suggestions = response.body()!!.data,
                     )
                 }
             }

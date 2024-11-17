@@ -4,6 +4,7 @@ const JWT = require('jsonwebtoken')
 const Redis = require('../configs/redis')
 const Mailer = require('../configs/mailer')
 const File = require('../models/file')
+const Friend = require('../models/friend')
 
 const TOKEN_SECRET = process.env.JWT_SECRET
 const TOKEN_EXPIRY = '30d'
@@ -81,7 +82,7 @@ class Controller {
 
   #loginSchema = JOI.object({
     email: JOI.string().email().required(),
-    password: JOI.string().min(5).max(12).required()
+    password: JOI.string().required()
   }).unknown(false).required()
 
   async login(req, res, next) {
@@ -110,12 +111,15 @@ class Controller {
     password: JOI.string().min(5).max(12),
     avatar: JOI.string(),
     phoneNumber: JOI.string()
-  }).unknown(false).required().custom((value, helpers) =>
-    BCRYPT.hash(value.password, 10)
-      .then(hashed => {
-        value.password = hashed
-        return value
-      })
+  }).unknown(false).required().custom((value, helpers) => {
+    if (value.password)
+      return BCRYPT.hash(value.password, 10)
+        .then(hashed => {
+          value.password = hashed
+          return value
+        })
+    else return value
+  }
   )
 
   async update(req, res, next) {
@@ -168,7 +172,16 @@ class Controller {
     try {
       const user = await this.model.findById(req.params.id).select('-password -_system')
       if (!user) throw new Error('User not found')
-      res.json(user)
+      let friendStatus = 'suggest'
+      const from = await Friend.findOne({ from: req.user._id, to: req.params.id })
+      const to = await Friend.findOne({ from: req.params.id, to: req.user._id })
+      if (from?.status === 'accepted' || to?.status === 'accepted') friendStatus = 'friend'
+      else if (from?.status === 'pending') friendStatus = 'send'
+      else if (to?.status === 'pending') friendStatus = 'request'
+      res.json({
+        ...user.toObject(),
+        friendStatus
+      })
     } catch (error) {
       next(error)
     }
@@ -182,8 +195,12 @@ class Controller {
 
   async getAll(req, res, next) {
     try {
-      const {limit, offset, q} = await this.#getAllSchema.validateAsync(req.query)
+      const { limit, offset, q } = await this.#getAllSchema.validateAsync(req.query)
       const query = JSON.parse(q)
+      if (query.name) {
+        query.$text = { $search: query.name }
+        delete query.name
+      }
       const count = await this.model.countDocuments(query)
       const users = await this.model.find(query).select('-password -_system').limit(limit).skip(offset)
       res.json({

@@ -176,6 +176,10 @@ class Controller {
       const { offset, limit, q } = await this.#getMessagesSchema.validateAsync(req.query)
       if (!await this.model.isMember(req.params.id, req.user._id)) throw new Error('You are not a member of this group')
       const query = { ...JSON.parse(q), chatgroup: req.params.id }
+      if(query.message) {
+        query.$text = { $search: query.message }
+        delete query.message
+      }
       const count = await Message.countDocuments(query)
       const messages = (await Message.find(query).skip(offset).limit(limit).sort({ createdAt: -1 })).reverse()
       res.json({

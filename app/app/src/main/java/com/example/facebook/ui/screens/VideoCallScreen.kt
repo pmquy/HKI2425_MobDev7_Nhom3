@@ -44,7 +44,7 @@ fun VideoCallScreen(
     val id = navController.currentBackStackEntry?.arguments?.getString("id") ?: ""
     val context = LocalContext.current
 
-    val uiState = videoCallViewModel.uiState.collectAsState()
+    val uiState = videoCallViewModel.uiState.collectAsState().value
 
 
     val launcher = rememberLauncherForActivityResult(
@@ -139,8 +139,8 @@ fun VideoCallScreen(
         floatingActionButtonPosition = FabPosition.Center
     ) {
         Column(modifier = Modifier.padding(it)) {
-            AndroidView(factory = { uiState.value.mainSurfaceViewRenderer }, modifier = Modifier.weight(1f).fillMaxWidth()) {}
-            uiState.value.users.forEach { user ->
+            AndroidView(factory = { uiState.mainSurfaceViewRenderer }, modifier = Modifier.weight(1f).fillMaxWidth()) {}
+            uiState.users.forEach { user ->
                 AndroidView(factory = { user.surfaceViewRenderer }, modifier = Modifier.weight(1f).fillMaxWidth()) {}
             }
         }

@@ -1,5 +1,6 @@
 package com.example.facebook.data
 
+import com.example.facebook.model.GetUsersResponse
 import com.example.facebook.model.LoginRequest
 import com.example.facebook.model.OtpRequest
 import com.example.facebook.model.User
@@ -27,8 +28,18 @@ interface UserRepository {
         avatar: Pair<File, String>
     ): Response<User>
 
+    suspend fun update(
+        firstName: String?,
+        lastName: String?,
+        password: String?,
+        phoneNumber: String?,
+        avatar: Pair<File, String>?
+    ): Response<User>
+
     suspend fun otp(email: String, otp: String): Response<Void>
     suspend fun logout(): Response<Void>
+
+    suspend fun getUsers(offset: Int, limit: Int, q: String): Response<GetUsersResponse>
 }
 
 class NetworkUserRepository(
@@ -62,8 +73,32 @@ class NetworkUserRepository(
         )
     )
 
+    override suspend fun update(
+        firstName: String?,
+        lastName: String?,
+        password: String?,
+        phoneNumber: String?,
+        avatar: Pair<File, String>?,
+    ): Response<User> = userApiService.update(
+        firstName?.toRequestBody("text/plain".toMediaType()),
+        lastName?.toRequestBody("text/plain".toMediaType()),
+        password?.toRequestBody("text/plain".toMediaType()),
+        phoneNumber?.toRequestBody("text/plain".toMediaType()),
+        avatar?.let {
+            MultipartBody.Part.createFormData(
+                "avatar", it.first.name, it.first.asRequestBody(it.second.toMediaType())
+            )
+        }
+    )
+
     override suspend fun otp(email: String, otp: String) =
         userApiService.otp(OtpRequest(email = email, otp = otp))
 
     override suspend fun logout() = userApiService.logout()
+
+    override suspend fun getUsers(
+        offset: Int,
+        limit: Int,
+        q: String,
+    ): Response<GetUsersResponse> = userApiService.getUsers(offset, limit, q)
 }

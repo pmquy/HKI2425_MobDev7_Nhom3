@@ -68,7 +68,8 @@ class AppCookieJar(context: Context) : CookieJar {
 }
 
 class DefaultAppContainer(context: Context) : AppContainer {
-    private val baseUrl = "http://192.168.44.101:3000/"
+//    private val baseUrl = "https://hki2425-mobdev7-nhom3.onrender.com/"
+    private val baseUrl = "http://192.168.13.102:3000/"
     private val cookieJar = AppCookieJar(context)
 
     private val okHttpClient = OkHttpClient.Builder()

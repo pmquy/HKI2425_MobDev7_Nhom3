@@ -1,5 +1,6 @@
 package com.example.facebook.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,9 +19,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Send
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -42,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -53,7 +51,6 @@ import com.example.facebook.model.User
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.components.File
 import com.example.facebook.ui.components.MediaPicker
-import com.example.facebook.util.uriToFile
 import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -75,6 +72,11 @@ fun ChatGroupScreen(
     LaunchedEffect(scrollState.value) {
         if (scrollState.value == 0) {
             chatGroupViewModel.getMoreMessages()
+        }
+    }
+    LaunchedEffect(scrollState.maxValue) {
+        if(scrollState.value >= scrollState.maxValue - 500) {
+            scrollState.animateScrollTo(scrollState.maxValue)
         }
     }
 
@@ -140,8 +142,10 @@ fun ChatGroupScreen(
                             MessageWrapper(
                                 message = message,
                                 user = user,
-                                isMine = chatGroupViewModel.isMine(message)
-                            )
+                                isMine = chatGroupViewModel.isMine(message),
+                            ) {
+                                navController.navigate("${FacebookScreen.PROFILE.name}/${user._id}")
+                            }
                     }
                 }
             }
@@ -154,7 +158,8 @@ fun MessageWrapper(
     message: Message,
     user: User,
     isMine: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
 
     Row(
@@ -171,9 +176,9 @@ fun MessageWrapper(
                 MessageMain(user = user, message = message)
             }
             Spacer(modifier = Modifier.width(8.dp))
-            MessageUser(user)
+            MessageUser(user, onClick = onClick)
         } else {
-            MessageUser(user)
+            MessageUser(user, onClick = onClick)
             Spacer(modifier = Modifier.width(8.dp))
             Column {
                 MessageMain(user = user, message = message)
@@ -183,12 +188,13 @@ fun MessageWrapper(
 }
 
 @Composable
-fun MessageUser(user: User) {
+fun MessageUser(user: User, onClick : () -> Unit = {}) {
     File(
         user.avatar,
         Modifier
             .size(32.dp)
             .clip(shape = CircleShape)
+            .clickable { onClick() }
     )
 }
 
@@ -213,7 +219,6 @@ fun CreateMessage(
 ) {
     var messageText by remember { mutableStateOf("") }
     var files by remember { mutableStateOf<List<Pair<File, String>>>(emptyList()) }
-    val context = LocalContext.current
 
     Column {
 
@@ -229,9 +234,7 @@ fun CreateMessage(
                 placeholder = { Text("Type a message") }
             )
             MediaPicker {
-                files = it.map {
-                    uriToFile(context, it)
-                }
+                files = it
             }
             IconButton(
                 onClick = { onCreate(messageText, files) },

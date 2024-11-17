@@ -108,7 +108,7 @@ fun RegisterScreen(
                     )
                     if (uiState.avatar != null) {
                         AsyncImage(
-                            model = uiState.avatar,
+                            model = uiState.avatar?.first,
                             contentDescription = "Avatar",
                             modifier = Modifier
                                 .size(100.dp)

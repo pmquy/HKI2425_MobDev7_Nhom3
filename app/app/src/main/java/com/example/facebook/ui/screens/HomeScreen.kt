@@ -64,7 +64,7 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Facebook")
-                        IconButton({}) {
+                        IconButton({ navController.navigate(FacebookScreen.FIND_USER.name) }) {
                             Icon(Icons.Default.Search, contentDescription = "Search")
                         }
                         Spacer(modifier = Modifier.width(24.dp))

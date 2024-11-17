@@ -1,5 +1,6 @@
 package com.example.facebook
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -14,13 +15,15 @@ import com.example.facebook.ui.theme.FacebookTheme
 
 class MainActivity : ComponentActivity() {
 
-    private val permissionRequest = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-        if (isGranted) {
-            // Permission is granted
-        } else {
-            // Permission is denied
+    private val permissionRequest =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            if (isGranted) {
+                // Permission is granted
+            } else {
+                // Permission is denied
+            }
         }
-    }
+
 
     @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,48 +32,52 @@ class MainActivity : ComponentActivity() {
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.CAMERA
+                Manifest.permission.CAMERA
             ) -> {
 
             }
+
             else -> {
-                permissionRequest.launch(android.Manifest.permission.CAMERA)
+                permissionRequest.launch(Manifest.permission.CAMERA)
             }
         }
 
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.RECORD_AUDIO
+                Manifest.permission.RECORD_AUDIO
             ) -> {
 
             }
+
             else -> {
-                permissionRequest.launch(android.Manifest.permission.RECORD_AUDIO)
+                permissionRequest.launch(Manifest.permission.RECORD_AUDIO)
             }
         }
 
         when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.READ_EXTERNAL_STORAGE
+                Manifest.permission.READ_EXTERNAL_STORAGE
             ) -> {
 
             }
+
             else -> {
-                permissionRequest.launch(android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                permissionRequest.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
             }
         }
 
-        when(PackageManager.PERMISSION_GRANTED) {
+        when (PackageManager.PERMISSION_GRANTED) {
             ContextCompat.checkSelfPermission(
                 this,
-                android.Manifest.permission.POST_NOTIFICATIONS
+                Manifest.permission.POST_NOTIFICATIONS
             ) -> {
 
             }
+
             else -> {
-                permissionRequest.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                permissionRequest.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         }
 

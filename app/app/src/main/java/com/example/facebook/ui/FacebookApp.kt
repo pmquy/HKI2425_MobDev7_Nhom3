@@ -13,10 +13,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.facebook.ui.screens.ChatGroupScreen
 import com.example.facebook.ui.screens.CreateChatGroupScreen
+import com.example.facebook.ui.screens.FindUserScreen
 import com.example.facebook.ui.screens.FriendScreen
 import com.example.facebook.ui.screens.HomeScreen
 import com.example.facebook.ui.screens.LoginScreen
 import com.example.facebook.ui.screens.MyAccountScreen
+import com.example.facebook.ui.screens.ProfileScreen
 import com.example.facebook.ui.screens.RegisterScreen
 import com.example.facebook.ui.screens.UserViewModel
 import com.example.facebook.ui.screens.VideoCallScreen
@@ -30,7 +32,9 @@ enum class FacebookScreen {
     REGISTER,
     MY_ACCOUNT,
     FRIENDS,
-    CREATE_CHAT_GROUP
+    CREATE_CHAT_GROUP,
+    FIND_USER,
+    PROFILE,
 }
 
 @RequiresApi(Build.VERSION_CODES.TIRAMISU)
@@ -80,6 +84,14 @@ fun FacebookApp() {
         }
         composable(FacebookScreen.CREATE_CHAT_GROUP.name) {
             CreateChatGroupScreen(navController = navController)
+        }
+
+        composable(FacebookScreen.FIND_USER.name) {
+            FindUserScreen(navController = navController)
+        }
+
+        composable("${FacebookScreen.PROFILE.name}/{id}") {
+            ProfileScreen(navController = navController)
         }
     }
 

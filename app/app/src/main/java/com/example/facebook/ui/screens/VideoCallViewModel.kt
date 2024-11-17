@@ -10,7 +10,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.facebook.FacebookApplication
 import com.example.facebook.data.SocketRepository
-import com.example.facebook.data.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.json.JSONObject
@@ -51,7 +50,6 @@ data class VideoCallUiState(
 
 class VideoCallViewModel(
     private val application: FacebookApplication,
-    private val userRepository: UserRepository,
     private val socketRepository: SocketRepository
 ) : ViewModel() {
 
@@ -287,9 +285,6 @@ class VideoCallViewModel(
                         object : SdpObserver {
                             override fun onCreateSuccess(p0: SessionDescription?) {
                                 Log.d("RTCClient", "onCreateSuccess: $p0")
-                            }
-
-                            override fun onSetSuccess() {
                                 peerConnection.createAnswer(object : SdpObserver {
                                     override fun onCreateSuccess(sdp: SessionDescription?) {
                                         peerConnection.setLocalDescription(object : SdpObserver {
@@ -328,7 +323,10 @@ class VideoCallViewModel(
 
                                     }
                                 }, MediaConstraints())
+                            }
 
+                            override fun onSetSuccess() {
+                                Log.d("RTCClient", "onSetSuccess")
                             }
 
                             override fun onCreateFailure(p0: String?) {
@@ -340,6 +338,8 @@ class VideoCallViewModel(
                             }
                         }, SessionDescription(SessionDescription.Type.OFFER, data.getString("sdp"))
                     )
+
+
 
                     peerConnection.addTrack(localVideoTrack)
                     peerConnection.addTrack(localAudioTrack)
@@ -516,7 +516,6 @@ class VideoCallViewModel(
 
                 VideoCallViewModel(
                     application = application,
-                    userRepository = userRepository,
                     socketRepository = socketRepository
                 )
             }

@@ -1,11 +1,14 @@
 package com.example.facebook.ui.components
 
 import android.net.Uri
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
@@ -15,11 +18,13 @@ import androidx.compose.material3.CardColors
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -32,10 +37,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.PlayerView
 import coil.compose.AsyncImage
 import com.example.facebook.R.drawable
+import com.example.facebook.util.toTime
 
 @Composable
 fun File(
@@ -50,28 +57,30 @@ fun File(
 
         when (file?.type) {
             "image" -> {
-                if(file.status == "safe" || view) {
+                if (file.status == "safe" || view) {
                     AsyncImage(
                         model = file.url,
                         contentDescription = file.name,
                         contentScale = ContentScale.Crop,
                     )
-                } else if(file.status == "unsafe") {
+                } else if (file.status == "unsafe") {
                     AsyncImage(
                         model = file.blurUrl,
                         contentDescription = file.name,
                         contentScale = ContentScale.Crop,
                     )
-                    Column (modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text("This image has been flagged as inappropriate.")
-                        Button( onClick = {view = true}) {
+                        Button(onClick = { view = true }) {
                             Text("View anyway")
                         }
                     }
                 } else {
                     CircularProgressIndicator(
-                        modifier = Modifier
-                            .align(Alignment.Center)
+                        modifier = Modifier.align(Alignment.Center)
                     )
                     AsyncImage(
                         model = file.blurUrl,
@@ -83,15 +92,12 @@ fun File(
             }
 
             "video" -> {
-                if (file.url.isNotEmpty())
-                    VideoFile(file.url)
+                VideoFile(file.url)
             }
 
             "audio" -> {
                 Column {
-                    if (file.url.isNotEmpty())
-                        AudioFile(file.url)
-                    Text(file.description)
+                    AudioFile(file.url, file.description)
                 }
             }
 
@@ -119,11 +125,11 @@ fun VideoFile(url: String) {
             PlayerView(it).apply {
                 player = exoPlayer
             }
-        },
-        modifier = Modifier.fillMaxSize()
+        }, modifier = Modifier.fillMaxSize()
     )
 
     DisposableEffect(Unit) {
+
         onDispose {
             exoPlayer.release()
         }
@@ -131,8 +137,12 @@ fun VideoFile(url: String) {
 }
 
 @Composable
-fun AudioFile(url: String) {
+fun AudioFile(url: String, description: String) {
     val context = LocalContext.current
+    var isPlaying by remember { mutableStateOf(false) }
+    var duration by remember { mutableLongStateOf(1000) }
+    var currentPosition by remember { mutableLongStateOf(0) }
+    val handler = remember { Handler(Looper.getMainLooper()) }
 
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
@@ -141,26 +151,84 @@ fun AudioFile(url: String) {
         }
     }
 
+    val onCardClick = {
+        if (isPlaying) {
+            isPlaying = false
+            exoPlayer.pause()
+        } else {
+            isPlaying = true
+            exoPlayer.play()
+        }
+    }
+
+    DisposableEffect(Unit) {
+        val updatePositionRunnable = object : Runnable {
+            override fun run() {
+                currentPosition = exoPlayer.currentPosition / 1000
+                handler.postDelayed(this, 1000) // Update every second
+            }
+        }
+
+        val listener = object : Player.Listener {
+            override fun onPlaybackStateChanged(playbackState: Int) {
+                duration = (exoPlayer.duration / 1000).coerceAtLeast(1)
+            }
+
+            override fun onIsPlayingChanged(a: Boolean) {
+                isPlaying = a
+                currentPosition = exoPlayer.currentPosition / 1000
+                if(a) {
+                    handler.post(updatePositionRunnable)
+                } else {
+                    handler.removeCallbacks(updatePositionRunnable)
+                }
+            }
+        }
+
+        exoPlayer.addListener(listener)
+
+        onDispose {
+            exoPlayer.removeListener(listener)
+            handler.removeCallbacks(updatePositionRunnable)
+            exoPlayer.release()
+        }
+    }
+
     Card(
-        onClick = { if (exoPlayer.isPlaying) exoPlayer.pause() else exoPlayer.play() },
-        colors = CardColors(
+        onClick = onCardClick, colors = CardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             disabledContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
             disabledContainerColor = MaterialTheme.colorScheme.primaryContainer
         )
     ) {
-        Row(Modifier.padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(painterResource(drawable.baseline_mic_24), contentDescription = "")
-            Text("00:00 / 01:00")
-            Icon(Icons.Default.PlayArrow, contentDescription = "")
-        }
-    }
-
-
-    DisposableEffect(Unit) {
-        onDispose {
-            exoPlayer.release()
+        Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Icon(painterResource(drawable.baseline_mic_24), contentDescription = "")
+                Text("${currentPosition.toTime()} / ${duration.toTime()}")
+                if (isPlaying) Icon(
+                    painterResource(drawable.baseline_pause_24),
+                    contentDescription = ""
+                )
+                else Icon(
+                    Icons.Default.PlayArrow, contentDescription = ""
+                )
+            }
+            Slider(
+                value = currentPosition.toFloat(),
+                onValueChange = {
+                    exoPlayer.play()
+                    exoPlayer.seekTo((it * 1000).toLong())
+                },
+                valueRange = 0f..duration.toFloat(),
+                steps = 100
+            )
+            if (description.isNotBlank()) {
+                Text(description)
+            }
         }
     }
 }

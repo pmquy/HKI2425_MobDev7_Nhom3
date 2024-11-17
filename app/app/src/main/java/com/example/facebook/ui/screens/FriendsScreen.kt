@@ -4,8 +4,10 @@ import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -52,6 +54,7 @@ fun FriendsScreen(
             friendsViewModel.getRequests()
             friendsViewModel.getSuggestions()
             friendsViewModel.getSends()
+            Log.e("FriendScreen", "GetAlls", )
         } catch (e: Exception) {
             Log.e("FriendScreen", "Error getting friends", e)
         }
@@ -74,14 +77,16 @@ fun FriendsScreen(
                 Card  (
                     onClick = {
                         friendsViewModel.changeSubScreen(FriendSubScreen.SUGGESTS)
-                        friendsViewModel.getSuggestions()
+                        Log.e("FriendScreeen", uiState.value.suggestions.toString())
                               },
                     content = {
                         Text("Gợi ý", modifier = Modifier.padding(10.dp))
                     }
                 )
                 Card (
-                    onClick = {friendsViewModel.changeSubScreen(FriendSubScreen.REQUESTS)},
+                    onClick = {
+                        friendsViewModel.changeSubScreen(FriendSubScreen.REQUESTS)
+                              },
                     content = {
                         Text("Lời mời kết bạn", modifier = Modifier.padding(10.dp))
                     }
@@ -89,6 +94,7 @@ fun FriendsScreen(
                 Card (
                     onClick = {
                         friendsViewModel.changeSubScreen(FriendSubScreen.ALL)
+                        Log.e("FriendScreeen", uiState.value.friends.toString())
                               },
                     content = {
                         Text("Tất cả bạn bè", modifier = Modifier.padding(10.dp))
@@ -97,23 +103,20 @@ fun FriendsScreen(
             }
 
             when (uiState.value.currentSubScreen) {
-                FriendSubScreen.SUGGESTS -> FriendSuggestList(
-                    uiState.value.suggestions.map {id ->
-                        userViewModel.getUserById(id).value
-                    },
-                    friendsViewModel
+                FriendSubScreen.SUGGESTS -> FriendSuggestion(
+                    uiState.value.suggestions,
+                    friendsViewModel,
+                    userViewModel
                 )
                 FriendSubScreen.REQUESTS -> FriendRequestList(
-                    uiState.value.requests.map {friend ->
-                        userViewModel.getUserById(friend.from).value
-                    },
-                    friendsViewModel
+                    uiState.value.requests.map {friend -> friend.from},
+                    friendsViewModel,
+                    userViewModel
                 )
-                FriendSubScreen.ALL -> FriendsList(
-                    uiState.value.friends.map {friend ->
-                        userViewModel.getUserById(friend.from).value
-                    },
-                    friendsViewModel
+                FriendSubScreen.ALL -> AllFriendsList(
+                    uiState.value.friends.map {friend -> friend.from},
+                    friendsViewModel,
+                    userViewModel
                 )
             }
         }
@@ -121,148 +124,88 @@ fun FriendsScreen(
 }
 
 @Composable
-fun FriendSearching(modifier: Modifier = Modifier) {
-    
-}
-
-@Composable
-fun FriendSuggestList(friends: List<User?>, friendsViewModel: FriendsViewModel, modifier: Modifier = Modifier) {
-    LazyColumn() {
-        items(friends) { friend ->
-            if (friend != null)
-            Card(
-                modifier = Modifier
-                    .padding(10.dp)
-            ) {
-                Row (
-                    verticalAlignment = Alignment.CenterVertically
+fun FriendSuggestion(
+    friends: List<String>,
+    friendsViewModel: FriendsViewModel,
+    userViewModel: UserViewModel,
+    modifier: Modifier = Modifier
+) {
+    FriendList(
+        friends,
+        userViewModel,
+        { friend ->
+            Row {
+                Button(
+                    onClick = {
+                        friendsViewModel.request(friend._id)
+                    },
                 ) {
-                    File(
-                        id = friend.avatar,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                    )
-                    Column(
-                        modifier = Modifier
-                            .padding(10.dp)
-                    ) {
-                        Text(
-                            text = friend.firstName + friend.lastName,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier
-                                .padding(10.dp)
-                        )
-                        Row {
-                            Button(
-                                onClick = {
-                                    friendsViewModel.request(friend._id)
-                                },
-                            ) {
-                                Text("Thêm bạn bè")
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Button(
-                                onClick = {friendsViewModel.decline(friend._id)}
-                            ) {
-                                Text("Xoá")
-                            }
-                        }
-                    }
+                    Text("Thêm bạn bè")
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Button(
+                    onClick = {friendsViewModel.decline(friend._id)}
+                ) {
+                    Text("Xoá")
                 }
             }
         }
-    }
+    )
+}
+
+@Composable
+fun FriendRequestList(
+    friends: List<String>,
+    friendsViewModel: FriendsViewModel,
+    userViewModel: UserViewModel,
+    modifier: Modifier = Modifier)
+{
+    FriendList(
+        friends,
+        userViewModel,
+        { friend->
+            Row {
+                Button(
+                    onClick = {
+                        friendsViewModel.accept(friend._id)
+                    },
+                ) {
+                    Text("Châps nhận")
+                }
+                Spacer(modifier = Modifier.width(10.dp))
+                Button(
+                    onClick = {}
+                ) {
+                    Text("Xoá")
+                }
+            }
+        }
+    )
 }
 
 
 @Composable
-fun FriendRequestList(friends: List<User?>, friendsViewModel: FriendsViewModel, modifier: Modifier = Modifier) {
-    LazyColumn() {
-        items(friends) { friend ->
-            if (friend != null)
-            Card(
-                modifier = Modifier
-                    .padding(10.dp)
-            ) {
-                Row {
-                    File(
-                        id = friend.avatar,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                    )
-                    Column(
-                        modifier = Modifier
-                            .padding(10.dp)
-                    ) {
-                        Text(
-                            text = friend.firstName + friend.lastName,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier
-                                .padding(10.dp)
-                        )
-                        Row {
-                            Button(
-                                onClick = {
-                                    friendsViewModel.accept(friend._id)
-                                },
-                            ) {
-                                Text("Châps nhận")
-                            }
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Button(
-                                onClick = {}
-                            ) {
-                                Text("Xoá")
-                            }
-                        }
-                    }
+fun AllFriendsList(
+    friends: List<String>,
+    friendsViewModel: FriendsViewModel,
+    userViewModel: UserViewModel,
+    modifier: Modifier = Modifier)
+{
+    Log.e("FriendScreen", "Call all friends")
+    Log.e("FriendScreen", friends.toString())
+    FriendList(
+        friends,
+        userViewModel,
+        { friend ->
+            Row {
+                Button(
+                    onClick = {friendsViewModel.disfriend(friend._id)}
+                ) {
+                    Text("Xoá bạn bè")
                 }
             }
         }
-    }
-}
-
-
-@Composable
-fun FriendsList(friends: List<User?>, friendsViewModel: FriendsViewModel, modifier: Modifier = Modifier) {
-    LazyColumn() {
-        items(friends) { friend ->
-            if (friend != null)
-            Card(
-                modifier = Modifier
-                    .padding(10.dp)
-            ) {
-                Row {
-                    File(
-                        id = friend.avatar,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                    )
-                    Column(
-                        modifier = Modifier
-                            .padding(10.dp)
-                    ) {
-                        Text(
-                            text = friend.firstName + friend.lastName,
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier
-                                .padding(10.dp)
-                        )
-                        Row {
-                            Button(
-                                onClick = {friendsViewModel.disfriend(friend._id)}
-                            ) {
-                                Text("Xoá bạn bè")
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -284,9 +227,58 @@ fun TopBar(navController: NavHostController, modifier: Modifier = Modifier) {
     )
 }
 
-@Preview
 @Composable
-fun FriendsSearchingScreenPreview(modifier: Modifier = Modifier) {
-    val navController = rememberNavController()
-    FriendsScreen(userViewModel = viewModel(factory = UserViewModel.Factory), navController = navController, friendsViewModel = viewModel(factory = FriendsViewModel.Factory))
+fun FriendList(
+    friends: List<String>,
+    userViewModel: UserViewModel,
+    friendCardButtons: @Composable RowScope.(User) -> Unit,
+    modifier: Modifier = Modifier)
+{
+    LazyColumn() {
+        items(friends) { friend ->
+            val user : User? = userViewModel.getUserById(friend).collectAsState().value
+            if (user != null) {
+                FriendCard(user, friendCardButtons)
+            }
+        }
+    }
+}
+
+@Composable
+fun FriendCard(
+    friend: User,
+    otherContent: @Composable RowScope.(user: User) -> Unit,
+    modifier: Modifier = Modifier)
+{
+    Card(
+        modifier = Modifier
+            .padding(20.dp)
+            .fillMaxWidth()
+    ) {
+        Row (
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            File(
+                id = friend.avatar,
+                modifier = Modifier
+                    .size(75.dp)
+                    .clip(CircleShape)
+            )
+            Column(
+                modifier = Modifier
+                    .padding(10.dp)
+            ) {
+                Text(
+                    text = friend.firstName + friend.lastName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier
+                        .padding(10.dp)
+                )
+                Row {
+                    otherContent(friend)
+                }
+            }
+        }
+    }
 }

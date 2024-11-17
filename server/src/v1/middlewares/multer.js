@@ -23,7 +23,6 @@ const IMAGE_PROCESSING = 'IMAGE_PROCESSING';
           Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjBlMjg4OGUtZmQ2NS00ZGU3LWFkNGUtMzRlYWVkZDkyOGRmIiwidHlwZSI6ImFwaV90b2tlbiJ9.l0nFCh_L0YSELnE5KjTAcy8dPu1HQX0xsIrXWTBZ6c0"
         }
       }).then(res => res.json())
-
       const isSafe = !res.content.results.image__explicit_content.results.some(e => e.items?.length)
       SocketIO.io.emit("file_update", _id, { status: isSafe ? "safe" : "unsafe" })
       await File.findByIdAndUpdate(_id, { status: isSafe ? "safe" : "unsafe" })
@@ -46,8 +45,7 @@ const IMAGE_PROCESSING = 'IMAGE_PROCESSING';
       }).then(res => res.json());
 
       let description = res1.results.channels[0].alternatives[0].transcript
-
-      console.log(description)
+      
 
       if(description.length > 30) {
         description = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBQm4dj0r3MaXTbhzHoZ6jLQVvbE448Pzc', {
@@ -132,12 +130,6 @@ const upload = multer({
   limits: 10 * 1024,
 })
 
-/** 
- * Create a file in the database with the given file
- * 
- * @param {*} f 
- * @returns id of the file
- */
 async function getFile(f) {
   const file = await File.create({
     type: f.mimetype,
@@ -147,11 +139,6 @@ async function getFile(f) {
   return file._id.toString()
 }
 
-/**
- * 
- * @param {String} fieldName - name of the field in the form
- * @returns array of middleware that will handle single file upload
- */
 const single = (fieldName) => {
   return [
     upload.single(fieldName),
@@ -166,12 +153,6 @@ const single = (fieldName) => {
   ]
 }
 
-/**
- * 
- * @param {String} fieldName - name of the field in the form
- * @param {Number} maxCount - maximum number of files to be uploaded
- * @returns array of middleware that will handle multiple file upload
- */
 const array = (fieldName, maxCount) => {
   return [
     upload.array(fieldName, maxCount),

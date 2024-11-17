@@ -23,6 +23,3 @@ Promise.all([
   .then(() => app.use('/api/v1', require('./v1/routers')))
 
 module.exports = server
-
-
-

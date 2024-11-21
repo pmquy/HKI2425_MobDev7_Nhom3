@@ -14,7 +14,8 @@ const File = new mongoose.Schema({
   description: String,
   _system: {
     need_to_delete: Boolean,
-    cloudinary_public_id: String
+    cloudinary_public_id: String,
+    resource_type: String,
   }
 }, { timestamps: true, versionKey: false })
 

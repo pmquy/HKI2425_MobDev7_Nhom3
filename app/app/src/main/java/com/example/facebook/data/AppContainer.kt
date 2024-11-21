@@ -28,6 +28,7 @@ interface AppContainer {
     val chatGroupRepository: ChatGroupRepository
     val messageRepository: MessageRepository
     val friendRepository: FriendRepository
+    val userPreferenceRepository: UserPreferenceRepository
     val user: User?
 }
 
@@ -114,6 +115,10 @@ class DefaultAppContainer(context: Context) : AppContainer {
 
     override val friendRepository: FriendRepository by lazy {
         NetworkFriendRepository(retrofit.create(FriendsApiService::class.java))
+    }
+
+    override val userPreferenceRepository: UserPreferenceRepository by lazy {
+        UserPreferenceRepository(context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE))
     }
 
     override val user = null

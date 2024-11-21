@@ -17,12 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.facebook.ui.screens.ChatGroupScreen
+import com.example.facebook.ui.screens.CreateChatGroupScreen
 import com.example.facebook.ui.screens.FriendsScreen
 import com.example.facebook.ui.screens.HomeScreen
 import com.example.facebook.ui.screens.LoginScreen
@@ -39,7 +39,8 @@ enum class FacebookScreen {
     CHAT_GROUP,
     LOADING,
     VIDEO_CALL,
-    FRIENDS
+    FRIENDS,
+    CREATE_CHAT_GROUP,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,15 +84,13 @@ fun FacebookApp() {
     val userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
 
     val navController = rememberNavController()
-    val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(true) {
-        FirebaseMessaging.getInstance().token.addOnCompleteListener {
-            coroutineScope.launch {
-                val success = userViewModel.auth(it.result)
-                if (success) navController.navigate(FacebookScreen.HOME.name)
-                else navController.navigate(FacebookScreen.LOGIN.name)
-            }
+    LaunchedEffect(Unit) {
+        try {
+            userViewModel.auth()
+            navController.navigate(FacebookScreen.HOME.name)
+        } catch (e: Exception) {
+            navController.navigate(FacebookScreen.LOGIN.name)
         }
     }
 
@@ -120,6 +119,9 @@ fun FacebookApp() {
         }
         composable("${FacebookScreen.FRIENDS.name}/{id}") {
             FriendsScreen(userViewModel, navController =  navController)
+        }
+        composable(FacebookScreen.CREATE_CHAT_GROUP.name) {
+            CreateChatGroupScreen(navController =  navController)
         }
     }
 

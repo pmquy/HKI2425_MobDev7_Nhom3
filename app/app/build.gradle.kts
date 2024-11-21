@@ -52,8 +52,10 @@ android {
 }
 
 dependencies {
+    implementation(libs.coil3.coil.gif)
     implementation(libs.stream.webrtc.android)
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     implementation(libs.socket.io.client.v211)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
@@ -61,7 +63,6 @@ dependencies {
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.retrofit)
-    implementation(libs.coil.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.retrofit2.kotlinx.serialization.converter)
     implementation(libs.androidx.core.ktx)

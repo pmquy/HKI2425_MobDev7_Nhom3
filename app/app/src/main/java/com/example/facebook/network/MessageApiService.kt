@@ -11,6 +11,7 @@ import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Part
+import retrofit2.http.PartMap
 import retrofit2.http.Path
 
 interface MessageApiService {
@@ -22,8 +23,9 @@ interface MessageApiService {
     suspend fun create(
         @Part("chatgroup") chatgroup: RequestBody,
         @Part("message") message: RequestBody,
+        @PartMap systemFiles: HashMap<String, RequestBody>,
         @Part files: List<MultipartBody.Part>
-        ): Response<Message>
+    ): Response<Message>
 
     @PUT("api/v1/message/{id}")
     suspend fun updateById(@Path("id") id: String, @Body message: Message): Response<Message>

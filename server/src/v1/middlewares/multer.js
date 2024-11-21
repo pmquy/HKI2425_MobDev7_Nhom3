@@ -24,7 +24,7 @@ const IMAGE_PROCESSING = 'IMAGE_PROCESSING';
         }
       }).then(res => res.json())
       const isSafe = !res.content.results.image__explicit_content.results.some(e => e.items?.length)
-      SocketIO.io.emit("file_update", _id, { status: isSafe ? "safe" : "unsafe" })
+      console.log(SocketIO.io.emit("file_update", _id, { status: isSafe ? "safe" : "unsafe" }))
       await File.findByIdAndUpdate(_id, { status: isSafe ? "safe" : "unsafe" })
       RabbitMQ.channel.ack(message)
     } catch (error) {

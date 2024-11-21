@@ -8,24 +8,35 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.facebook.FacebookApplication
 import com.example.facebook.data.SocketRepository
+import com.example.facebook.data.UserPreferenceRepository
 import com.example.facebook.data.UserRepository
 import com.example.facebook.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 data class UIState(
-    var user: User? = null
+    var user: User,
 )
 
 class UserViewModel(
     private val userRepository: UserRepository,
     private val socketRepository: SocketRepository,
-    private val application: FacebookApplication
+    private val userPreferenceRepository: UserPreferenceRepository,
+    private val application: FacebookApplication,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(UIState())
+    private val _uiState = MutableStateFlow(UIState(application.user))
     val uiState = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _uiState.asStateFlow().collect { state ->
+                application.user = state.user
+            }
+        }
+    }
 
     private val users = mutableMapOf<String, MutableStateFlow<User?>>()
 
@@ -48,11 +59,16 @@ class UserViewModel(
         application.user = response.body()!!
     }
 
-    suspend fun auth(token: String): Boolean {
-        val response = userRepository.auth(token, socketRepository.getID())
-        if (!response.isSuccessful) return false
-        application.user = response.body()!!
-        return true
+    suspend fun auth() {
+        val token = userPreferenceRepository.getToken()
+        val socketId = socketRepository.getID()
+        val response = userRepository.auth(token = token ?: "", socketId = socketId)
+        if (!response.isSuccessful) throw Exception("Error authenticating")
+        _uiState.update {
+            it.copy(
+                user = response.body()!!
+            )
+        }
     }
 
     companion object {
@@ -61,9 +77,11 @@ class UserViewModel(
                 val application = (this[APPLICATION_KEY] as FacebookApplication)
                 val userRepository = application.container.userRepository
                 val socketRepository = application.container.socketRepository
+                val userPreferenceRepository = application.container.userPreferenceRepository
                 UserViewModel(
                     userRepository = userRepository,
                     socketRepository = socketRepository,
+                    userPreferenceRepository = userPreferenceRepository,
                     application = application
                 )
             }

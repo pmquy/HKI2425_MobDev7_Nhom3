@@ -49,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.components.ImagePicker
 import kotlinx.coroutines.launch

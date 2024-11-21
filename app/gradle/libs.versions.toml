@@ -1,8 +1,7 @@
 [versions]
 agp = "8.6.0"
-coilCompose = "2.4.0"
+coilCompose = "3.0.3"
 datastorePreferences = "1.1.1"
-exoplayer = "2.19.1"
 firebaseBom = "33.5.1"
 gson = "2.10.1"
 kotlin = "1.9.0"
@@ -28,8 +27,9 @@ media3Ui = "1.4.1"
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastorePreferences" }
 androidx-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycleRuntimeKtx" }
-coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
-exoplayer = { module = "com.google.android.exoplayer:exoplayer", version.ref = "exoplayer" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coilCompose" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilCompose" }
+coil3-coil-gif = { module = "io.coil-kt.coil3:coil-gif", version.ref = "coilCompose" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-messaging = { module = "com.google.firebase:firebase-messaging" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }

@@ -10,7 +10,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.facebook.FacebookApplication
 import com.example.facebook.data.FriendRepository
 import com.example.facebook.model.Friend
-import com.example.facebook.model.User
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -136,7 +135,7 @@ class FriendsViewModel(
 
                 _uiState.update {
                     it.copy(
-                        friends = friends.data
+                        friends =  friends.data
                     )
                 }
             }

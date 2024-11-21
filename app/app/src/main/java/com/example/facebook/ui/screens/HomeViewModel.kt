@@ -15,8 +15,7 @@ import kotlinx.coroutines.flow.update
 data class HomeUIState(
     val chatGroups: List<ChatGroup> = listOf(),
     val hasMore: Boolean = true,
-    val page: Int = 0,
-    val limit: Int = 100,
+    val offset: Int = 0,
 )
 
 class HomeViewModel(
@@ -26,8 +25,10 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow(HomeUIState())
     val uiState = _uiState.asStateFlow()
 
+    private val LIMIT = 10
+
     suspend fun getAll() {
-        val response = chatGroupRepository.getAll(0, 100, "{}")
+        val response = chatGroupRepository.getAll(0, LIMIT, "{}")
         if (!response.isSuccessful) throw Exception("Error getting chat groups")
         _uiState.update {
             it.copy(

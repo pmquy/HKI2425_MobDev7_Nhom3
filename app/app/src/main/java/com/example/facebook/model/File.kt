@@ -14,3 +14,9 @@ data class File(
     val createdAt: String = "",
     val updatedAt: String = "",
 )
+
+@Serializable
+data class GetSystemFileResponse(
+    val hasMore: Boolean,
+    val data: List<File>,
+)

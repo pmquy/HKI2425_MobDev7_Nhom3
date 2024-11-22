@@ -29,7 +29,7 @@ interface ChatgroupApiService {
     suspend fun create(
         @Part("name") name: RequestBody,
         @PartMap users: HashMap<String, RequestBody>,
-        @Part avatar: MultipartBody.Part,
+        @Part avatar: MultipartBody.Part?,
     ): Response<ChatGroup>
 
     @PUT("api/v1/chatgroup/{id}")

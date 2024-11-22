@@ -1,5 +1,6 @@
 package com.example.facebook.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -79,6 +80,7 @@ class ChatGroupViewModel(
             if (!response1.isSuccessful) throw Exception("Error getting chat group")
             val response2 = chatGroupRepository.getMessage(id, 0, LIMIT, "{}")
             if (!response2.isSuccessful) throw Exception("Error getting messages")
+            Log.d("ChatGroupViewModel", "initChatGroup: ${response1.body()}")
             _uiState.value = _uiState.value.copy(
                 chatGroup = response1.body()!!,
                 messages = response2.body()!!.data,
@@ -141,6 +143,11 @@ class ChatGroupViewModel(
     ) {
         viewModelScope.launch {
             try {
+                _uiState.update {
+                    it.copy(
+                        inputType = InputType.DEFAULT
+                    )
+                }
                 val response = messageRepository.create(
                     messageText,
                     _uiState.value.chatGroup._id,
@@ -152,7 +159,6 @@ class ChatGroupViewModel(
                         messageText = "",
                         files = listOf(),
                         systemFiles = listOf(),
-                        inputType = InputType.DEFAULT
                     )
                 }
                 if (!response.isSuccessful) throw Exception("Error creating message")

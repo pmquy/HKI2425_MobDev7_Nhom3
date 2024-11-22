@@ -3,6 +3,7 @@ const ChatGroup = require('../models/chatgroup')
 const SocketIO = require('../configs/socketio')
 const Firebase = require('../configs/firebase')
 const RabbitMQ = require('../configs/rabbitmq')
+const Redis = require('../configs/redis')
 const Joi = require('joi')
 const File = require('../models/file')
 
@@ -20,7 +21,7 @@ class Controller {
 
 
   #createSchema = JOI.object({
-    message: JOI.when('files', { is: JOI.array().min(1), then: JOI.string().allow(''), otherwise: JOI.string()}).required(),
+    message: JOI.when('files', { is: JOI.array().min(1), then: JOI.string().allow(''), otherwise: JOI.string() }).required(),
     chatgroup: JOI.string().required(),
     files: JOI.array().items(JOI.string()).default([]),
   }).unknown(false).required()
@@ -36,7 +37,7 @@ class Controller {
         if (file?.type === 'audio' && file.description == undefined) throw new Error("Processing the file")
 
         RabbitMQ.channel.ack(msg)
-       
+
         Firebase.sendEachForMulticast({
           title: sender.firstName + ' ' + sender.lastName,
           body: file?.type === 'image' ? 'Đã gửi một hình ảnh' : file?.type === 'audio' ? file.description : file?.type === 'video' ? 'Đã gửi một video' : file ? 'Đã gửi một tệp tin' : message.message,
@@ -46,7 +47,7 @@ class Controller {
 
       } catch (error) {
         console.error(error)
-        setTimeout(() => RabbitMQ.channel.nack(msg), 2000)
+        setTimeout(() => RabbitMQ.channel.nack(msg), 1000)
       }
     })
   }
@@ -59,6 +60,12 @@ class Controller {
       if (!chatgroup.hasMember(req.user._id)) throw new Error('You are not a member of this group')
       const result = await this.model.create({ ...value, user: req.user._id })
       res.json(result)
+      Redis.client.json.set(`last-message-${chatgroup._id}`, '.', {
+        name: req.user.lastName,
+        content: value.message ? value.message : 'Đã gửi một tệp tin',
+        createdAt: result.createdAt
+      })
+      chatgroup.updateOne({ _system: { lastMessageTimeStamp: result.createdAt } }).then(() => { }).catch(console.error)
       SocketIO.io.to(`chatgroup-${result.chatgroup}`).emit('new_message', result)
       RabbitMQ.channel.sendToQueue(this.#MESSAGE_NOTIFICATION, Buffer.from(JSON.stringify({ message: result, sender: req.user, users: chatgroup.users })))
     } catch (error) {

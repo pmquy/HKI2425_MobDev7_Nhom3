@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -38,12 +39,14 @@ import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.example.facebook.model.ChatGroup
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.components.File
+import com.example.facebook.util.parseDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -129,7 +132,14 @@ fun HomeScreen(
 
 @Composable
 fun ChatGroup(chatGroup: ChatGroup, onClick: (String) -> Unit, modifier: Modifier = Modifier) {
-    Card(modifier = modifier, onClick = { onClick(chatGroup._id) }) {
+    Card(
+        modifier = modifier, onClick = { onClick(chatGroup._id) }, colors = CardColors(
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = MaterialTheme.colorScheme.surface,
+        )
+    ) {
         Row(
             modifier = Modifier.padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -138,10 +148,29 @@ fun ChatGroup(chatGroup: ChatGroup, onClick: (String) -> Unit, modifier: Modifie
             File(
                 id = chatGroup.avatar,
                 Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
+                    .size(60.dp)
+                    .clip(CircleShape),
+                allowOrigin = false,
             )
-            Text(text = chatGroup.name)
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(text = chatGroup.name)
+                if (chatGroup.lastMessage != null) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = chatGroup.lastMessage.name + ": " + chatGroup.lastMessage.content,
+                            modifier = Modifier.weight(1f),
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
+                        )
+                        Text(parseDate(chatGroup.lastMessage.createdAt, "HH:mm"))
+                    }
+                }
+            }
         }
     }
 }

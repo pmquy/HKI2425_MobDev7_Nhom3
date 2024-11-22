@@ -18,7 +18,7 @@ interface ChatGroupRepository {
     suspend fun create(
         name: String,
         users: List<Member>,
-        avatar: Pair<File, String>
+        avatar: Pair<File, String>?
     ): Response<ChatGroup>
 
     suspend fun updateById(id: String, chatGroup: ChatGroup): Response<ChatGroup>
@@ -44,7 +44,7 @@ class NetworkChatGroupRepository(
     override suspend fun create(
         name: String,
         users: List<Member>,
-        avatar: Pair<File, String>
+        avatar: Pair<File, String>?
     ): Response<ChatGroup> {
 
         val map = HashMap<String, RequestBody>()
@@ -57,11 +57,13 @@ class NetworkChatGroupRepository(
         return chatgroupApiService.create(
             name.toRequestBody("text/plain".toMediaType()),
             map,
-            MultipartBody.Part.createFormData(
-                "avatar",
-                avatar.first.name,
-                avatar.first.asRequestBody(avatar.second.toMediaType())
-            )
+            avatar?.let {
+                MultipartBody.Part.createFormData(
+                    "avatar",
+                    it.first.name,
+                    it.first.asRequestBody(avatar.second.toMediaType())
+                )
+            }
         )
     }
 

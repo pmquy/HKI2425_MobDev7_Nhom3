@@ -36,13 +36,12 @@ class CreateChatGroupViewModel(
 
     suspend fun createChatGroup() {
         if (_uiState.value.name.isEmpty()) throw Exception("Name is empty")
-        if (_uiState.value.avatar == null) throw Exception("Avatar is empty")
         if (_uiState.value.users.isEmpty()) throw Exception("Members is empty")
 
         chatGroupRepository.create(
             name = _uiState.value.name,
             users = _uiState.value.users,
-            avatar = _uiState.value.avatar!!,
+            avatar = _uiState.value.avatar,
         )
     }
 

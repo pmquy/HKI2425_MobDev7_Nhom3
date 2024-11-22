@@ -2,6 +2,7 @@ package com.example.facebook.ui
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
@@ -15,7 +16,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
@@ -29,8 +29,6 @@ import com.example.facebook.ui.screens.LoginScreen
 import com.example.facebook.ui.screens.SignUpScreen
 import com.example.facebook.ui.screens.UserViewModel
 import com.example.facebook.ui.screens.VideoCallScreen
-import com.google.firebase.messaging.FirebaseMessaging
-import kotlinx.coroutines.launch
 
 enum class FacebookScreen {
     HOME,
@@ -95,7 +93,7 @@ fun FacebookApp() {
     }
 
     NavHost(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         navController = navController,
         startDestination = FacebookScreen.LOADING.name
     ) {

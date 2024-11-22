@@ -29,7 +29,7 @@ class Controller {
     lastName: JOI.string().required(),
     phoneNumber: JOI.string().required(),
     email: JOI.string().email().required(),
-    avatar: JOI.string().default("6724e8b3290173e98590e225"),
+    avatar: JOI.string().default("67400340428abd4234ad1160"),
     password: JOI.string().min(5).max(12).required()
   }).unknown(false).required().custom((value, helpers) =>
     BCRYPT.hash(value.password, 10)

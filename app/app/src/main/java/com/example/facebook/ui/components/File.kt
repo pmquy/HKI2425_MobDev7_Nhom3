@@ -49,11 +49,11 @@ import com.example.facebook.util.toTime
 fun File(
     id: String,
     modifier: Modifier = Modifier,
-    fileViewModel: FileViewModel = viewModel(factory = FileViewModel.Factory)
+    fileViewModel: FileViewModel = viewModel(factory = FileViewModel.Factory),
+    allowOrigin: Boolean = true
 ) {
     val file = fileViewModel.getFileById(id).collectAsState().value
     var view by remember { mutableStateOf(false) }
-
 
     Box(modifier = modifier.wrapContentSize()) {
 
@@ -80,13 +80,15 @@ fun File(
                         loading = { CircularProgressIndicator() },
                         modifier = Modifier.fillMaxSize()
                     )
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text("This image has been flagged as inappropriate.")
-                        Button(onClick = { view = true }) {
-                            Text("View anyway")
+                    if(allowOrigin) {
+                        Column(
+                            modifier = Modifier.align(Alignment.Center),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("This image has been flagged as inappropriate.")
+                            Button(onClick = { view = true }) {
+                                Text("View anyway")
+                            }
                         }
                     }
                 }

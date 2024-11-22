@@ -118,10 +118,10 @@ fun ChatGroupScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         File(
                             uiState.chatGroup.avatar, modifier = Modifier
-                                .size(24.dp)
+                                .size(32.dp)
                                 .clip(CircleShape)
                         )
                         Text(uiState.chatGroup.name)
@@ -226,7 +226,8 @@ fun MessageUser(user: User, onClick: () -> Unit = {}) {
         Modifier
             .size(32.dp)
             .clip(shape = CircleShape)
-            .clickable { onClick() }
+            .clickable { onClick() },
+        allowOrigin = false
     )
 }
 

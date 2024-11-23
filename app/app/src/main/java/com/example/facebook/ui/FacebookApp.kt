@@ -26,6 +26,7 @@ import com.example.facebook.ui.screens.CreateChatGroupScreen
 import com.example.facebook.ui.screens.FriendsScreen
 import com.example.facebook.ui.screens.HomeScreen
 import com.example.facebook.ui.screens.LoginScreen
+import com.example.facebook.ui.screens.ProfileScreen
 import com.example.facebook.ui.screens.SignUpScreen
 import com.example.facebook.ui.screens.UserViewModel
 import com.example.facebook.ui.screens.VideoCallScreen
@@ -39,6 +40,7 @@ enum class FacebookScreen {
     VIDEO_CALL,
     FRIENDS,
     CREATE_CHAT_GROUP,
+    PROFILE,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,7 +103,7 @@ fun FacebookApp() {
             Text("Loading")
         }
         composable(FacebookScreen.HOME.name) {
-            HomeScreen(navController = navController)
+            HomeScreen(navController = navController, userViewModel = userViewModel)
         }
         composable(FacebookScreen.SIGNUP.name) {
             SignUpScreen(navController = navController)
@@ -120,6 +122,9 @@ fun FacebookApp() {
         }
         composable(FacebookScreen.CREATE_CHAT_GROUP.name) {
             CreateChatGroupScreen(navController =  navController)
+        }
+        composable("${FacebookScreen.PROFILE.name}/{id}") {
+            ProfileScreen(navController = navController)
         }
     }
 

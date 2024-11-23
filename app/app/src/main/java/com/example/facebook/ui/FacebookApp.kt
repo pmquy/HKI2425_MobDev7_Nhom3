@@ -23,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.facebook.ui.screens.ChatGroupScreen
 import com.example.facebook.ui.screens.CreateChatGroupScreen
+import com.example.facebook.ui.screens.FindUserScreen
 import com.example.facebook.ui.screens.FriendsScreen
 import com.example.facebook.ui.screens.HomeScreen
 import com.example.facebook.ui.screens.LoginScreen
@@ -39,6 +40,8 @@ enum class FacebookScreen {
     LOADING,
     VIDEO_CALL,
     FRIENDS,
+    FRIEND_SEARCHING,
+    PROFILE,
     CREATE_CHAT_GROUP,
     PROFILE,
 }
@@ -62,6 +65,8 @@ fun FacebookTopBar(
                 FacebookScreen.LOGIN -> Text("Login")
                 FacebookScreen.CHAT_GROUP -> Text("Chat Group")
                 FacebookScreen.FRIENDS -> Text("Friends")
+                FacebookScreen.FRIEND_SEARCHING -> Text("Search")
+                FacebookScreen.PROFILE -> Text("Profile")
                 else -> Text("")
             }
         },
@@ -84,6 +89,7 @@ fun FacebookApp() {
     val userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
 
     val navController = rememberNavController()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         try {
@@ -117,8 +123,11 @@ fun FacebookApp() {
         composable("${FacebookScreen.VIDEO_CALL.name}/{id}") {
             VideoCallScreen(navController =  navController)
         }
-        composable("${FacebookScreen.FRIENDS.name}/{id}") {
+        composable(FacebookScreen.FRIENDS.name) {
             FriendsScreen(userViewModel, navController =  navController)
+        }
+        composable(FacebookScreen.FRIEND_SEARCHING.name) {
+            FindUserScreen(navController =  navController)
         }
         composable(FacebookScreen.CREATE_CHAT_GROUP.name) {
             CreateChatGroupScreen(navController =  navController)
@@ -127,5 +136,4 @@ fun FacebookApp() {
             ProfileScreen(navController = navController)
         }
     }
-
 }

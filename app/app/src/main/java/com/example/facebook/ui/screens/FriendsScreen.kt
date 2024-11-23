@@ -1,6 +1,8 @@
 package com.example.facebook.ui.screens
 
 import android.util.Log
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,20 +10,17 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,12 +30,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.example.facebook.model.User
+import com.example.facebook.ui.FacebookScreen
+import com.example.facebook.ui.FacebookTopBar
 import com.example.facebook.ui.components.File
 
 @Composable
@@ -48,20 +47,26 @@ fun FriendsScreen(
 ) {
     var uiState = friendsViewModel.uiState.collectAsState()
 
-    LaunchedEffect(true) {
+    LaunchedEffect(uiState.value.currentSubScreen) {
         try {
             friendsViewModel.getFriends()
             friendsViewModel.getRequests()
             friendsViewModel.getSuggestions()
             friendsViewModel.getSends()
-            Log.e("FriendScreen", "GetAlls", )
         } catch (e: Exception) {
             Log.e("FriendScreen", "Error getting friends", e)
         }
     }
 
     Scaffold (
-        topBar = { TopBar(navController) }
+        topBar = {
+            FacebookTopBar(
+                FacebookScreen.FRIENDS,
+                true
+            ) {
+                navController.navigateUp()
+            }
+        }
     ) { contentPadding ->
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -72,51 +77,49 @@ fun FriendsScreen(
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier
-                    .padding(10.dp)
+                    .padding(20.dp)
+                    .fillMaxWidth()
             ) {
-                Card  (
-                    onClick = {
-                        friendsViewModel.changeSubScreen(FriendSubScreen.SUGGESTS)
-                        Log.e("FriendScreeen", uiState.value.suggestions.toString())
-                              },
-                    content = {
-                        Text("Gợi ý", modifier = Modifier.padding(10.dp))
-                    }
-                )
-                Card (
-                    onClick = {
-                        friendsViewModel.changeSubScreen(FriendSubScreen.REQUESTS)
-                              },
-                    content = {
-                        Text("Lời mời kết bạn", modifier = Modifier.padding(10.dp))
-                    }
-                )
-                Card (
-                    onClick = {
-                        friendsViewModel.changeSubScreen(FriendSubScreen.ALL)
-                        Log.e("FriendScreeen", uiState.value.friends.toString())
-                              },
-                    content = {
-                        Text("Tất cả bạn bè", modifier = Modifier.padding(10.dp))
-                    }
-                )
+                FriendSubScreen.entries.forEach {
+                    Card  (
+                        onClick = {
+                            friendsViewModel.changeSubScreen(it)
+                        },
+                        content = {
+                            Text(it.tag,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(10.dp))
+                        },
+                        modifier = Modifier
+                            .background(color = MaterialTheme.colorScheme.surface)
+                    )
+                }
             }
 
             when (uiState.value.currentSubScreen) {
                 FriendSubScreen.SUGGESTS -> FriendSuggestion(
                     uiState.value.suggestions,
                     friendsViewModel,
-                    userViewModel
+                    userViewModel,
+                    navController
                 )
                 FriendSubScreen.REQUESTS -> FriendRequestList(
                     uiState.value.requests.map {friend -> friend.from},
                     friendsViewModel,
-                    userViewModel
+                    userViewModel,
+                    navController
+                )
+                FriendSubScreen.SENTS -> FriendSents(
+                    uiState.value.sends.map {friend -> friend.to},
+                    friendsViewModel,
+                    userViewModel,
+                    navController
                 )
                 FriendSubScreen.ALL -> AllFriendsList(
                     uiState.value.friends.map {friend -> friend.from},
                     friendsViewModel,
-                    userViewModel
+                    userViewModel,
+                    navController
                 )
             }
         }
@@ -124,29 +127,59 @@ fun FriendsScreen(
 }
 
 @Composable
-fun FriendSuggestion(
+fun FriendSents(
     friends: List<String>,
     friendsViewModel: FriendsViewModel,
     userViewModel: UserViewModel,
+    navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
     FriendList(
         friends,
         userViewModel,
-        { friend ->
+        navController,
+        { user ->
             Row {
                 Button(
                     onClick = {
-                        friendsViewModel.request(friend._id)
+                        friendsViewModel.revoke(user._id)
+                        friendsViewModel.getSends()
                     },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text("Huỷ")
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun FriendSuggestion(
+    friends: List<String>,
+    friendsViewModel: FriendsViewModel,
+    userViewModel: UserViewModel,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    FriendList(
+        friends,
+        userViewModel,
+        navController,
+        { user ->
+            Row {
+                Button(
+                    onClick = {
+                        friendsViewModel.request(user._id)
+                        friendsViewModel.getSuggestions()
+                    },
+                    modifier = Modifier.weight(2f)
                 ) {
                     Text("Thêm bạn bè")
-                }
-                Spacer(modifier = Modifier.width(10.dp))
-                Button(
-                    onClick = {friendsViewModel.decline(friend._id)}
-                ) {
-                    Text("Xoá")
                 }
             }
         }
@@ -158,16 +191,19 @@ fun FriendRequestList(
     friends: List<String>,
     friendsViewModel: FriendsViewModel,
     userViewModel: UserViewModel,
+    navController: NavHostController,
     modifier: Modifier = Modifier)
 {
     FriendList(
         friends,
         userViewModel,
+        navController,
         { friend->
             Row {
                 Button(
                     onClick = {
                         friendsViewModel.accept(friend._id)
+                        friendsViewModel.getRequests()
                     },
                 ) {
                     Text("Châps nhận")
@@ -189,39 +225,27 @@ fun AllFriendsList(
     friends: List<String>,
     friendsViewModel: FriendsViewModel,
     userViewModel: UserViewModel,
+    navController: NavHostController,
     modifier: Modifier = Modifier)
 {
-    Log.e("FriendScreen", "Call all friends")
-    Log.e("FriendScreen", friends.toString())
     FriendList(
         friends,
         userViewModel,
+        navController,
         { friend ->
             Row {
                 Button(
-                    onClick = {friendsViewModel.disfriend(friend._id)}
+                    onClick = {
+                        friendsViewModel.disfriend(friend._id)
+                        friendsViewModel.getFriends()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 ) {
                     Text("Xoá bạn bè")
                 }
-            }
-        }
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun TopBar(navController: NavHostController, modifier: Modifier = Modifier) {
-    CenterAlignedTopAppBar(
-        title = {
-            Text("Friends")
-        },
-        navigationIcon = {
-            IconButton(
-                onClick = {
-                    navController.navigateUp()
-                }
-            ) {
-                Icon(Icons.Filled.ArrowBack, contentDescription = null)
             }
         }
     )
@@ -231,6 +255,7 @@ fun TopBar(navController: NavHostController, modifier: Modifier = Modifier) {
 fun FriendList(
     friends: List<String>,
     userViewModel: UserViewModel,
+    navController: NavHostController,
     friendCardButtons: @Composable RowScope.(User) -> Unit,
     modifier: Modifier = Modifier)
 {
@@ -238,7 +263,10 @@ fun FriendList(
         items(friends) { friend ->
             val user : User? = userViewModel.getUserById(friend).collectAsState().value
             if (user != null) {
-                FriendCard(user, friendCardButtons)
+                FriendCard(
+                    user,
+                    navController,
+                    friendCardButtons)
             }
         }
     }
@@ -246,38 +274,37 @@ fun FriendList(
 
 @Composable
 fun FriendCard(
-    friend: User,
+    user: User,
+    navController: NavHostController,
     otherContent: @Composable RowScope.(user: User) -> Unit,
     modifier: Modifier = Modifier)
 {
-    Card(
+    Row (
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(20.dp),
         modifier = Modifier
-            .padding(20.dp)
             .fillMaxWidth()
     ) {
-        Row (
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        File(
+            id = user.avatar,
+            modifier = Modifier
+                .padding(start = 20.dp, top = 10.dp, bottom = 10.dp)
+                .size(75.dp)
+                .clip(CircleShape)
+        )
+        Column(
+            modifier = Modifier
+                .padding(10.dp)
         ) {
-            File(
-                id = friend.avatar,
-                modifier = Modifier
-                    .size(75.dp)
-                    .clip(CircleShape)
-            )
-            Column(
+            Text(
+                text = user.firstName + user.lastName,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier
                     .padding(10.dp)
-            ) {
-                Text(
-                    text = friend.firstName + friend.lastName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier
-                        .padding(10.dp)
-                )
-                Row {
-                    otherContent(friend)
-                }
+            )
+            Row {
+                otherContent(user)
             }
         }
     }

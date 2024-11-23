@@ -75,14 +75,14 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Facebook")
-                        IconButton({}) {
+                        IconButton({navController.navigate(FacebookScreen.FRIEND_SEARCHING.name)}) {
                             Icon(Icons.Default.Search, contentDescription = "Search")
                         }
                         Spacer(modifier = Modifier.width(24.dp))
                         IconButton({}) {
                             Icon(Icons.Default.Home, contentDescription = "Home")
                         }
-                        IconButton({ navController.navigate("${FacebookScreen.FRIENDS.name}/{id}") }) {
+                        IconButton({navController.navigate(FacebookScreen.FRIENDS.name)}) {
                             Icon(Icons.Default.Person, contentDescription = "Friends")
                         }
                         IconButton({navController.navigate("${FacebookScreen.PROFILE.name}/${userViewModel.uiState.value.user._id}")}) {
@@ -123,12 +123,16 @@ fun HomeScreen(
                     ChatGroup(
                         chatGroup = chatGroup,
                         onClick = { navController.navigate("${FacebookScreen.CHAT_GROUP.name}/$it") },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
                     )
                 }
             }
         }
     }
+
+
 }
 
 @Composable

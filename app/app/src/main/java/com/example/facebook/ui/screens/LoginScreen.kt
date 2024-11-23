@@ -1,5 +1,6 @@
 package com.example.facebook.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -29,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +53,7 @@ fun LoginScreen(userViewModel: UserViewModel = viewModel(factory = UserViewModel
     var password by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
     val handleLogin: () -> Unit = {
         coroutineScope.launch {
@@ -58,7 +61,11 @@ fun LoginScreen(userViewModel: UserViewModel = viewModel(factory = UserViewModel
                 userViewModel.login(email, password)
                 navController.navigate(FacebookScreen.HOME.name)
             } catch (e: Exception) {
-                // Handle error
+                Toast.makeText(
+                    context,
+                    "Thông tin tài khoản hoặc mật khẩu chưa đúng",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }

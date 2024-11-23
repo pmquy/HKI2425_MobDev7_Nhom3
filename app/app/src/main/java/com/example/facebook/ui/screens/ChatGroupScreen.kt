@@ -183,7 +183,7 @@ fun ChatGroupScreen(
                             user = user,
                             isMine = chatGroupViewModel.isMine(message),
                         ) {
-
+                            navController.navigate("${FacebookScreen.PROFILE.name}/${user._id}")
                         }
                 }
             }

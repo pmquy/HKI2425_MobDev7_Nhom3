@@ -52,6 +52,7 @@ import com.example.facebook.util.parseDate
 @Composable
 fun HomeScreen(
     homeViewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory),
+    userViewModel: UserViewModel,
     navController: NavHostController
 ) {
     val uiState by homeViewModel.uiState.collectAsState()
@@ -84,7 +85,7 @@ fun HomeScreen(
                         IconButton({ navController.navigate("${FacebookScreen.FRIENDS.name}/{id}") }) {
                             Icon(Icons.Default.Person, contentDescription = "Friends")
                         }
-                        IconButton({}) {
+                        IconButton({navController.navigate("${FacebookScreen.PROFILE.name}/${userViewModel.uiState.value.user._id}")}) {
                             Icon(Icons.Default.Settings, contentDescription = "Settings")
                         }
                         IconButton({}) {

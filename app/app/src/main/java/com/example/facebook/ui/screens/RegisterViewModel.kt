@@ -65,7 +65,7 @@ class RegisterViewModel(
                     email = uiState.value.email,
                     password = uiState.value.password,
                     phoneNumber = uiState.value.phoneNumber,
-                    avatar = uiState.value.avatar!!
+                    avatar = uiState.value.avatar
                 )
                 if (!response.isSuccessful) throw Exception("Error registering")
                 _uiState.value = _uiState.value.copy(showOtpPage = true)

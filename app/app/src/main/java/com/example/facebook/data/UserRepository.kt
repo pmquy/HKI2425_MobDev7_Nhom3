@@ -1,5 +1,6 @@
 package com.example.facebook.data
 
+import com.example.facebook.model.GetUsersResponse
 import com.example.facebook.model.LoginRequest
 import com.example.facebook.model.OtpRequest
 import com.example.facebook.model.User
@@ -21,9 +22,18 @@ interface UserRepository {
         email: String,
         password: String,
         phoneNumber: String,
-        avatar: Pair<File, String>
+        avatar: Pair<File, String>?
     ): Response<User>
     suspend fun verifyOtp(email: String, otp: String): Response<User>
+    suspend fun update(
+        firstName: String?,
+        lastName: String?,
+        password: String?,
+        phoneNumber: String?,
+        avatar: Pair<File, String>?
+    ): Response<User>
+    suspend fun logout(): Response<Void>
+    suspend fun getUsers(offset: Int, limit: Int, q: String): Response<GetUsersResponse>
 }
 
 class NetworkUserRepository(
@@ -44,17 +54,45 @@ class NetworkUserRepository(
         email: String,
         password: String,
         phoneNumber: String,
-        avatar: Pair<File, String>,
+        avatar: Pair<File, String>?,
     ): Response<User> = userApiService.register(
             firstName = firstName.toRequestBody("text/plain".toMediaType()),
             lastName = lastName.toRequestBody("text/plain".toMediaType()),
             email = email.toRequestBody("text/plain".toMediaType()),
             password = password.toRequestBody("text/plain".toMediaType()),
             phoneNumber = phoneNumber.toRequestBody("text/plain".toMediaType()),
-            avatar = MultipartBody.Part.createFormData(
-                "avatar", avatar.first.name, avatar.first.asRequestBody(avatar.second.toMediaType())
-            )
+            avatar = avatar?.let {
+                MultipartBody.Part.createFormData(
+                    "avatar", it.first.name, it.first.asRequestBody(it.second.toMediaType())
+                )
+            }
         )
+
+    override suspend fun update(
+        firstName: String?,
+        lastName: String?,
+        password: String?,
+        phoneNumber: String?,
+        avatar: Pair<File, String>?,
+    ): Response<User> = userApiService.update(
+        firstName?.toRequestBody("text/plain".toMediaType()),
+        lastName?.toRequestBody("text/plain".toMediaType()),
+        password?.toRequestBody("text/plain".toMediaType()),
+        phoneNumber?.toRequestBody("text/plain".toMediaType()),
+        avatar?.let {
+            MultipartBody.Part.createFormData(
+                "avatar", it.first.name, it.first.asRequestBody(it.second.toMediaType())
+            )
+        }
+    )
+
+    override suspend fun logout() = userApiService.logout()
+
+    override suspend fun getUsers(
+        offset: Int,
+        limit: Int,
+        q: String,
+    ): Response<GetUsersResponse> = userApiService.getUsers(offset, limit, q)
 
     override suspend fun verifyOtp(email: String, otp: String): Response<User> =
         userApiService.verifyOtp(OtpRequest(email = email, otp = otp))

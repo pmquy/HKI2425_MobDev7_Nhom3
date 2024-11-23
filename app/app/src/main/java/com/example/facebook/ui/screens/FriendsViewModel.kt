@@ -1,5 +1,6 @@
 package com.example.facebook.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -28,6 +29,7 @@ class FriendsViewModel(
         try {
             viewModelScope.launch {
                 friendRepository.request(to)
+                Log.wtf("Frien view model", "sent request")
             }
         } catch (e: Exception) {
             Toast.makeText(application, e.message, Toast.LENGTH_SHORT).show()
@@ -75,7 +77,6 @@ class FriendsViewModel(
     }
 
     fun getRequests() {
-
         try {
             viewModelScope.launch {
                 val response = friendRepository.getAll(
@@ -95,8 +96,7 @@ class FriendsViewModel(
         }
     }
 
-    suspend fun getSends() {
-
+    fun getSends() {
         try {
             viewModelScope.launch {
                 val response = friendRepository.getAll(
@@ -112,7 +112,7 @@ class FriendsViewModel(
                 if (!response.isSuccessful) throw Exception("Error getting sends")
                 _uiState.update {
                     it.copy(
-                        sends = it.sends + response.body()!!.data,
+                        sends = response.body()!!.data,
                     )
                 }
             }
@@ -195,8 +195,9 @@ data class FriendsUIState(
     val suggestions: List<String> = listOf(),
 )
 
-enum class FriendSubScreen {
-    SUGGESTS,
-    REQUESTS,
-    ALL
+enum class FriendSubScreen (val tag: String) {
+    SUGGESTS("Gơị ý"),
+    REQUESTS("Lời mời"),
+    SENTS("Đã gửi"),
+    ALL("Bạn bè")
 }

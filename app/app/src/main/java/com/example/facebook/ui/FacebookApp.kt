@@ -1,7 +1,5 @@
 package com.example.facebook.ui
 
-import android.os.Build
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -43,7 +41,6 @@ enum class FacebookScreen {
     FRIEND_SEARCHING,
     PROFILE,
     CREATE_CHAT_GROUP,
-    PROFILE,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -83,18 +80,15 @@ fun FacebookTopBar(
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
-fun FacebookApp() {
+fun FacebookApp(startDestination: String?) {
     val userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
-
     val navController = rememberNavController()
-    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
         try {
             userViewModel.auth()
-            navController.navigate(FacebookScreen.HOME.name)
+            navController.navigate(startDestination?: FacebookScreen.HOME.name)
         } catch (e: Exception) {
             navController.navigate(FacebookScreen.LOGIN.name)
         }

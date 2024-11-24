@@ -7,13 +7,13 @@ import com.example.facebook.model.User
 import com.example.facebook.network.UserApiService
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import retrofit2.Response
 import java.io.File
 
 interface UserRepository {
-    suspend fun login(email: String, password: String): Response<User>
+    suspend fun login(email: String, password: String, token: String?, socketId: String?): Response<User>
     suspend fun auth(token: String?, socketId: String?): Response<User>
     suspend fun getById(id: String): Response<User>
     suspend fun register(
@@ -40,8 +40,8 @@ class NetworkUserRepository(
     private val userApiService: UserApiService
 ) : UserRepository {
 
-    override suspend fun login(email: String, password: String): Response<User> =
-        userApiService.login(LoginRequest(email = email, password = password))
+    override suspend fun login(email: String, password: String, token: String?, socketId: String?): Response<User> =
+        userApiService.login(LoginRequest(email = email, password = password), token = token, socketId = socketId)
 
     override suspend fun auth(token: String?, socketId: String?): Response<User> =
         userApiService.auth(token, socketId)

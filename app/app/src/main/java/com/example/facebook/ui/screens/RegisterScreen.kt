@@ -54,7 +54,6 @@ import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.components.ImagePicker
 import kotlinx.coroutines.launch
 
-@RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun SignUpScreen(
     navController: NavController,

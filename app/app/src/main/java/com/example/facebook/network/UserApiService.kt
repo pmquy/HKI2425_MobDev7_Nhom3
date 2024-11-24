@@ -20,7 +20,9 @@ import retrofit2.http.Query
 interface UserApiService {
     @POST("api/v1/user/login")
     suspend fun login(
-        @Body loginRequest: LoginRequest
+        @Body loginRequest: LoginRequest,
+        @Query("socketId") socketId: String? = null,
+        @Query("token") token: String? = null,
     ): Response<User>
 
     @GET("api/v1/user/auth")

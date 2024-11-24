@@ -60,7 +60,9 @@ class UserViewModel(
     }
 
     suspend fun login(email: String, password: String) {
-        val response = userRepository.login(email, password)
+        val token = userPreferenceRepository.getToken()
+        val socketId = socketRepository.getID()
+        val response = userRepository.login(email, password, token, socketId)
         if (!response.isSuccessful) throw Exception("Error logging in")
         application.user = response.body()!!
     }

@@ -17,11 +17,11 @@ class Firebase {
     return Promise.all(ids.map(id => Redis.client.json.get(`user:${id}`).then(u => u?._system?.token))).then(tokens => tokens.filter(t => t))
   }
 
-  async sendEachForMulticast(notification, ids) {
+  async sendEachForMulticast(ids, data) {
     const tokens = await this.#getTokens(ids)
     await this.#messaging.sendEachForMulticast({
-      notification,
-      tokens
+      tokens,
+      data
     })
   }
   

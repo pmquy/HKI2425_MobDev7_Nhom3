@@ -118,7 +118,10 @@ fun ChatGroupScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         File(
                             uiState.chatGroup.avatar, modifier = Modifier
                                 .size(32.dp)
@@ -416,7 +419,7 @@ fun CreateMessage(
 
             InputType.IMAGE -> {
                 MultipleImagePicker {
-                    chatGroupViewModel.createMessage("", it, listOf())
+                    if (it.isNotEmpty()) chatGroupViewModel.createMessage("", it, listOf())
                 }
                 GifPicker(
                     modifier = Modifier.height(300.dp)

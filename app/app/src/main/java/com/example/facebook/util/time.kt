@@ -1,7 +1,6 @@
 package com.example.facebook.util
 
 import android.annotation.SuppressLint
-import android.util.Log
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -23,7 +22,6 @@ val mongoDateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.ge
 fun parseDate(date: String, format: String):String {
     return try {
         val d = mongoDateFormat.parse(date)
-        Log.d("parseDate", d.toString())
         SimpleDateFormat(format, Locale.getDefault()).format(d)
     } catch (e: Exception) {
         ""

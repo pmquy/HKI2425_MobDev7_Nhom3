@@ -37,12 +37,15 @@ class Controller {
         if (file?.type === 'audio' && file.description == undefined) throw new Error("Processing the file")
 
         RabbitMQ.channel.ack(msg)
-
-        Firebase.sendEachForMulticast({
-          title: sender.firstName + ' ' + sender.lastName,
-          body: file?.type === 'image' ? 'Đã gửi một hình ảnh' : file?.type === 'audio' ? file.description : file?.type === 'video' ? 'Đã gửi một video' : file ? 'Đã gửi một tệp tin' : message.message,
-          imageUrl: file?.type === 'image' ? file.url : undefined
-        }, users.map(u => u.user))
+        Firebase.sendEachForMulticast(
+          users,
+          {
+            type: "new_message",
+            chatgroup: message.chatgroup,
+            title: sender.firstName + ' ' + sender.lastName,
+            body: file?.type === 'image' ? 'Đã gửi một hình ảnh' : file?.type === 'audio' ? file.description : file?.type === 'video' ? 'Đã gửi một video' : file ? 'Đã gửi một tệp tin' : message.message,
+          }
+        )
           .catch(console.error)
 
       } catch (error) {
@@ -67,7 +70,8 @@ class Controller {
       })
       chatgroup.updateOne({ _system: { lastMessageTimeStamp: result.createdAt } }).then(() => { }).catch(console.error)
       SocketIO.io.to(`chatgroup-${result.chatgroup}`).emit('new_message', result)
-      RabbitMQ.channel.sendToQueue(this.#MESSAGE_NOTIFICATION, Buffer.from(JSON.stringify({ message: result, sender: req.user, users: chatgroup.users })))
+      RabbitMQ.channel.sendToQueue(this.#MESSAGE_NOTIFICATION, Buffer.from(JSON.stringify({ message: result, sender: req.user, users: chatgroup.users.map(e => e.user) })))
+      // RabbitMQ.channel.sendToQueue(this.#MESSAGE_NOTIFICATION, Buffer.from(JSON.stringify({ message: result, sender: req.user, users: chatgroup.users.filter(e => e.user != req.user._id).map(e => e.user) })))
     } catch (error) {
       next(error)
     }

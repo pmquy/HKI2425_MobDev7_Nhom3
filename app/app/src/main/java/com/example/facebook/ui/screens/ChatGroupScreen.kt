@@ -144,13 +144,13 @@ fun ChatGroupScreen(
                     IconButton(onClick = {}) {
                         Icon(Icons.Default.Call, contentDescription = "Call")
                     }
-                    IconButton(onClick = { navController.navigate("${FacebookScreen.VIDEO_CALL.name}/$id") }) {
+                    IconButton(onClick = { navController.navigate("${FacebookScreen.VIDEO_CALL.name}/${id}") }) {
                         Icon(
                             painterResource(R.drawable.video_call),
                             contentDescription = "Video Call"
                         )
                     }
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = {navController.navigate("${FacebookScreen.FIND_MESSAGE.name}/$id")}) {
                         Icon(Icons.Default.Info, contentDescription = "Info")
                     }
                 }

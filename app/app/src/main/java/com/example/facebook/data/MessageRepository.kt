@@ -24,7 +24,6 @@ interface MessageRepository {
     suspend fun getAll(): Response<List<Message>>
 }
 
-
 class NetworkMessageRepository(
     private val messageApiService: MessageApiService
 ) : MessageRepository {

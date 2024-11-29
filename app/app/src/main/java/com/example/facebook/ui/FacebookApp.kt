@@ -1,5 +1,7 @@
 package com.example.facebook.ui
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -21,6 +23,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.facebook.ui.screens.ChatGroupScreen
 import com.example.facebook.ui.screens.CreateChatGroupScreen
+import com.example.facebook.ui.screens.FindMessageScreen
 import com.example.facebook.ui.screens.FindUserScreen
 import com.example.facebook.ui.screens.FriendsScreen
 import com.example.facebook.ui.screens.HomeScreen
@@ -41,6 +44,7 @@ enum class FacebookScreen {
     FRIEND_SEARCHING,
     PROFILE,
     CREATE_CHAT_GROUP,
+    FIND_MESSAGE
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,15 +84,17 @@ fun FacebookTopBar(
     )
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun FacebookApp(startDestination: String?) {
     val userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
+
     val navController = rememberNavController()
 
     LaunchedEffect(Unit) {
         try {
             userViewModel.auth()
-            navController.navigate(startDestination?: FacebookScreen.HOME.name)
+            navController.navigate(startDestination?:FacebookScreen.HOME.name)
         } catch (e: Exception) {
             navController.navigate(FacebookScreen.LOGIN.name)
         }
@@ -128,6 +134,9 @@ fun FacebookApp(startDestination: String?) {
         }
         composable("${FacebookScreen.PROFILE.name}/{id}") {
             ProfileScreen(navController = navController)
+        }
+        composable("${FacebookScreen.FIND_MESSAGE.name}/{id}") {
+            FindMessageScreen(navController = navController)
         }
     }
 }

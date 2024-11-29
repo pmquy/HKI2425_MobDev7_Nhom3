@@ -1,5 +1,6 @@
 package com.example.facebook.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -72,6 +73,7 @@ class UserViewModel(
         val socketId = socketRepository.getID()
         val response = userRepository.auth(token = token ?: "", socketId = socketId)
         if (!response.isSuccessful) throw Exception("Error authenticating")
+        Log.d("user", response.body()!!._id)
         _uiState.update {
             it.copy(
                 user = response.body()!!

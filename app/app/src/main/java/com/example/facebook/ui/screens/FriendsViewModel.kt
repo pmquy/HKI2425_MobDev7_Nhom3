@@ -145,7 +145,6 @@ class FriendsViewModel(
     }
 
     fun getSuggestions() {
-
         try {
             viewModelScope.launch {
                 val response = friendRepository.getSuggestions(
@@ -173,6 +172,18 @@ class FriendsViewModel(
         }
     }
 
+    val setSearch : (String) -> Unit = {text ->
+        _uiState.update {
+            it.copy(search = text)
+        }
+    }
+
+    fun clearInput() {
+        _uiState.update {
+            it.copy(search = "")
+        }
+    }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
@@ -193,6 +204,7 @@ data class FriendsUIState(
     val sends: List<Friend> = listOf(),
     val friends: List<Friend> = listOf(),
     val suggestions: List<String> = listOf(),
+    val search: String = ""
 )
 
 enum class FriendSubScreen (val tag: String) {

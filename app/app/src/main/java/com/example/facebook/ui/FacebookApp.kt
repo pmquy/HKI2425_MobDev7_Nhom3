@@ -1,7 +1,8 @@
 package com.example.facebook.ui
 
 import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -17,6 +18,7 @@ import androidx.compose.material3.TopAppBarDefaults.topAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -84,28 +86,44 @@ fun FacebookTopBar(
     )
 }
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun FacebookApp(startDestination: String?) {
     val userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory)
-
+    val context = LocalContext.current
     val navController = rememberNavController()
 
-    LaunchedEffect(Unit) {
-        try {
-            userViewModel.auth()
-            navController.navigate(startDestination?:FacebookScreen.HOME.name)
-        } catch (e: Exception) {
-            navController.navigate(FacebookScreen.LOGIN.name)
-        }
-    }
-
     NavHost(
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         navController = navController,
         startDestination = FacebookScreen.LOADING.name
     ) {
         composable(FacebookScreen.LOADING.name) {
+            val permissionLauncher = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestPermission()
+            ) {
+
+            }
+            LaunchedEffect(Unit) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
+
+                when {
+                    context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED -> {
+
+                    }
+                }
+
+                try {
+                    userViewModel.auth()
+                    navController.navigate(startDestination ?: FacebookScreen.HOME.name)
+                } catch (e: Exception) {
+                    navController.navigate(FacebookScreen.LOGIN.name)
+                }
+            }
+
             Text("Loading")
         }
         composable(FacebookScreen.HOME.name) {

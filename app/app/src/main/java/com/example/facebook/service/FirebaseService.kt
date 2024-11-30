@@ -95,7 +95,7 @@ class FirebaseService : FirebaseMessagingService() {
                     action = "REPLY"
                     putExtra("chatgroup", chatgroup)
                 },
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
             )
         ).addRemoteInput(remoteInput).build()
 
@@ -109,7 +109,7 @@ class FirebaseService : FirebaseMessagingService() {
                     action = "LIKE"
                     putExtra("chatgroup", chatgroup)
                 },
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         ).build()
 
@@ -124,7 +124,7 @@ class FirebaseService : FirebaseMessagingService() {
                     action = "LISTEN"
                     putExtra("content", "$title $message")
                 },
-                PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         ).build()
 
@@ -134,7 +134,7 @@ class FirebaseService : FirebaseMessagingService() {
         }
 
         val pendingIntent =
-            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
 
 
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)

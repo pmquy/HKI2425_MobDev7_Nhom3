@@ -32,8 +32,13 @@ interface ChatgroupApiService {
         @Part avatar: MultipartBody.Part?,
     ): Response<ChatGroup>
 
+    @Multipart
     @PUT("api/v1/chatgroup/{id}")
-    suspend fun updateById(@Path("id") id: String, @Body chatGroup: ChatGroup): Response<ChatGroup>
+    suspend fun updateById(
+        @Path("id") id: String,
+        @Part("name") name: RequestBody,
+        @Part avatar: MultipartBody.Part?
+    ): Response<ChatGroup>
 
     @DELETE("api/v1/chatgroup/{id}")
     suspend fun deleteById(@Path("id") id: String): Response<Void>

@@ -21,7 +21,7 @@ interface ChatGroupRepository {
         avatar: Pair<File, String>?
     ): Response<ChatGroup>
 
-    suspend fun updateById(id: String, chatGroup: ChatGroup): Response<ChatGroup>
+    suspend fun updateById(id: String, name: String, avatar: Pair<File, String>?): Response<ChatGroup>
     suspend fun deleteById(id: String): Response<Void>
     suspend fun getAll(offset: Int, limit: Int, query: String): Response<GetAllChatGroupsResponse>
     suspend fun getMessage(
@@ -67,9 +67,19 @@ class NetworkChatGroupRepository(
         )
     }
 
-    override suspend fun updateById(id: String, chatGroup: ChatGroup): Response<ChatGroup> =
-        chatgroupApiService.updateById(id, chatGroup)
-
+    override suspend fun updateById(id: String, name: String, avatar: Pair<File, String>?): Response<ChatGroup> {
+        val nameRequestBody = name.toRequestBody("text/plain".toMediaType())
+        val avatarPart = avatar?.let {
+            MultipartBody.Part.createFormData(
+                "avatar", it.first.name, it.first.asRequestBody(it.second.toMediaType())
+            )
+        }
+        val response = chatgroupApiService.updateById(id, nameRequestBody, avatarPart)
+        if (!response.isSuccessful) {
+            throw Exception("Error updating chat group: ${response.errorBody()?.string()}")
+        }
+        return response
+    }
     override suspend fun deleteById(id: String): Response<Void> = chatgroupApiService.deleteById(id)
     override suspend fun getAll(
         offset: Int,

@@ -14,6 +14,7 @@ import com.example.facebook.data.MessageRepository
 import com.example.facebook.data.SocketRepository
 import com.example.facebook.data.UserRepository
 import com.example.facebook.model.ChatGroup
+import com.example.facebook.model.Member
 import com.example.facebook.model.Message
 import io.socket.emitter.Emitter
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +45,7 @@ data class ChatGroupUIState(
     var systemFiles: List<String> = listOf(),
     var files: List<Pair<File, String>> = listOf(),
     var inputType: InputType = InputType.DEFAULT,
+    val users: List<Member> = listOf(),
 )
 
 class ChatGroupViewModel(
@@ -80,13 +82,17 @@ class ChatGroupViewModel(
             if (!response1.isSuccessful) throw Exception("Error getting chat group")
             val response2 = chatGroupRepository.getMessage(id, 0, LIMIT, "{}")
             if (!response2.isSuccessful) throw Exception("Error getting messages")
+            val response3 = chatGroupRepository.getMember(id)
+            if (!response3.isSuccessful) throw Exception("User getting messages")
             Log.d("ChatGroupViewModel", "initChatGroup: ${response1.body()}")
             _uiState.value = _uiState.value.copy(
                 chatGroup = response1.body()!!,
                 messages = response2.body()!!.data,
                 hasMore = response2.body()!!.hasMore,
                 offset = LIMIT,
+                users = response3.body()!!
             )
+            Log.d("ChatGroupViewModel", "initChatGroup: ${_uiState.value}")
         }
     }
 
@@ -168,6 +174,43 @@ class ChatGroupViewModel(
         }
     }
 
+    fun handleUpdate(
+        name : String? = null,
+        avatar: Pair<File, String>? = null,
+    ) {
+        viewModelScope.launch {
+            try {
+                val updatedName = name ?: _uiState.value.chatGroup.name
+                val response = chatGroupRepository.updateById(
+                    _uiState.value.chatGroup._id,
+                    updatedName,
+                    avatar
+                )
+                if (!response.isSuccessful) throw Exception("Error updating chat group")
+                _uiState.update {
+                    it.copy(chatGroup = response.body()!!)
+                }
+            } catch (e: Exception) {
+                Toast.makeText(application, e.message, Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    fun currentUserId(): String {
+        return application.user._id
+    }
+
+    fun addMember(user: String, role: String = "member") {
+        _uiState.value = _uiState.value.copy(users = _uiState.value.users + Member(user, role))
+    }
+
+    fun checkMember(user: String): Boolean {
+        return _uiState.value.users.any { it.user == user }
+    }
+
+    fun removeMember(user: String) {
+        _uiState.value = _uiState.value.copy(users = _uiState.value.users.filter { it.user != user })
+    }
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {

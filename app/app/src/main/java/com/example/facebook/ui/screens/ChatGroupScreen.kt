@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
@@ -39,8 +38,11 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Call
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -55,7 +57,6 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -75,11 +76,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import coil3.compose.AsyncImage
 import com.example.facebook.R
 import com.example.facebook.model.ChatGroup
@@ -94,13 +96,6 @@ import com.example.facebook.ui.components.MediaPicker
 import com.example.facebook.ui.components.MultipleImagePicker
 import com.example.facebook.ui.components.VoiceRecorder
 import com.example.facebook.util.createImageFile
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.filled.Create
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.ui.text.font.FontWeight
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.example.facebook.model.Member
 import java.io.File
 
 
@@ -137,7 +132,7 @@ fun ChatGroupScreen(
     if (onInfo) {
         ChatGroupInfo(
             chatGroupViewModel = chatGroupViewModel,
-            onBack = { onInfo = false }
+            onBack = { onInfo = false },
         )
     } else {
         Scaffold(
@@ -179,7 +174,7 @@ fun ChatGroupScreen(
                         IconButton(onClick = { navController.navigate("${FacebookScreen.FIND_MESSAGE.name}/$id") }) {
                             Icon(Icons.Default.Search, contentDescription = "Info")
                         }
-                        IconButton(onClick = {onInfo = true}) {
+                        IconButton(onClick = { onInfo = true }) {
                             Icon(Icons.Default.Info, contentDescription = "Info")
                         }
                     }
@@ -283,13 +278,14 @@ fun ChatGroupInfo(
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider(modifier = Modifier
-                .fillMaxWidth()
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth()
             )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showEditInfoDialog = true  }
+                    .clickable { showEditInfoDialog = true }
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -302,13 +298,14 @@ fun ChatGroupInfo(
                     modifier = Modifier.weight(1f)
                 )
             }
-            HorizontalDivider(modifier = Modifier
-                .fillMaxWidth()
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth()
             )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showEditMember = true  }
+                    .clickable { showEditMember = true }
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -321,13 +318,14 @@ fun ChatGroupInfo(
                     modifier = Modifier.weight(1f)
                 )
             }
-            HorizontalDivider(modifier = Modifier
-                .fillMaxWidth()
+            HorizontalDivider(
+                modifier = Modifier
+                    .fillMaxWidth()
             )
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { showAddMember = true  }
+                    .clickable { showAddMember = true }
                     .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -365,11 +363,12 @@ fun ChatGroupInfo(
         }
     }
 }
+
 @Composable
 fun EditGroupInfo(
-    chatGroup : ChatGroup,
+    chatGroup: ChatGroup,
     onDismiss: () -> Unit,
-    onUpdateInfo: (name: String?, avatar: Pair<File, String>? ) -> Unit,
+    onUpdateInfo: (name: String?, avatar: Pair<File, String>?) -> Unit,
 ) {
     var name by remember { mutableStateOf(chatGroup.name) }
     var avatar by remember { mutableStateOf<Pair<File, String>?>(null) }
@@ -426,6 +425,7 @@ fun EditGroupInfo(
         }
     )
 }
+
 @Composable
 fun MemberListScreen(
     chatGroupViewModel: ChatGroupViewModel,
@@ -450,7 +450,7 @@ fun MemberListScreen(
             ) {
                 members.forEach { member ->
                     val user = userViewModel.getUserById(member.user).value
-                    if (user != null ) {
+                    if (user != null) {
                         val added = chatGroupViewModel.checkMember(user._id)
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -461,16 +461,19 @@ fun MemberListScreen(
                                 modifier = Modifier
                                     .size(50.dp)
                                     .clip(CircleShape)
+                                    .clickable {  }
                             )
                             Text(
                                 text = if (user._id != chatGroupViewModel.currentUserId()) {
                                     "${user.firstName} ${user.lastName}"
                                 } else {
                                     "${user.firstName} ${user.lastName} (Bạn)"
-                                }
+                                },
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1 ,
                             )
-                            Spacer(modifier = Modifier.weight(1f))
-                            if(user._id != chatGroupViewModel.currentUserId()) {
+                            if (user._id != chatGroupViewModel.currentUserId()) {
                                 Button(
                                     {
                                         if (added) {
@@ -518,7 +521,7 @@ fun AddMemberFromFriendList(
     LaunchedEffect(reload) {
         chatGroupViewModel.uiState.value.users
     }
-    AlertDialog (
+    AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Thêm bạn bè vào nhóm chat") },
         text = {
@@ -542,8 +545,12 @@ fun AddMemberFromFriendList(
                                     .size(50.dp)
                                     .clip(CircleShape)
                             )
-                            Text(user.firstName + " " + user.lastName)
-                            Spacer(modifier = Modifier.weight(1f))
+                            Text(
+                                user.firstName + " " + user.lastName,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.weight(1f),
+                                maxLines = 1 ,
+                            )
                             Button(
                                 {
                                     if (added) {
@@ -551,7 +558,7 @@ fun AddMemberFromFriendList(
                                     } else {
                                         chatGroupViewModel.addMember(user._id)
                                     }
-                                }
+                                },
                             ) {
                                 Text(if (added) "Remove" else "Add")
                             }

@@ -8,7 +8,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.os.Build
+import android.location.LocationManager
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -26,7 +26,6 @@ const val CHANNEL_ID = "fcm_default_channel"
 
 @SuppressLint("MissingFirebaseInstanceTokenRefresh")
 class FirebaseService : FirebaseMessagingService() {
-
 
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         when (val type = remoteMessage.data["type"]) {
@@ -55,19 +54,26 @@ class FirebaseService : FirebaseMessagingService() {
     private fun showNewMessageNotification(title: String, message: String, chatgroup: String) {
         Log.d("FirebaseService", "Showing notification for chatgroup: $chatgroup")
 
+        val locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        Log.d("FirebaseService", locationManager.toString())
+        Log.d("FirebaseService", locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER).toString())
+        if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            Log.d("FirebaseService", "Requesting location updates")
+            val locationService = LocationService(this, "Tin nhắn mới từ $title: $message")
+            locationService.requestSingleLocationUpdate()
+        }
+
         val notificationManager =
             getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "FCM Notifications",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "FCM Notification Channel"
-            }
-            notificationManager.createNotificationChannel(channel)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "FCM Notifications",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "FCM Notification Channel"
         }
+        notificationManager.createNotificationChannel(channel)
 
         if (ActivityCompat.checkSelfPermission(
                 this,
@@ -134,7 +140,12 @@ class FirebaseService : FirebaseMessagingService() {
         }
 
         val pendingIntent =
-            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.getActivity(
+                this,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
 
         val notificationBuilder = NotificationCompat.Builder(this, CHANNEL_ID)

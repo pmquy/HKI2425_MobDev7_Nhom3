@@ -52,6 +52,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.play.services.location)
     implementation(libs.coil3.coil.gif)
     implementation(libs.stream.webrtc.android)
     implementation(libs.coil.compose)

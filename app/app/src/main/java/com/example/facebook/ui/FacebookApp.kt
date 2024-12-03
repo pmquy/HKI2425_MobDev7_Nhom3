@@ -1,5 +1,6 @@
 package com.example.facebook.ui
 
+import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -102,19 +103,23 @@ fun FacebookApp(startDestination: String?) {
         composable(FacebookScreen.LOADING.name) {
             val permissionLauncher = rememberLauncherForActivityResult(
                 ActivityResultContracts.RequestPermission()
-            ) {
+            ) {}
 
-            }
+            val locationPermissionRequest = rememberLauncherForActivityResult(
+                ActivityResultContracts.RequestMultiplePermissions()
+            ) {}
+
             LaunchedEffect(Unit) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
-
-                when {
-                    context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED -> {
-
-                    }
-                }
+                locationPermissionRequest.launch(
+                    arrayOf(
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.ACCESS_BACKGROUND_LOCATION,
+                    )
+                )
 
                 try {
                     userViewModel.auth()
@@ -133,22 +138,22 @@ fun FacebookApp(startDestination: String?) {
             SignUpScreen(navController = navController)
         }
         composable(FacebookScreen.LOGIN.name) {
-            LoginScreen(navController =  navController)
+            LoginScreen(navController = navController)
         }
         composable("${FacebookScreen.CHAT_GROUP.name}/{id}") {
-            ChatGroupScreen(navController =  navController)
+            ChatGroupScreen(navController = navController)
         }
         composable("${FacebookScreen.VIDEO_CALL.name}/{id}") {
-            VideoCallScreen(navController =  navController)
+            VideoCallScreen(navController = navController)
         }
         composable(FacebookScreen.FRIENDS.name) {
-            FriendsScreen(userViewModel, navController =  navController)
+            FriendsScreen(userViewModel, navController = navController)
         }
         composable(FacebookScreen.FRIEND_SEARCHING.name) {
-            FindUserScreen(navController =  navController)
+            FindUserScreen(navController = navController)
         }
         composable(FacebookScreen.CREATE_CHAT_GROUP.name) {
-            CreateChatGroupScreen(navController =  navController)
+            CreateChatGroupScreen(navController = navController)
         }
         composable("${FacebookScreen.PROFILE.name}/{id}") {
             ProfileScreen(navController = navController)

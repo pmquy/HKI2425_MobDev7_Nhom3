@@ -135,7 +135,7 @@ class ListenService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val content = intent?.getStringExtra("content")
-        if (content != null) {
+        if (!content.isNullOrEmpty()) {
             Log.d("ListenService", "Received content: $content")
             TextToSpeechInstance.speak(
                 content,

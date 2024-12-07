@@ -130,16 +130,6 @@ fun LoginScreen(userViewModel: UserViewModel = viewModel(factory = UserViewModel
             ) {
                 Text("Đăng nhập")
             }
-
-            Text(
-                text = "Quên mật khẩu?",
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Right,
-                modifier = Modifier
-                    .clickable { /* Handle forgot password action */ }
-                    .padding(bottom = 32.dp)
-                    .fillMaxWidth()
-            )
             Spacer(modifier = Modifier.height(96.dp))
             Row(
                 horizontalArrangement = Arrangement.Center,

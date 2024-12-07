@@ -224,7 +224,81 @@ fun SignUpScreen(
                     )
                 }
             } else {
-                AvatarSelection(registerViewModel)
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(8.dp)
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "Chọn hình ảnh đại diện",
+                        style = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold),
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Text(
+                        text = "Thể hiện cá tính của bạn",
+                        style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
+                        color = Color.Gray,
+                        textAlign = TextAlign.Left,
+                        modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth()
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp, bottom = 32.dp),
+                        thickness = DividerDefaults.Thickness
+                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(CircleShape)
+                                .background(Color.LightGray),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (uiState.avatar != null) {
+                                AsyncImage(
+                                    model = uiState.avatar!!.first.toURI().toString(),
+                                    contentDescription = "Avatar",
+                                    modifier = Modifier
+                                        .size(100.dp)
+                                        .clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Text(
+                                    text = "No Image",
+                                    color = Color.White,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
+                    }
+                    ImagePicker {
+                        registerViewModel.setAvatar(it)
+                    }
+                    Button(
+                        onClick = registerViewModel.handleRegister,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 16.dp)
+                    ) {
+                        Text(text = "Hoàn thành đăng ký")
+                    }
+                    Button(
+                        onClick = { registerViewModel.setCurrentStep(1) },
+                    ) {
+                        Text(text = "Quay lại")
+                    }
+                }
             }
         }
     }

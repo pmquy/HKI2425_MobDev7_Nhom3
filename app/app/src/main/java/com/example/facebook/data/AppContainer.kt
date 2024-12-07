@@ -30,6 +30,7 @@ interface AppContainer {
     val friendRepository: FriendRepository
     val userPreferenceRepository: UserPreferenceRepository
     val user: User?
+    val appCookieJar: AppCookieJar
 }
 
 class AppCookieJar(context: Context) : CookieJar {
@@ -59,21 +60,22 @@ class AppCookieJar(context: Context) : CookieJar {
         editor.apply()
     }
 
-    private fun loadCookies() {
+    fun loadCookies() {
         for ((key, value) in sharedPreferences.all) {
             val cookieStrings = (value as String).split(";")
             val cookies = cookieStrings.mapNotNull { Cookie.parse("http://$key".toHttpUrl(), it) }
             cookieStore[key] = cookies
         }
     }
+
 }
 
 class DefaultAppContainer(context: Context) : AppContainer {
     private val baseUrl = "https://hki2425-mobdev7-nhom3.onrender.com/"
-    private val cookieJar = AppCookieJar(context)
+    override val appCookieJar = AppCookieJar(context)
 
     private val okHttpClient = OkHttpClient.Builder()
-        .cookieJar(cookieJar)
+        .cookieJar(appCookieJar)
         .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
         .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
         .build()
@@ -87,7 +89,7 @@ class DefaultAppContainer(context: Context) : AppContainer {
         .build()
 
     override val socketRepository: SocketRepository by lazy {
-        val cookies = cookieJar.loadForRequest(baseUrl.toHttpUrl())
+        val cookies = appCookieJar.loadForRequest(baseUrl.toHttpUrl())
         val cookieMap = cookies.associate { it.name to it.value }
         val cookieJson = Json.encodeToString(cookieMap)
         val options = IO.Options()

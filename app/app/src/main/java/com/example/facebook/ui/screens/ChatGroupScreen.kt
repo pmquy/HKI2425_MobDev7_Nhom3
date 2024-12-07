@@ -37,7 +37,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
@@ -77,6 +76,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
@@ -150,29 +150,24 @@ fun ChatGroupScreen(
                                     .size(32.dp)
                                     .clip(CircleShape)
                             )
-                            Text(uiState.chatGroup.name)
+                            Text(
+                                uiState.chatGroup.name,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     },
                     scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior(),
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        containerColor = MaterialTheme.colorScheme.background,
                         titleContentColor = MaterialTheme.colorScheme.primary,
                     ),
                     navigationIcon = {
-                        IconButton(onClick = { navController.navigateUp() }) {
+                        IconButton(onClick = { navController.navigate("Home") }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     },
                     actions = {
-                        IconButton(onClick = {}) {
-                            Icon(Icons.Default.Call, contentDescription = "Call")
-                        }
-                        IconButton(onClick = { navController.navigate("${FacebookScreen.VIDEO_CALL.name}/$id") }) {
-                            Icon(
-                                painterResource(R.drawable.video_call),
-                                contentDescription = "Video Call"
-                            )
-                        }
                         IconButton(onClick = { navController.navigate("${FacebookScreen.FIND_MESSAGE.name}/$id") }) {
                             Icon(Icons.Default.Search, contentDescription = "Info")
                         }
@@ -252,7 +247,7 @@ fun ChatGroupInfo(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
             )
@@ -282,7 +277,8 @@ fun ChatGroupInfo(
                         text = uiState.chatGroup.name,
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(4.dp)
+                        modifier = Modifier.padding(4.dp).fillMaxWidth(),
+                        textAlign = TextAlign.Center
                     )
                 }
             }

@@ -90,6 +90,7 @@ import com.example.facebook.model.User
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.components.EmojiPicker
 import com.example.facebook.ui.components.File
+import com.example.facebook.ui.components.FileViewModel
 import com.example.facebook.ui.components.GifPicker
 import com.example.facebook.ui.components.ImagePicker
 import com.example.facebook.ui.components.MediaPicker
@@ -104,6 +105,7 @@ import java.io.File
 fun ChatGroupScreen(
     chatGroupViewModel: ChatGroupViewModel = viewModel(factory = ChatGroupViewModel.Factory),
     userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory),
+    fileViewModel: FileViewModel = viewModel(factory = FileViewModel.Factory),
     navController: NavHostController,
 ) {
     val uiState by chatGroupViewModel.uiState.collectAsState()
@@ -209,9 +211,16 @@ fun ChatGroupScreen(
                                 message = message,
                                 user = user,
                                 isMine = chatGroupViewModel.isMine(message),
-                            ) {
-                                navController.navigate("${FacebookScreen.PROFILE.name}/${user._id}")
-                            }
+                                onClick = {
+                                    navController.navigate("${FacebookScreen.PROFILE.name}/${user._id}")
+                                },
+                                onFileClick = { fileId ->
+                                    val file = fileViewModel.getFileById(fileId)
+                                    if (file.value != null && file.value!!.type == "image") {
+                                        navController.navigate("${FacebookScreen.IMAGE_VIEW.name}/${fileId}")
+                                    }
+                                }
+                            )
                     }
                 }
             }
@@ -461,7 +470,7 @@ fun MemberListScreen(
                                 modifier = Modifier
                                     .size(50.dp)
                                     .clip(CircleShape)
-                                    .clickable {  }
+                                    .clickable { }
                             )
                             Text(
                                 text = if (user._id != chatGroupViewModel.currentUserId()) {
@@ -587,7 +596,8 @@ fun MessageWrapper(
     user: User,
     isMine: Boolean,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onFileClick: (String) -> Unit = {}
 ) {
 
     Row(
@@ -598,13 +608,13 @@ fun MessageWrapper(
         verticalAlignment = Alignment.Bottom,
     ) {
         if (isMine) {
-            MessageMain(user = user, message = message, isMine = true)
+            MessageMain(user = user, message = message, isMine = true, onFileClick = onFileClick)
             Spacer(modifier = Modifier.width(8.dp))
             MessageUser(user, onClick = onClick)
         } else {
             MessageUser(user, onClick = onClick)
             Spacer(modifier = Modifier.width(8.dp))
-            MessageMain(user = user, message = message, isMine = false)
+            MessageMain(user = user, message = message, isMine = false, onFileClick = onFileClick)
         }
     }
 }
@@ -622,7 +632,7 @@ fun MessageUser(user: User, onClick: () -> Unit = {}) {
 }
 
 @Composable
-fun MessageMain(user: User, message: Message, isMine: Boolean) {
+fun MessageMain(user: User, message: Message, isMine: Boolean, onFileClick: (String) -> Unit = {}) {
     Column(
         horizontalAlignment = if (isMine) Alignment.End else Alignment.Start,
     ) {
@@ -631,7 +641,12 @@ fun MessageMain(user: User, message: Message, isMine: Boolean) {
             modifier = Modifier.widthIn(max = 200.dp)
         ) {
             message.files.forEach { file ->
-                File(id = file)
+                File(
+                    id = file,
+                    modifier = Modifier.clickable {
+                        onFileClick(file)
+                    }
+                )
             }
             if (message.message.isNotEmpty()) Text(
                 message.message,

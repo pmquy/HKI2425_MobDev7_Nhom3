@@ -30,6 +30,7 @@ import com.example.facebook.ui.screens.FindMessageScreen
 import com.example.facebook.ui.screens.FindUserScreen
 import com.example.facebook.ui.screens.FriendsScreen
 import com.example.facebook.ui.screens.HomeScreen
+import com.example.facebook.ui.screens.ImageViewScreen
 import com.example.facebook.ui.screens.LoginScreen
 import com.example.facebook.ui.screens.ProfileScreen
 import com.example.facebook.ui.screens.SignUpScreen
@@ -47,7 +48,8 @@ enum class FacebookScreen {
     FRIEND_SEARCHING,
     PROFILE,
     CREATE_CHAT_GROUP,
-    FIND_MESSAGE
+    FIND_MESSAGE,
+    IMAGE_VIEW
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -160,6 +162,9 @@ fun FacebookApp(startDestination: String?) {
         }
         composable("${FacebookScreen.FIND_MESSAGE.name}/{id}") {
             FindMessageScreen(navController = navController)
+        }
+        composable("${FacebookScreen.IMAGE_VIEW.name}/{id}") {
+            ImageViewScreen(navController = navController)
         }
     }
 }

@@ -69,7 +69,7 @@ class Controller {
         createdAt: result.createdAt
       })
       chatgroup.updateOne({ _system: { lastMessageTimeStamp: result.createdAt } }).then(() => { }).catch(console.error)
-      SocketIO.io.to(`chatgroup-${result.chatgroup}`).emit('new_message', result)
+      console.log(SocketIO.io.to(`chatgroup-${result.chatgroup}`).emit('new_message', result))
       RabbitMQ.channel.sendToQueue(this.#MESSAGE_NOTIFICATION, Buffer.from(JSON.stringify({ message: result, sender: req.user, users: chatgroup.users.filter(e => e.user != req.user._id).map(e => e.user) })))
     } catch (error) {
       next(error)

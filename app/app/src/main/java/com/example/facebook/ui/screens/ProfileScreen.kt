@@ -73,7 +73,8 @@ fun ProfileScreen(
     navController: NavHostController,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val id = navController.currentBackStackEntry?.arguments?.getString("id") ?: ""
+    var id = navController.currentBackStackEntry?.arguments?.getString("id")
+    if(id.isNullOrEmpty()) id = userViewModel.application.user._id
     val user = userViewModel.getUserById(id).collectAsState().value
     val randomImageId by remember { mutableStateOf((1..4).random())}
     val coverPhoto = painterResource(id = when (randomImageId) {
@@ -103,7 +104,7 @@ fun ProfileScreen(
                         }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 )
             )

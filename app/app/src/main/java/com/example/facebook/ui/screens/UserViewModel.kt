@@ -27,7 +27,7 @@ class UserViewModel(
     private val userRepository: UserRepository,
     private val socketRepository: SocketRepository,
     private val userPreferenceRepository: UserPreferenceRepository,
-    private val application: FacebookApplication,
+    val application: FacebookApplication,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(UIState(application.user))
@@ -66,6 +66,12 @@ class UserViewModel(
         val response = userRepository.login(email, password, token, socketId)
         if (!response.isSuccessful) throw Exception("Error logging in")
         application.user = response.body()!!
+        _uiState.update {
+            it.copy(
+                user = response.body()!!
+            )
+        }
+        application.container.appCookieJar.loadCookies()
     }
 
     suspend fun auth() {

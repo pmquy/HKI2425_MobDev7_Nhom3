@@ -58,8 +58,9 @@ fun LoginScreen(userViewModel: UserViewModel = viewModel(factory = UserViewModel
     val handleLogin: () -> Unit = {
         coroutineScope.launch {
             try {
-                userViewModel.login(email, password)
-                navController.navigate(FacebookScreen.HOME.name)
+                userViewModel.login(email, password).also {
+                    navController.navigate(FacebookScreen.HOME.name)
+                }
             } catch (e: Exception) {
                 Toast.makeText(
                     context,
@@ -130,16 +131,6 @@ fun LoginScreen(userViewModel: UserViewModel = viewModel(factory = UserViewModel
             ) {
                 Text("Đăng nhập")
             }
-
-            Text(
-                text = "Quên mật khẩu?",
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Right,
-                modifier = Modifier
-                    .clickable { /* Handle forgot password action */ }
-                    .padding(bottom = 32.dp)
-                    .fillMaxWidth()
-            )
             Spacer(modifier = Modifier.height(96.dp))
             Row(
                 horizontalArrangement = Arrangement.Center,

@@ -1,9 +1,13 @@
 package com.example.facebook.ui.screens
 
+import android.content.Context
+import com.example.facebook.model.User
+import com.example.facebook.network.UserApiService
 import com.example.facebook.FacebookApplication
 import com.example.facebook.data.ChatGroupRepository
 import com.example.facebook.model.ChatGroup
 import com.example.facebook.model.Member
+import com.example.facebook.service.RetrofitInstance
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -14,12 +18,14 @@ import org.junit.Test
 import org.junit.Assert.*
 import java.io.File
 
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class CreateChatGroupViewModelTest {
 
     private lateinit var viewModel: CreateChatGroupViewModel
     private val application = mockk<FacebookApplication>()
     private val chatGroupRepository = mockk<ChatGroupRepository>()
+
 
     @Before
     fun setup() {

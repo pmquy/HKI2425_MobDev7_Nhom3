@@ -75,6 +75,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -172,7 +173,7 @@ fun ChatGroupScreen(
                             )
                         }
                         IconButton(onClick = { navController.navigate("${FacebookScreen.FIND_MESSAGE.name}/$id") }) {
-                            Icon(Icons.Default.Search, contentDescription = "Info")
+                            Icon(Icons.Default.Search, contentDescription = "Search")
                         }
                         IconButton(onClick = { onInfo = true }) {
                             Icon(Icons.Default.Info, contentDescription = "Info")
@@ -286,7 +287,8 @@ fun ChatGroupInfo(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showEditInfoDialog = true }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .testTag("Change"),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.Create, contentDescription = "Edit")
@@ -306,7 +308,8 @@ fun ChatGroupInfo(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showEditMember = true }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .testTag("Look"),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.Person, contentDescription = "Edit")
@@ -326,7 +329,8 @@ fun ChatGroupInfo(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { showAddMember = true }
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .testTag("Add"),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.Add, contentDescription = "Edit")
@@ -616,7 +620,8 @@ fun MessageUser(user: User, onClick: () -> Unit = {}) {
         Modifier
             .size(32.dp)
             .clip(shape = CircleShape)
-            .clickable { onClick() },
+            .clickable { onClick() }
+            .testTag("Avatar"),
         allowOrigin = false
     )
 }
@@ -671,7 +676,8 @@ fun CreateMessage(
                     Icons.Default.Add,
                     modifier = Modifier.clickable {
                         chatGroupViewModel.setInputType(InputType.FILE)
-                    },
+                    }
+                        .testTag("ADDFILE"),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
                 )
@@ -679,7 +685,8 @@ fun CreateMessage(
                     painterResource(R.drawable.baseline_camera_alt_24),
                     modifier = Modifier.clickable {
                         chatGroupViewModel.setInputType(InputType.TAKE_PICTURE)
-                    },
+                    }
+                        .testTag("CAM"),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
                 )
@@ -687,7 +694,8 @@ fun CreateMessage(
                     painterResource(R.drawable.baseline_image_24),
                     modifier = Modifier.clickable {
                         chatGroupViewModel.setInputType(InputType.IMAGE)
-                    },
+                    }
+                        .testTag("IMG"),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
                 )
@@ -695,7 +703,7 @@ fun CreateMessage(
                     painterResource(R.drawable.baseline_mic_24),
                     modifier = Modifier.clickable {
                         chatGroupViewModel.setInputType(InputType.MIC)
-                    },
+                    }.testTag("MIC"),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
                 )
@@ -704,7 +712,8 @@ fun CreateMessage(
             IconButton({ chatGroupViewModel.setInputType(InputType.DEFAULT) }) {
                 Icon(
                     Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    modifier = Modifier.clickable { chatGroupViewModel.setInputType(InputType.DEFAULT) },
+                    modifier = Modifier.clickable { chatGroupViewModel.setInputType(InputType.DEFAULT) }
+                        .testTag("backDefault"),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
                 )
@@ -733,7 +742,8 @@ fun CreateMessage(
                     .background(
                         MaterialTheme.colorScheme.surfaceVariant,
                         MaterialTheme.shapes.extraLarge
-                    ),
+                    )
+                    .testTag("messageText"),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
                 decorationBox = { innerTextField ->
@@ -759,7 +769,8 @@ fun CreateMessage(
                 painterResource(R.drawable.baseline_insert_emoticon_24),
                 modifier = Modifier
                     .padding(end = 4.dp)
-                    .clickable { chatGroupViewModel.setInputType(InputType.EMOTICON) },
+                    .clickable { chatGroupViewModel.setInputType(InputType.EMOTICON) }
+                    .testTag("EMOTICON"),
                 tint = MaterialTheme.colorScheme.primary,
                 contentDescription = "Send",
             )
@@ -767,6 +778,7 @@ fun CreateMessage(
 
         IconButton(
             { chatGroupViewModel.createMessage(messageText, files, systemFiles) },
+            modifier = Modifier.testTag("SENDmes"),
             enabled = messageText.isNotEmpty() || files.isNotEmpty() || systemFiles.isNotEmpty(),
         ) {
             BadgedBox(
@@ -947,6 +959,7 @@ fun CreateMessage(
                                 file = null
                             },
                             modifier = Modifier.align(Alignment.CenterHorizontally)
+                                .testTag("MIC_RECORDER")
                         ) {
                             Text("Send")
                         }

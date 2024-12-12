@@ -68,6 +68,9 @@ class fakeUserRepository : UserRepository {
 
     private val mockedUsers = listOf(mockedUser, mockedUser2, mockedUser3)
 
+    fun getAllUsers(): List<User> {
+        return mockedUsers
+    }
     override suspend fun login(
         email: String,
         password: String,
@@ -125,7 +128,7 @@ class fakeUserRepository : UserRepository {
     }
 
     override suspend fun getUsers(offset: Int, limit: Int, q: String): Response<GetUsersResponse> {
-        TODO("Not yet implemented")
+        return Response.success(GetUsersResponse(data = mockedUsers, hasMore = false))
     }
 }
 

@@ -107,6 +107,7 @@ dependencies {
 
     // Testing
     testImplementation(libs.junit)
+    testImplementation("org.robolectric:robolectric:4.14.1")
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.androidx.core.testing.v210)
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.7.5")

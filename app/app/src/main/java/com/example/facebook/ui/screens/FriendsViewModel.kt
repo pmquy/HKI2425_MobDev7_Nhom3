@@ -208,7 +208,7 @@ data class FriendsUIState(
 )
 
 enum class FriendSubScreen (val tag: String) {
-    SUGGESTS("Gơị ý"),
+    SUGGESTS("Gợi ý"),
     REQUESTS("Lời mời"),
     SENTS("Đã gửi"),
     ALL("Bạn bè")

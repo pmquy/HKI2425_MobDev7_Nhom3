@@ -39,6 +39,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -239,7 +240,8 @@ fun AvatarSelection(registerViewModel: RegisterViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .testTag("AvatarSelection"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {

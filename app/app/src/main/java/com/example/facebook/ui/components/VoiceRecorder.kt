@@ -144,12 +144,12 @@ fun VoiceRecorder(modifier: Modifier = Modifier, onDone: (Pair<File, String>?) -
                     when (state) {
                         RecorderState.START, RecorderState.DONE -> {
                             IconButton(onStartRecorder, colors = IconButtonDefaults.filledIconButtonColors()) {
-                                Icon(painterResource(R.drawable.baseline_mic_24), contentDescription = "")
+                                Icon(painterResource(R.drawable.baseline_mic_24), contentDescription = "play")
                             }
                         }
                         RecorderState.RECORDING -> {
                             IconButton(onPauseRecorder, colors = IconButtonDefaults.filledIconButtonColors()) {
-                                Icon(painterResource(R.drawable.baseline_pause_24), contentDescription = "")
+                                Icon(painterResource(R.drawable.baseline_pause_24), contentDescription = "pause")
                             }
                         }
                         RecorderState.PAUSED -> {
@@ -163,7 +163,7 @@ fun VoiceRecorder(modifier: Modifier = Modifier, onDone: (Pair<File, String>?) -
 
                     if (state != RecorderState.START && state != RecorderState.DONE) {
                         IconButton(onStopRecorder) {
-                            Icon(painterResource(R.drawable.baseline_stop_24), contentDescription = "")
+                            Icon(painterResource(R.drawable.baseline_stop_24), contentDescription = "stop")
                         }
                     }
                 }

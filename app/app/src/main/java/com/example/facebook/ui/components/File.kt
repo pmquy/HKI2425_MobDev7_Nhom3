@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -55,7 +56,7 @@ fun File(
     val file = fileViewModel.getFileById(id).collectAsState().value
     var view by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.wrapContentSize()) {
+    Box(modifier = modifier.wrapContentSize().testTag("BoxFile")) {
 
         if(file == null || file.url.isEmpty()) {
             CircularProgressIndicator()
@@ -70,7 +71,7 @@ fun File(
                         contentDescription = file.name,
                         contentScale = ContentScale.Crop,
                         loading = { CircularProgressIndicator() },
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize().testTag("ImageFile")
                     )
                 } else if (file.status == "unsafe") {
                     SubcomposeAsyncImage(
@@ -78,7 +79,7 @@ fun File(
                         contentDescription = file.name,
                         contentScale = ContentScale.Crop,
                         loading = { CircularProgressIndicator() },
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize().testTag("UnsafeFile")
                     )
                     if(allowOrigin) {
                         Column(
@@ -97,7 +98,7 @@ fun File(
                         model = file.blurUrl,
                         contentDescription = file.name,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
+                        modifier = Modifier.fillMaxSize().testTag("ProcessingFile")
                     )
                     CircularProgressIndicator( modifier = Modifier.align(Alignment.Center))
                 } else {
@@ -107,10 +108,12 @@ fun File(
 
             "video" -> {
                 VideoFile(file.url)
+                Modifier.testTag("VideoFile")
             }
 
             "audio" -> {
                 AudioFile(Uri.parse(file.url), file.description)
+                Modifier.testTag("AudioFile")
             }
 
             else -> {
@@ -137,7 +140,7 @@ fun VideoFile(url: String) {
             PlayerView(it).apply {
                 player = exoPlayer
             }
-        }, modifier = Modifier.fillMaxSize()
+        }, modifier = Modifier.fillMaxSize().testTag("VideoFile")
     )
 
     DisposableEffect(Unit) {
@@ -222,14 +225,14 @@ fun AudioFile(uri: Uri, description: String) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(painterResource(drawable.baseline_mic_24), contentDescription = "")
+                Icon(painterResource(drawable.baseline_mic_24), contentDescription = "Mic")
                 Text("${currentPosition.toTime()} / ${duration.toTime()}")
                 if (isPlaying) Icon(
                     painterResource(drawable.baseline_pause_24),
-                    contentDescription = ""
+                    contentDescription = "Pause"
                 )
                 else Icon(
-                    Icons.Default.PlayArrow, contentDescription = ""
+                    Icons.Default.PlayArrow, contentDescription = "PlayArrow"
                 )
             }
             Slider(

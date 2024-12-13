@@ -21,13 +21,22 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
+data class FindMessageUIState(
+    val chatGroupId: String = "",
+    val search: String = "",
+    val hasMore: Boolean = false,
+    val offset: Int = 0,
+    val messages: List<Message> = listOf(),
+    val error: String? = null  // Add error message field
+)
+
 class FindMessageViewModel(
     private val chatGroupRepository: ChatGroupRepository,
     private val application: FacebookApplication
 ) : ViewModel() {
-    private val _uiState =  MutableStateFlow(FindMessageUIState())
+    private val _uiState = MutableStateFlow(FindMessageUIState())
     val uiState = _uiState.asStateFlow()
-    var searchJob : Job? = null
+    var searchJob: Job? = null
 
     private val LIMIT = 100
 
@@ -49,18 +58,19 @@ class FindMessageViewModel(
                     limit = LIMIT,
                     query = Json.encodeToString(mapOf("message" to _uiState.value.search))
                 )
-                Log.wtf("find message", response.toString())
-                if (!response.isSuccessful) throw Exception(response.message())
+                if (!response.isSuccessful) throw Exception("Error retrieving messages")
                 _uiState.update {
                     it.copy(
                         messages = response.body()!!.data,
                         hasMore = response.body()!!.hasMore,
-                        offset = it.offset + LIMIT
+                        offset = it.offset + LIMIT,
+                        error = null  // Clear error if successful
                     )
                 }
             } catch (e: Exception) {
-                Toast.makeText(application, e.message, Toast.LENGTH_SHORT).show()
-                Log.e("Find message", e.message!!)
+                _uiState.update {
+                    it.copy(error = e.message)  // Update UIState with the error message instead of displaying a Toast
+                }
             }
         }
     }
@@ -91,11 +101,3 @@ class FindMessageViewModel(
         }
     }
 }
-
-data class FindMessageUIState(
-    val chatGroupId: String = "",
-    val search: String = "",
-    val hasMore: Boolean = false,
-    val offset: Int = 0,
-    val messages: List<Message> = listOf()
-)

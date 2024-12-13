@@ -1,18 +1,10 @@
 package com.example.facebook.ui.screen
 
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
-import androidx.compose.ui.test.assertPositionInRootIsEqualTo
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -21,25 +13,24 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.printToLog
-import androidx.navigation.NavType
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.action.ViewActions.swipeUp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.facebook.R
 import com.example.facebook.data.ChatGroupRepository
 import com.example.facebook.data.MessageRepository
 import com.example.facebook.data.UserRepository
 import com.example.facebook.model.ChatGroup
 import com.example.facebook.model.GetAllChatGroupsResponse
 import com.example.facebook.model.GetMessagesResponse
+import com.example.facebook.model.GetUsersResponse
 import com.example.facebook.model.Member
 import com.example.facebook.model.Message
+import com.example.facebook.model.User
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.components.EmojiPicker
 import com.example.facebook.ui.screens.AddMemberFromFriendList
@@ -49,15 +40,11 @@ import com.example.facebook.ui.screens.ChatGroupViewModel
 import com.example.facebook.ui.screens.CreateMessage
 import com.example.facebook.ui.screens.EditGroupInfo
 import com.example.facebook.ui.screens.FriendsViewModel
-import com.example.facebook.ui.screens.HomeScreen
-import com.example.facebook.ui.screens.InputType
 import com.example.facebook.ui.screens.MemberListScreen
 import com.example.facebook.ui.screens.MessageMain
 import com.example.facebook.ui.screens.MessageUser
 import com.example.facebook.ui.screens.MessageWrapper
-import com.example.facebook.ui.screens.ProfileScreen
 import com.example.facebook.ui.screens.UserViewModel
-import com.example.facebook.ui.screens.VideoCallScreen
 import io.mockk.Runs
 import io.mockk.coEvery
 import io.mockk.just
@@ -72,6 +59,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import retrofit2.Response
+import java.io.File
 
 
 class FakeChatGroup : ChatGroupRepository {
@@ -230,6 +218,141 @@ class FakeListMes : MessageRepository {
     }
 }
 
+class fakeUserRepository : UserRepository {
+    private val mockedUser = User(
+        _id = "user1",
+        firstName = "test2",
+        lastName = "mhias",
+        email = "ssbkss1010@gmail.com",
+        phoneNumber = "0937263813",
+        avatar = "6755f2b80d0a71201c9ee387",
+        password = "mahieu1010",
+        createdAt = "2024-12-08T19:26:06.898Z",
+        updatedAt = "2024-12-08T19:26:06.898Z"
+    )
+
+    private val mockedUser2 = User(
+        _id = "user2",
+        firstName = "test3",
+        lastName = "mahias",
+        email = "adefasf14@gmail.com",
+        phoneNumber = "0937263814",
+        avatar = "672f78cd4763def725d6974f",
+        password = "test3010",
+        createdAt = "2024-12-09T19:26:06.898Z",
+        updatedAt = "2024-12-24T19:26:06.898Z"
+    )
+    private val mockedUser3 = User(
+        _id = "user3",
+        firstName = "test4",
+        lastName = "hiua",
+        email = "adefasf134455@gmail.com",
+        phoneNumber = "0937263815",
+        avatar = "672f78cd4763def725d69750",
+        password = "test4010",
+        createdAt = "2024-12-19T19:26:06.898Z",
+        updatedAt = "2024-12-24T19:26:06.898Z"
+    )
+
+    private var mockedUsers = listOf(mockedUser, mockedUser2, mockedUser3)
+
+    fun getAllUsers(): List<User> {
+        return mockedUsers
+    }
+    override suspend fun login(
+        email: String,
+        password: String,
+        token: String?,
+        socketId: String?
+    ): Response<User> {
+        if(email == "ssbkss1010@gmail.com" && password == "mahieu1010") {
+            return Response.success(mockedUser)
+        } else {
+            val errorResponseBody = ResponseBody.create(null, "Invalid credentials")
+            return Response.error(500, errorResponseBody)
+        }
+    }
+
+    override suspend fun auth(token: String?, socketId: String?): Response<User> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getById(id: String): Response<User> {
+        when (id) {
+            "user1" -> return Response.success(mockedUser)
+            "user2" -> return Response.success(mockedUser2)
+            "user3" -> return Response.success(mockedUser3)
+            else -> return Response.error(404, ResponseBody.create(null, "User not found"))
+        }
+    }
+
+    override suspend fun register(
+        firstName: String,
+        lastName: String,
+        email: String,
+        password: String,
+        phoneNumber: String,
+        avatar: Pair<File, String>?
+    ): Response<User> {
+        val newUser = User(
+            _id = "User${(mockedUsers.size + 1).toString()}",
+            firstName = firstName,
+            lastName = lastName,
+            email = email,
+            phoneNumber = phoneNumber,
+            avatar =  avatar?.second?: "",
+            password = password,
+            createdAt = java.time.Instant.now().toString(),
+            updatedAt = java.time.Instant.now().toString()
+        )
+        mockedUsers = mockedUsers + newUser
+        return Response.success(newUser)
+    }
+
+    override suspend fun verifyOtp(email: String, otp: String): Response<User> {
+        TODO("Not yet implemented")
+    }
+
+     override suspend fun update(
+        firstName: String?,
+        lastName: String?,
+        password: String?,
+        phoneNumber: String?,
+        avatar: Pair<File, String>?
+    ): Response<User> {
+        val updatedUsers = mockedUsers.map { user ->
+            if (user._id in listOf("user1", "user2", "user3")) {
+                user.copy(
+                    firstName = firstName ?: user.firstName,
+                    lastName = lastName ?: user.lastName,
+                    password = password ?: user.password,
+                    phoneNumber = phoneNumber ?: user.phoneNumber,
+                    avatar = avatar?.second ?: user.avatar,
+                    updatedAt = java.time.Instant.now().toString()
+                )
+            } else {
+                user
+            }
+        }
+
+        mockedUsers = updatedUsers
+        val updatedUser = updatedUsers.find { it._id == "user1" }
+        return if (updatedUser != null) {
+            Response.success(updatedUser)
+        } else {
+            Response.error(404, ResponseBody.create(null, "User not found"))
+        }
+    }
+
+    override suspend fun logout(): Response<Void> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getUsers(offset: Int, limit: Int, q: String): Response<GetUsersResponse> {
+        return Response.success(GetUsersResponse(data = mockedUsers, hasMore = false))
+    }
+}
+
 @RunWith(AndroidJUnit4::class)
 class ChatGroupScreenTest {
 
@@ -320,7 +443,7 @@ class ChatGroupScreenTest {
         // Given
         val mockFriendsViewModel = mockk<FriendsViewModel>(relaxed = true)
         coEvery { mockFriendsViewModel.getFriends() } just Runs
-    
+        var screen = false
         // When
         composeTestRule.setContent {
             ChatGroupScreen(
@@ -328,15 +451,18 @@ class ChatGroupScreenTest {
                 userViewModel = userViewModel,
                 navController = navController
             )
-            ChatGroupInfo(
-                chatGroupViewModel = chatGroupViewModel,
-                friendViewModel = mockFriendsViewModel,
-                onBack = {}
-            )
+            if(screen) {
+                ChatGroupInfo(
+                    chatGroupViewModel = chatGroupViewModel,
+                    friendViewModel = mockFriendsViewModel,
+                    onBack = {}
+                )
+            }
         }
     
         // Then
         composeTestRule.onNodeWithContentDescription("Info").performClick()
+        screen = true
         composeTestRule.onNodeWithText("Tùy chỉnh nhóm chat").assertIsDisplayed()
     }
 
@@ -456,19 +582,23 @@ class ChatGroupScreenTest {
 
     @Test
     fun testNavigationEditGroupInfo() {
+        var screen = false
         composeTestRule.setContent {
             ChatGroupInfo(
                 friendViewModel = mockFriendsViewModel,
                 chatGroupViewModel = chatGroupViewModel,
                 onBack = {}
             )
-            EditGroupInfo(
-                chatGroup = chatGroupViewModel.uiState.value.chatGroup,
-                onDismiss = { },
-                onUpdateInfo = {userName, avatar -> chatGroupViewModel.handleUpdate(userName, avatar) }
-            )
+            if(screen) {
+                EditGroupInfo(
+                    chatGroup = chatGroupViewModel.uiState.value.chatGroup,
+                    onDismiss = { },
+                    onUpdateInfo = {userName, avatar -> chatGroupViewModel.handleUpdate(userName, avatar) }
+                )
+            }
         }
         composeTestRule.onNodeWithTag("Change").performClick()
+        screen = true
         composeTestRule.onNodeWithText("Chỉnh sửa thông tin nhóm chat").assertExists().assertIsDisplayed()
         composeTestRule.onNodeWithText("Chọn ảnh").assertExists().assertIsDisplayed()
         composeTestRule.onNodeWithText("Thay đổi ảnh nhóm").assertExists().assertIsDisplayed()
@@ -482,18 +612,22 @@ class ChatGroupScreenTest {
 
     @Test
     fun testNavigationMemberListScreen() {
+        var screen = false
         composeTestRule.setContent {
             ChatGroupInfo(
                 friendViewModel = mockFriendsViewModel,
                 chatGroupViewModel = chatGroupViewModel,
                 onBack = {}
             )
-            MemberListScreen(
-                chatGroupViewModel = chatGroupViewModel,
-                onBack = {}
-            )
+            if(screen) {
+                MemberListScreen(
+                    chatGroupViewModel = chatGroupViewModel,
+                    onBack = {}
+                )
+            }
         }
         composeTestRule.onNodeWithTag("Look").performClick()
+        screen = true
         composeTestRule.onNodeWithText("Xem thành viên nhóm chat").assertExists().assertIsDisplayed()
         composeTestRule.onNodeWithText("Xác nhận").assertExists().assertIsDisplayed()
         composeTestRule.onNodeWithText("Reload").assertExists().assertIsDisplayed()
@@ -501,19 +635,23 @@ class ChatGroupScreenTest {
 
     @Test
     fun testNavigationAddMemberFromFriendList() {
+        var screen = false
         composeTestRule.setContent {
             ChatGroupInfo(
                 friendViewModel = mockFriendsViewModel,
                 chatGroupViewModel = chatGroupViewModel,
                 onBack = {}
             )
+            if(screen) {
             AddMemberFromFriendList(
                 friendViewModel = mockFriendsViewModel,
                 chatGroupViewModel = chatGroupViewModel,
                 onDismiss = {}
             )
+            }
         }
         composeTestRule.onNodeWithTag("Add").performClick()
+        screen = true
         composeTestRule.onNodeWithText("Thêm bạn bè vào nhóm chat").assertExists().assertIsDisplayed()
         composeTestRule.onNodeWithText("Xác nhận").assertExists().assertIsDisplayed()
         composeTestRule.onNodeWithText("Reload").assertExists().assertIsDisplayed()
@@ -593,35 +731,20 @@ class ChatGroupScreenTest {
 
     @Test
     fun testEmojiPicker() {
+        var screen = false
         composeTestRule.setContent {
             CreateMessage(
                 chatGroupViewModel = chatGroupViewModel
             )
-            EmojiPicker()
+            if(screen) {
+                EmojiPicker(
+                )
+            }
         }
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("ADDFILE").performClick()
+        composeTestRule.onNodeWithTag("EMOTICON").performClick()
+        screen = true
         composeTestRule.onNodeWithText(chatGroupViewModel.uiState.value.messageText).assertExists().assertIsDisplayed()
     }
-
-//    @OptIn(ExperimentalMaterial3Api::class)
-//    @Test
-//    fun testModalBottomSheet() {
-//        composeTestRule.setContent {
-//            CreateMessage(
-//                chatGroupViewModel = chatGroupViewModel
-//            )
-//            val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-//            ModalBottomSheet(
-//                sheetState = sheetState,
-//                onDismissRequest = {
-//                    chatGroupViewModel.setInputType(InputType.DEFAULT)
-//                },
-//                content = {}
-//            )
-//        }
-//        composeTestRule.waitForIdle()
-//        composeTestRule.onNodeWithTag("").assertExists()
-//    }
 
 }

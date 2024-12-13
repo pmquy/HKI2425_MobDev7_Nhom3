@@ -4,9 +4,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
@@ -16,11 +14,8 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.facebook.ui.FacebookScreen
-import com.example.facebook.ui.screens.ChatGroupScreen
-import com.example.facebook.ui.screens.ChatGroupViewModel
 import com.example.facebook.ui.screens.FindMessageScreen
 import com.example.facebook.ui.screens.FindMessageViewModel
-import com.example.facebook.ui.screens.FriendsViewModel
 import com.example.facebook.ui.screens.UserViewModel
 import io.mockk.mockk
 import kotlinx.coroutines.delay
@@ -29,12 +24,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import android.util.Log
-import androidx.compose.ui.test.onRoot
-import androidx.compose.ui.test.printToLog
 import com.example.facebook.model.Message
-import com.example.facebook.model.User
 import com.example.facebook.ui.screens.MessageCard
-import kotlinx.coroutines.runBlocking
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
@@ -124,7 +115,7 @@ class FindMessageScreenTest {
         composeTestRule.onNodeWithText("Tìm kiếm tin nhắn").performTextInput("Hello, group!")
         composeTestRule.onNodeWithText("${findMessageViewModel.uiState.value.messages.size.toString()} tin nhắn khớp").assertExists().assertIsDisplayed()
         composeTestRule.waitForIdle()
-        Log.d("FindMessageScreenTest", "testSearchMessage: ${findMessageViewModel.uiState.value.chatGroupId}")
+        //Log.d("FindMessageScreenTest", "testSearchMessage: ${findMessageViewModel.uiState.value.chatGroupId}")
     }
 
     @Test
@@ -144,7 +135,7 @@ class FindMessageScreenTest {
                 )
             )
         }
-        Log.d("hagse", "MessageCardTest: ${userViewModel.uiState.value.user.firstName} ${userViewModel.uiState.value.user.lastName}")
+        //Log.d("hagse", "MessageCardTest: ${userViewModel.uiState.value.user.firstName} ${userViewModel.uiState.value.user.lastName}")
         Thread.sleep(1000)
         // Check if the user's name is displayed
         composeTestRule.onNodeWithText("test2 mhias").assertExists().assertIsDisplayed()

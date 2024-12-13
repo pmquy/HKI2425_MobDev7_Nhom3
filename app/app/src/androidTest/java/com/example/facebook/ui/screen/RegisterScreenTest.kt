@@ -2,7 +2,6 @@ package com.example.facebook.ui.screen
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -13,17 +12,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.facebook.data.UserRepository
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.screens.AvatarSelection
 import com.example.facebook.ui.screens.LoginScreen
-import com.example.facebook.ui.screens.RegisterUiState
 import com.example.facebook.ui.screens.RegisterViewModel
 import com.example.facebook.ui.screens.SignUpScreen
-import io.mockk.coEvery
-import io.mockk.mockk
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

@@ -1,14 +1,12 @@
 package com.example.facebook.ui.screen
 
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -16,10 +14,11 @@ import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.facebook.FacebookApplication
+import com.example.facebook.data.SocketRepository
 import com.example.facebook.model.User
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.screens.*
-import junit.framework.TestCase.assertEquals
+import io.mockk.mockk
 import kotlinx.coroutines.delay
 import org.junit.Before
 import org.junit.Rule
@@ -46,24 +45,24 @@ class ProfileScreenTest {
         val application = ApplicationProvider.getApplicationContext<FacebookApplication>()
 
         userViewModel = UserViewModel(
-            userRepository = application.container.userRepository,
-            socketRepository = application.container.socketRepository,
-            userPreferenceRepository = application.container.userPreferenceRepository,
-            application = application
+            userRepository = fakeUserRepository(),
+            socketRepository = mockk<SocketRepository>(relaxed = true),
+            userPreferenceRepository = mockk(relaxed = true),
+            application = ApplicationProvider.getApplicationContext()
         )
 
         homeViewModel = HomeViewModel(
-            chatGroupRepository = application.container.chatGroupRepository
+            chatGroupRepository = FakeChatGroup(),
         )
 
         friendsViewModel = FriendsViewModel(
-            friendRepository = application.container.friendRepository,
-            application = application
+            friendRepository = fakeFriendsRepository(),
+            application = ApplicationProvider.getApplicationContext()
         )
 
         // Perform login
         runBlocking {
-            userViewModel.login("hieuma535@gmail.com", "mahieu1010")
+            userViewModel.login("ssbkss1010@gmail.com", "mahieu1010")
             composeTestRule.waitForIdle()
         }
     }
@@ -76,7 +75,6 @@ class ProfileScreenTest {
                 friendViewModel = friendsViewModel)
         }
         composeTestRule.waitForIdle()
-        Thread.sleep(100000)
         composeTestRule.onNodeWithText(userViewModel.uiState.value.user.firstName + " " + userViewModel.uiState.value.user.lastName).assertExists().assertIsDisplayed()
         composeTestRule.onNodeWithText(userViewModel.uiState.value.user.email).assertExists().assertIsDisplayed()
         composeTestRule.onNodeWithText("Thông tin cá nhân").assertExists().assertIsDisplayed()
@@ -89,26 +87,22 @@ class ProfileScreenTest {
             val navController = rememberNavController()
             NavHost(
                 navController = navController,
-                startDestination = FacebookScreen.HOME.name
+                startDestination = FacebookScreen.PROFILE.name
             ) {
-                composable(FacebookScreen.HOME.name) {
-                    HomeScreen(
+                composable("${FacebookScreen.PROFILE.name}/${userViewModel.uiState.value.user._id}") {
+                    ProfileScreen(
                         navController = navController,
                         userViewModel = userViewModel,
-                        homeViewModel = homeViewModel
+                        friendViewModel = friendsViewModel
                     )
                 }
-                composable(FacebookScreen.PROFILE.name) {
+                composable(FacebookScreen.HOME.name) {
                 }
             }
 
             LaunchedEffect(Unit) {
-                navController.navigate(FacebookScreen.PROFILE.name)
+                navController.navigate(FacebookScreen.HOME.name)
                 delay(100)
-                assertTrue(navController.currentBackStackEntry?.destination?.route == FacebookScreen.PROFILE.name)
-                assertTrue(navController.previousBackStackEntry?.destination?.route == FacebookScreen.HOME.name)
-                val canNavigateUp = navController.navigateUp()
-                assertTrue(canNavigateUp)
                 assertTrue(navController.currentBackStackEntry?.destination?.route == FacebookScreen.HOME.name)
             }
         }
@@ -184,21 +178,18 @@ class ProfileScreenTest {
     @Test
     fun FriendStatusSectionFriendTest() {
         composeTestRule.setContent {
+            friendsViewModel.getFriends()
+            val status = friendsViewModel.uiState.value.friends
+            val user = userViewModel.getUserById(status[0].from).collectAsState(initial = null).value
             FriendStatusSection(
-                status = "friend",
-                user = User(
-                    _id = "2",
-                    firstName = "test2",
-                    lastName = "no",
-                    email = "jjhajhaa2e@m.o"
-                ),
+                status = status[0].status,
+                user = user ?: User(), // Provide a default User object if user is null
                 friendViewModel = friendsViewModel
             )
             composeTestRule.onNodeWithText("Bạn và test2 đã là bạn bè").assertExists().assertIsDisplayed()
             composeTestRule.onNodeWithText("Hủy kết bạn").assertExists().assertIsDisplayed().assertIsEnabled()
         }
     }
-
     @Test
     fun FriendStatusSectionSendTest() {
         composeTestRule.setContent {

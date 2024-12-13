@@ -54,23 +54,43 @@ class FakeFriendRepository : FriendRepository {
 
     private val mockFriends = listOf(mockFriend1, mockFriend2)
     override suspend fun request(to: String) {
-        TODO("Not yet implemented")
+        mockFriends.map { friend ->
+            if (friend.to == to) {
+                friend.status = "pending"
+            }
+        }
     }
 
     override suspend fun accept(from: String) {
-        TODO("Not yet implemented")
+        mockFriends.map { friend ->
+            if (friend.from == from) {
+                friend.status = "accepted"
+            }
+        }
     }
 
     override suspend fun decline(from: String) {
-        TODO("Not yet implemented")
+        mockFriends.map { friend ->
+            if (friend.from == from) {
+                friend.status = "declined"
+            }
+        }
     }
 
     override suspend fun revoke(to: String) {
-        TODO("Not yet implemented")
+        mockFriends.map { friend ->
+            if (friend.to == to) {
+                friend.status = "revoked"
+            }
+        }
     }
 
     override suspend fun disfriend(from: String) {
-        TODO("Not yet implemented")
+        mockFriends.map { friend ->
+            if (friend.from == from) {
+                friend.status = "disfriended"
+            }
+        }
     }
 
     override suspend fun getAll(
@@ -86,7 +106,9 @@ class FakeFriendRepository : FriendRepository {
         limit: Int?,
         q: String?
     ): Response<GetFriendSuggestionsResponse> {
-        TODO("Not yet implemented")
+        val listFriends = mockFriends.filter { friend -> friend.status == "accepted" }
+        val listFriendsId = listFriends.toMutableList().map { friend -> friend.to }
+        return Response.success(GetFriendSuggestionsResponse(data = listFriendsId, hasMore = false))
     }
 }
 

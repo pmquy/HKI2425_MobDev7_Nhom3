@@ -8,7 +8,6 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTextInput
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -26,7 +25,6 @@ import com.example.facebook.ui.screens.FriendsScreen
 import com.example.facebook.ui.screens.FriendsViewModel
 import com.example.facebook.ui.screens.UserViewModel
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.delay
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -167,7 +165,6 @@ class FriendsScreenTest {
                 composable(FacebookScreen.PROFILE.name) {
                 }
             }
-
             LaunchedEffect(Unit) {
                 navController.navigate(FacebookScreen.PROFILE.name)
                 delay(100)

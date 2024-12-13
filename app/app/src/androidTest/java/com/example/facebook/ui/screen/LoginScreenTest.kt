@@ -100,47 +100,4 @@ class LoginScreenTest {
         composeTestRule.onNodeWithText("Đăng ký ngay").performClick()
         assertEquals(FacebookScreen.SIGNUP.name, navController.currentDestination?.route)
     }
-
-//    @Test
-//    fun testErrorMessageDisplaysOnInvalidLogin() = runBlocking {
-//        // Mock Toast static methods
-//        mockkStatic(Toast::class)
-//        val toastMessageSlot = slot<String>()
-//        // Create a mock context
-//        val mockContext = ApplicationProvider.getApplicationContext<Context>()
-//        println("Toastg:" + toastMessageSlot)
-//        // Mock NavController
-//        val mockNavController = mockk<NavController>(relaxed = true)
-//
-//        // Mock UserViewModel
-//        val mockUserViewModel = mockk<UserViewModel>(relaxed = true).apply {
-//            coEvery { login(any(), any()) } throws Exception("Invalid credentials")
-//        }
-//
-//        // Set up the test content
-//        composeTestRule.setContent {
-//            LoginScreen(
-//                userViewModel = mockUserViewModel,
-//                navController = mockNavController
-//            )
-//        }
-//
-//        // Perform login
-//        composeTestRule.onNodeWithText("Đăng nhập").performClick()
-//        println("toaast" + toastMessageSlot)
-//        // Verify Toast was shown with the correct message
-//        verify(timeout = 5000) {
-//            Toast.makeText(
-//                eq(mockContext),
-//                eq("Thông tin tài khoản hoặc mật khẩu chưa đúng"),
-//                eq(Toast.LENGTH_SHORT)
-//            ).show()
-//        }
-//
-//    // Kiểm tra thông báo Toast
-//        // Unmock Toast static methods
-//        unmockkStatic(Toast::class)
-//    }
-
-
 }

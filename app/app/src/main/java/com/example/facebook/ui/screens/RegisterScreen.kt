@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -34,6 +35,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -41,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -149,16 +152,34 @@ fun SignUpScreen(
                 OutlinedTextField(
                     value = uiState.firstName,
                     onValueChange = registerViewModel.setFirstName,
+                    singleLine = true,
                     label = { Text("Tên người dùng") },
                     placeholder = { Text("Nhập tên người dùng") },
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Next)
+                        }
+                    ),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 )
 
                 OutlinedTextField(
                     value = uiState.lastName,
                     onValueChange = registerViewModel.setLastName,
+                    singleLine = true,
                     label = { Text("Họ và tên đệm") },
                     placeholder = { Text("Nhập họ và tên đệm người dùng") },
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Next)
+                        }
+                    ),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 )
 
@@ -167,6 +188,15 @@ fun SignUpScreen(
                     onValueChange = registerViewModel.setPhoneNumber,
                     label = { Text("Số điện thoại") },
                     placeholder = { Text("Nhập số điện thoại người dùng") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Next)
+                        }
+                    ),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 )
 
@@ -175,6 +205,15 @@ fun SignUpScreen(
                     onValueChange = registerViewModel.setEmail,
                     label = { Text("Địa chỉ Email") },
                     placeholder = { Text("Nhập địa chỉ Email tài khoản") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Next)
+                        }
+                    ),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 )
 
@@ -184,7 +223,13 @@ fun SignUpScreen(
                     label = { Text("Mật khẩu") },
                     placeholder = { Text("Nhập mật khẩu tài khoản") },
                     visualTransformation = PasswordVisualTransformation(),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+                    keyboardActions = KeyboardActions(
+                        onNext = {
+                            focusManager.moveFocus(FocusDirection.Next)
+                        }
+                    ),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 )
                 Text(
@@ -198,7 +243,13 @@ fun SignUpScreen(
                     label = { Text("Xác nhận mật khẩu") },
                     placeholder = { Text("Nhập lại mật khẩu") },
                     visualTransformation = PasswordVisualTransformation(),
+                    singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                        }
+                    ),
                     modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
                 )
                 Button(

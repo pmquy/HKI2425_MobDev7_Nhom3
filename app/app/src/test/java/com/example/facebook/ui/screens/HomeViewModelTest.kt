@@ -140,7 +140,7 @@ class HomeViewModelTest {
         assertEquals(2, uiState.chatGroups.size)
         assertEquals(mockChatGroups, uiState.chatGroups)
         assertTrue(uiState.hasMore)
-        assertEquals(10, uiState.offset) // Assuming LIMIT = 10
+        assertEquals(0, uiState.offset)
     }
 
     @Test

@@ -1,20 +1,21 @@
 package com.example.facebook.ui.screens
 
-import android.content.Context
-import android.widget.Toast
 import com.example.facebook.FacebookApplication
 import com.example.facebook.data.UserRepository
-import com.example.facebook.model.GetUsersResponse
-import com.example.facebook.model.User
-import io.mockk.*
+import io.mockk.mockk
+import io.mockk.unmockkAll
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import retrofit2.Response
 
 @ExperimentalCoroutinesApi
 class FindUserViewModelTest {

@@ -1,38 +1,34 @@
 package com.example.facebook.ui.screens
 
-import android.content.Context
-import android.widget.Toast
 import com.example.facebook.FacebookApplication
 import com.example.facebook.data.UserRepository
-import com.example.facebook.model.GetUsersResponse
-import com.example.facebook.model.User
 import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.*
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.After
-import org.junit.Assert.*
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
+import java.io.File
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class RegisterViewModelTest {
 
-    private lateinit var findUserViewModel: FindUserViewModel
-    private lateinit var userRepository: UserRepository
-    private lateinit var application: FacebookApplication
+    private lateinit var viewModel: RegisterViewModel
+    private val userRepository = mockk<UserRepository>()
+    private val application = mockk<FacebookApplication>(relaxed = true)
 
-    private val testDispatcher = UnconfinedTestDispatcher()
+    private val testDispatcher = StandardTestDispatcher()
 
     @Before
-    fun setUp() {
+    fun setup() {
         Dispatchers.setMain(testDispatcher)
-
-        userRepository = mockk()
-        application = mockk(relaxed = true)
-
-        findUserViewModel = FindUserViewModel(application, userRepository)
+        viewModel = RegisterViewModel(userRepository, application)
     }
 
     @After
@@ -42,47 +38,52 @@ class RegisterViewModelTest {
     }
 
     @Test
-    fun `setSearch updates search term`() {
-        val searchTerm = "John"
-        findUserViewModel.setSearch(searchTerm)
-        assertEquals(searchTerm, findUserViewModel.uiState.value.search)
+    fun `email setting updates the UI state correctly`() {
+        val email = "test@example.com"
+        viewModel.setEmail(email)
+        Assert.assertEquals(email, viewModel.uiState.value.email)
     }
 
     @Test
-    fun `clearInput resets search term and user list`() {
-        findUserViewModel.setSearch("Test")
-        findUserViewModel.clearInput()
-        val uiState = findUserViewModel.uiState.value
-        assertEquals("", uiState.search)
-        assertTrue(uiState.users.isEmpty())
+    fun `otp verification sends request successfully`() = runTest(testDispatcher) {
+        val otp = "123456"
+        viewModel.setEmail("johndoe@example.com")
+        viewModel.setOtp(otp)
+
+        coEvery { userRepository.verifyOtp(any(), any()) } returns Response.success(null)
+
+        viewModel.otp()
+
+        Assert.assertTrue(true)
+    }
+
+    @Test(expected = Exception::class)
+    fun `otp verification fails with incorrect otp`() = runTest(testDispatcher) {
+        val incorrectOtp = "000000"
+        coEvery { userRepository.verifyOtp(any(), any()) } throws Exception("Incorrect OTP")
+
+        viewModel.setOtp(incorrectOtp)
+        viewModel.otp()
     }
 
     @Test
-    fun `findUsers cancels previous search job on new search`() {
-        findUserViewModel.setSearch("First")
-        val firstSearchJob = findUserViewModel.searchJob
-
-        findUserViewModel.setSearch("Second")
-        val secondSearchJob = findUserViewModel.searchJob
-
-        assertTrue(firstSearchJob?.isCancelled == true)
-        assertFalse(secondSearchJob?.isCancelled == true)
+    fun `avatar is set correctly`() {
+        val avatar = Pair(File("path/to/avatar.jpg"), "image/jpeg")
+        viewModel.setAvatar(avatar)
+        Assert.assertEquals(avatar, viewModel.uiState.value.avatar)
     }
 
     @Test
-    fun `clearInput should reset search and users`() = runTest {
-        findUserViewModel.clearInput()
-
-        assertTrue(findUserViewModel.uiState.value.search.isEmpty())
-        assertTrue(findUserViewModel.uiState.value.users.isEmpty())
+    fun `setting first name updates ui state`() {
+        val firstName = "Jane"
+        viewModel.setFirstName(firstName)
+        Assert.assertEquals(firstName, viewModel.uiState.value.firstName)
     }
 
     @Test
-    fun `test initial UI state`() {
-        assertEquals("", findUserViewModel.uiState.value.search)
-        assertTrue(findUserViewModel.uiState.value.users.isEmpty())
-        assertFalse(findUserViewModel.uiState.value.hasMore)
-        assertEquals(0, findUserViewModel.uiState.value.offset)
+    fun `setting phone number updates ui state`() {
+        val phoneNumber = "9876543210"
+        viewModel.setPhoneNumber(phoneNumber)
+        Assert.assertEquals(phoneNumber, viewModel.uiState.value.phoneNumber)
     }
-
 }

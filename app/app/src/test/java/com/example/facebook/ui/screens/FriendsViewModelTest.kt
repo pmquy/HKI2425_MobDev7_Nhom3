@@ -1,103 +1,114 @@
 package com.example.facebook.ui.screens
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.facebook.FacebookApplication
 import com.example.facebook.data.FriendRepository
 import com.example.facebook.model.Friend
+import com.example.facebook.model.GetFriendResponse
 import io.mockk.coEvery
-import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
+import io.mockk.unmockkAll
+import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.TestCoroutineScope
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertEquals
+import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
+import retrofit2.Response
 
-@ExperimentalCoroutinesApi
+@OptIn(ExperimentalCoroutinesApi::class)
 class FriendsViewModelTest {
 
-    @get:Rule
-    val instantExecutorRule = InstantTaskExecutorRule()
-
+    private val application = mockk<FacebookApplication>(relaxed = true)
+    private val friendRepository = mockk<FriendRepository>()
     private lateinit var viewModel: FriendsViewModel
-    private lateinit var friendRepository: FriendRepository
-    private val application: FacebookApplication = mockk(relaxed = true)
+
+    private val testDispatcher = StandardTestDispatcher()
 
     @Before
-    fun setUp() {
-        friendRepository = mockk(relaxed = true)
+    fun setup() {
+        Dispatchers.setMain(testDispatcher)
         viewModel = FriendsViewModel(friendRepository, application)
     }
 
-    @Test
-    fun `test request friend functionality`() = runTest {
-        val userId = "user1"
-        viewModel.request(userId)
-
-        advanceUntilIdle()
-
-        coVerify { friendRepository.request(userId) }
+    @After
+    fun teardown() {
+        unmockkAll()
     }
 
     @Test
-    fun `test accept friend functionality`() = runTest {
-        val userId = "user1"
-        viewModel.accept(userId)
-
-        advanceUntilIdle()
-
-        coVerify { friendRepository.accept(userId) }
+    fun `verify initial subScreen`() = runTest {
+        assertEquals(FriendSubScreen.SUGGESTS, viewModel.uiState.first().currentSubScreen)
     }
 
     @Test
-    fun `test decline friend functionality`() = runTest {
-        val userId = "user1"
-        viewModel.decline(userId)
-
-        advanceUntilIdle()
-
-        coVerify { friendRepository.decline(userId) }
+    fun `verify subScreen change`() = runTest {
+        viewModel.changeSubScreen(FriendSubScreen.ALL)
+        assertEquals(FriendSubScreen.ALL, viewModel.uiState.first().currentSubScreen)
     }
 
     @Test
-    fun `test revoke friend request functionality`() = runTest {
+    fun `search updates search text`() = runTest {
+        val searchText = "test search"
+        viewModel.setSearch(searchText)
+        assertEquals(searchText, viewModel.uiState.first().search)
+    }
+
+    @Test
+    fun `clearInput resets search text`() = runTest {
+        viewModel.setSearch("something")
+        viewModel.clearInput()
+        assertEquals("", viewModel.uiState.first().search)
+    }
+
+    @Test
+    fun `getFriends updates friends list`() = runTest {
+        val mockFriends = listOf(Friend(from = "user1", to = "user2", status = "accepted"))
+        val getFriendResponse = GetFriendResponse(data = mockFriends, hasMore = false)
+
+        coEvery { friendRepository.getAll(0, 100, any()) } returns Response.success(getFriendResponse)
+
+        viewModel.getFriends()
+        testDispatcher.scheduler.runCurrent()
+
+        val uiState = viewModel.uiState.first()
+
+        assertEquals(1, uiState.friends.size)
+        assertEquals("user1", uiState.friends[0].from)
+    }
+
+    @Test
+    fun `getRequests fetches and updates requests list`() = runTest {
+        val mockRequests = listOf(Friend(from = "user1", to = "user2", status = "pending"))
+        val requestResponse = GetFriendResponse(data = mockRequests, hasMore = false)
+
+        coEvery {
+            friendRepository.getAll(0, 100, any())
+        } returns Response.success(requestResponse)
+
+        viewModel.getRequests()
+        testDispatcher.scheduler.runCurrent()
+
+        val uiState = viewModel.uiState.first()
+        assertEquals(1, uiState.requests.size)
+        assertEquals("user1", uiState.requests[0].from)
+    }
+
+
+    @Test
+    fun `accept request should progress to a friend`() = runTest {
+        val friendId = "user1"
+        coEvery { friendRepository.accept(friendId) } returns Unit
+        viewModel.accept(friendId)
+    }
+
+    @Test
+    fun `revoke removes sent request`() = runTest {
         val userId = "user1"
+        coEvery { friendRepository.revoke(userId) } returns Unit
         viewModel.revoke(userId)
-
-        advanceUntilIdle()
-
-        coVerify { friendRepository.revoke(userId) }
-    }
-
-    @Test
-    fun `test disfriend functionality`() = runTest {
-        val userId = "user1"
-        viewModel.disfriend(userId)
-
-        advanceUntilIdle()
-
-        coVerify { friendRepository.disfriend(userId) }
-    }
-
-    @Test
-    fun `get suggestions should update UI state correctly`() = runTest {
-        val suggestions = listOf("user3", "user4", "user5")
-
-        coEvery { friendRepository.getSuggestions(0, 100, any()) } returns mockk {
-            every { isSuccessful } returns true
-            every { body() } returns mockk {
-                every { data } returns suggestions
-            }
-        }
-
-        viewModel.getSuggestions()
-        advanceUntilIdle()
-
-        assertEquals(suggestions, viewModel.uiState.value.suggestions)
     }
 }

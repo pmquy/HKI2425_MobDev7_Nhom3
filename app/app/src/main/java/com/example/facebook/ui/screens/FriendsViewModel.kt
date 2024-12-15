@@ -76,26 +76,6 @@ class FriendsViewModel(
         }
     }
 
-    fun getRequests() {
-        try {
-            viewModelScope.launch {
-                val response = friendRepository.getAll(
-                    0,
-                    100,
-                    Json.encodeToString(mapOf("status" to "pending", "to" to application.user?._id))
-                )
-                if (!response.isSuccessful) throw Exception("Error getting requests")
-                _uiState.update {
-                    it.copy(
-                        requests = response.body()!!.data,
-                    )
-                }
-            }
-        } catch (e: Exception) {
-            Toast.makeText(application, e.message, Toast.LENGTH_SHORT).show()
-        }
-    }
-
     fun getSends() {
         try {
             viewModelScope.launch {
@@ -130,19 +110,49 @@ class FriendsViewModel(
                     Json.encodeToString(mapOf("status" to "accepted"))
                 )
                 if (!response.isSuccessful) throw Exception("Error getting friends")
-                val friends = response.body()!!
-                friends.data.forEach { it.from = if (it.from == application.user?._id) it.to else it.from }
 
-                _uiState.update {
-                    it.copy(
-                        friends =  friends.data
-                    )
+                val friendsResponse = response.body()
+                if (friendsResponse != null) {
+                    friendsResponse.data.forEach {
+                        it.from = if (it.from == application.user?._id) it.to else it.from
+                    }
+
+                    _uiState.update {
+                        it.copy(
+                            friends = friendsResponse.data
+                        )
+                    }
                 }
             }
         } catch (e: Exception) {
             Toast.makeText(application, e.message, Toast.LENGTH_SHORT).show()
         }
     }
+
+    fun getRequests() {
+        try {
+            viewModelScope.launch {
+                val response = friendRepository.getAll(
+                    0,
+                    100,
+                    Json.encodeToString(mapOf("status" to "pending", "to" to application.user?._id))
+                )
+                if (!response.isSuccessful) throw Exception("Error getting requests")
+
+                val requestsResponse = response.body()
+                if (requestsResponse != null) {
+                    _uiState.update {
+                        it.copy(
+                            requests = requestsResponse.data
+                        )
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Toast.makeText(application, e.message, Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     fun getSuggestions() {
         try {

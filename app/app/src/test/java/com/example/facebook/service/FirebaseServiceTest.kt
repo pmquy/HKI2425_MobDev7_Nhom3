@@ -1,36 +1,17 @@
 package com.example.facebook.service
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.location.LocationListener
 import android.location.LocationManager
-import android.os.Build
-import android.os.Looper
-import android.text.TextUtils
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import androidx.media3.common.util.Log
-import androidx.test.core.app.ApplicationProvider
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.firebase.messaging.RemoteMessage
-import android.Manifest
-import com.example.facebook.ui.FacebookScreen
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.spyk
 import io.mockk.verify
-import io.mockk.*
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 
 class FirebaseServiceTest {
 

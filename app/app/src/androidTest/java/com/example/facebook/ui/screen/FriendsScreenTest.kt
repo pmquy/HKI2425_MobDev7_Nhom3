@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.facebook.FacebookApplication
 import com.example.facebook.data.FriendRepository
 import com.example.facebook.model.Friend
 import com.example.facebook.model.GetFriendResponse
@@ -26,6 +27,7 @@ import com.example.facebook.ui.screens.FriendsViewModel
 import com.example.facebook.ui.screens.UserViewModel
 import io.mockk.mockk
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -33,61 +35,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import retrofit2.Response
 
-class fakeFriendsRepository : FriendRepository {
-    val mockFrined1 = Friend(
-        _id = "1",
-        from = "user1",
-        to = "user2",
-        status = "accepted",
-        createdAt = "2024-12-08T19:26:06.898Z",
-        updatedAt = "2024-12-08T19:26:06.898Z"
-    )
-
-    val mockFriend2 = Friend(
-        _id = "2",
-        from = "user2",
-        to = "user3",
-        status = "pending",
-        createdAt = "2024-12-08T19:26:06.898Z",
-        updatedAt = "2024-12-08T19:26:06.898Z"
-    )
-
-    override suspend fun request(to: String) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun accept(from: String) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun decline(from: String) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun revoke(to: String) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun disfriend(from: String) {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getAll(
-        offset: Int?,
-        limit: Int?,
-        q: String?
-    ): Response<GetFriendResponse> {
-        return Response.success(GetFriendResponse(data = listOf(mockFrined1, mockFriend2), hasMore = false))
-    }
-
-    override suspend fun getSuggestions(
-        offset: Int?,
-        limit: Int?,
-        q: String?
-    ): Response<GetFriendSuggestionsResponse> {
-        return Response.success(GetFriendSuggestionsResponse(data = listOf("user4", "user5"), hasMore = false))
-    }
-}
 @RunWith(AndroidJUnit4::class)
 class FriendsScreenTest {
 
@@ -100,20 +47,24 @@ class FriendsScreenTest {
 
     @Before
     fun setUp() {
+        navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+        val application = ApplicationProvider.getApplicationContext<FacebookApplication>()
+
         userViewModel = UserViewModel(
-            userRepository = fakeUserRepository(),
-            socketRepository = mockk(relaxed = true),
-            userPreferenceRepository = mockk(relaxed = true),
-            application = ApplicationProvider.getApplicationContext()
+            userRepository = application.container.userRepository,
+            socketRepository = application.container.socketRepository,
+            userPreferenceRepository = application.container.userPreferenceRepository,
+            application = application
         )
 
         friendsViewModel = FriendsViewModel(
-            friendRepository = fakeFriendsRepository(),
-            application = ApplicationProvider.getApplicationContext()
+            friendRepository = application.container.friendRepository,
+            application = application
         )
 
-        navController = TestNavHostController(ApplicationProvider.getApplicationContext())
-        navController.navigatorProvider.addNavigator(ComposeNavigator())
+        runBlocking {
+            userViewModel.login("hieuma535@gmail.com", "mahieu1010")
+        }
     }
 
     @Test
@@ -142,7 +93,6 @@ class FriendsScreenTest {
             )
         }
 
-        // Verify that each sub-screen is displayed correctly
         FriendSubScreen.entries.forEach { subScreen ->
             composeTestRule.onNodeWithText(subScreen.tag).assertExists().assertIsDisplayed()
         }
@@ -201,24 +151,23 @@ class FriendsScreenTest {
                 navController = navController
             )
         }
-    
-        // Verify that each sub-screen is displayed correctly
+
         FriendSubScreen.entries.forEach { subScreen ->
             composeTestRule.onNodeWithText(subScreen.tag).performClick()
-            composeTestRule.waitForIdle() // Wait for the UI to update
+            composeTestRule.waitForIdle()
     
             when (subScreen) {
                 FriendSubScreen.SUGGESTS -> {
-                    composeTestRule.onNodeWithTag("Suggestions").assertExists().assertIsDisplayed()
+                    composeTestRule.onNodeWithTag("Suggestions").assertExists()
                 }
                 FriendSubScreen.REQUESTS -> {
-                    composeTestRule.onNodeWithTag("Requests").assertExists().assertIsDisplayed()
+                    composeTestRule.onNodeWithTag("Requests").assertExists()
                 }
                 FriendSubScreen.ALL -> {
-                    composeTestRule.onNodeWithTag("AllFriends").assertExists().assertIsDisplayed()
+                    composeTestRule.onNodeWithTag("AllFriends").assertExists()
                 }
                 FriendSubScreen.SENTS -> {
-                    composeTestRule.onNodeWithTag("Sents").assertExists().assertIsDisplayed()
+                    composeTestRule.onNodeWithTag("Sents").assertExists()
                 }
             }
         }

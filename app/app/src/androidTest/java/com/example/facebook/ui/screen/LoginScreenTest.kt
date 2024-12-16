@@ -1,5 +1,6 @@
 package com.example.facebook.ui.screen
 
+import android.view.WindowManager
 import androidx.compose.ui.test.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.facebook.ui.FacebookScreen
@@ -19,8 +20,14 @@ import junit.framework.TestCase.assertEquals
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.testing.TestNavHostController
+import androidx.test.espresso.Espresso
+import androidx.test.espresso.Root
+import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.matcher.ViewMatchers
 import io.mockk.coVerify
 import io.mockk.mockk
+import org.hamcrest.Description
+import org.hamcrest.TypeSafeMatcher
 import org.junit.Before
 
 @RunWith(AndroidJUnit4::class)

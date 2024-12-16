@@ -1,5 +1,6 @@
 package com.example.facebook.ui.screen
 
+import android.util.Log
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
@@ -7,110 +8,29 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.facebook.FacebookApplication
 import com.example.facebook.data.ChatGroupRepository
 import com.example.facebook.data.FriendRepository
 import com.example.facebook.data.UserRepository
-import com.example.facebook.model.Friend
-import com.example.facebook.model.GetFriendResponse
-import com.example.facebook.model.GetFriendSuggestionsResponse
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.screens.CreateChatGroupScreen
 import com.example.facebook.ui.screens.CreateChatGroupViewModel
 import com.example.facebook.ui.screens.FriendsViewModel
 import com.example.facebook.ui.screens.UserViewModel
-import io.mockk.mockk
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import retrofit2.Response
-
-class FakeFriendRepository : FriendRepository {
-    private val mockFriend1 = Friend(
-        _id = "1",
-        from = "user1",
-        to = "user2",
-        status = "accepted",
-        createdAt = "2024-12-08T19:26:06.898Z",
-        updatedAt = "2024-12-08T19:26:06.898Z")
-
-    private val mockFriend2 = Friend(
-        _id = "2",
-        from = "user2",
-        to = "user3",
-        status = "pending",
-        createdAt = "2024-12-08T19:26:06.898Z",
-        updatedAt = "2024-12-08T19:26:06.898Z")
-
-    private val mockFriends = listOf(mockFriend1, mockFriend2)
-    override suspend fun request(to: String) {
-        mockFriends.map { friend ->
-            if (friend.to == to) {
-                friend.status = "pending"
-            }
-        }
-    }
-
-    override suspend fun accept(from: String) {
-        mockFriends.map { friend ->
-            if (friend.from == from) {
-                friend.status = "accepted"
-            }
-        }
-    }
-
-    override suspend fun decline(from: String) {
-        mockFriends.map { friend ->
-            if (friend.from == from) {
-                friend.status = "declined"
-            }
-        }
-    }
-
-    override suspend fun revoke(to: String) {
-        mockFriends.map { friend ->
-            if (friend.to == to) {
-                friend.status = "revoked"
-            }
-        }
-    }
-
-    override suspend fun disfriend(from: String) {
-        mockFriends.map { friend ->
-            if (friend.from == from) {
-                friend.status = "disfriended"
-            }
-        }
-    }
-
-    override suspend fun getAll(
-        offset: Int?,
-        limit: Int?,
-        q: String?
-    ): Response<GetFriendResponse> {
-        return Response.success(GetFriendResponse(data = mockFriends, hasMore = false))
-    }
-
-    override suspend fun getSuggestions(
-        offset: Int?,
-        limit: Int?,
-        q: String?
-    ): Response<GetFriendSuggestionsResponse> {
-        val listFriends = mockFriends.filter { friend -> friend.status == "accepted" }
-        val listFriendsId = listFriends.toMutableList().map { friend -> friend.to }
-        return Response.success(GetFriendSuggestionsResponse(data = listFriendsId, hasMore = false))
-    }
-}
 
 @RunWith(AndroidJUnit4::class)
 class CreateChatGroupScreenTest {
@@ -128,31 +48,28 @@ class CreateChatGroupScreenTest {
 
     @Before
     fun setUp() {
-        // Sử dụng FakeUserRepository thay vì mock UserApiService
-        userRepository = fakeUserRepository()
-        friendRepository = FakeFriendRepository()
-        chatGroupRepository = FakeChatGroup()
+        navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+        val application = ApplicationProvider.getApplicationContext<FacebookApplication>()
 
         createChatGroupViewModel = CreateChatGroupViewModel(
-            chatGroupRepository = chatGroupRepository,
-            application = ApplicationProvider.getApplicationContext()
+            chatGroupRepository = application.container.chatGroupRepository,
+            application = application
         )
 
         friendsViewModel = FriendsViewModel(
-            friendRepository = friendRepository,
-            application = ApplicationProvider.getApplicationContext()
+            friendRepository = application.container.friendRepository,
+            application = application
         )
 
         userViewModel = UserViewModel(
-            userRepository = userRepository,
-            socketRepository = mockk(relaxed = true),
-            userPreferenceRepository = mockk(relaxed = true),
-            application = ApplicationProvider.getApplicationContext()
+            userRepository = application.container.userRepository,
+            socketRepository = application.container.socketRepository,
+            userPreferenceRepository = application.container.userPreferenceRepository,
+            application = application
         )
-
-        // Khởi tạo TestNavHostController
-        navController = TestNavHostController(ApplicationProvider.getApplicationContext())
-        navController.navigatorProvider.addNavigator(ComposeNavigator())
+        runBlocking {
+            userViewModel.login("hieuma535@gmail.com", "mahieu1010")
+        }
     }
 
     @Test
@@ -214,15 +131,23 @@ class CreateChatGroupScreenTest {
                 userViewModel = userViewModel
             )
         }
-        composeTestRule.waitForIdle()
-    
-        friendsViewModel.uiState.value.friends.forEach { friend ->
-            if (friend.status == "accepted") {
-                val isFriend = userRepository.getById(friend.to).body()
-                isFriend?.let {
-                    val fullName = "${it.firstName} ${it.lastName}"
+
+            // Đợi cho UI được cập nhật
+            composeTestRule.waitForIdle()
+
+            //Log.d("FriendListTest", "friends: ${friendsViewModel.uiState.value.friends}")
+            friendsViewModel.uiState.value.friends.forEach { friend ->
+                if (friend.status == "accepted") {
+                    val friendUser = userViewModel.getUserById(friend.from).value
+                    Log.d("FriendListTest", "Found friend: $friendUser")
+
+                    friendUser?.let { user ->
+                        val fullName = "${user.firstName} ${user.lastName}"
+                        Log.d("FriendListTest", "Checking for friend: $fullName")
+
+                        Thread.sleep(1000)
                     composeTestRule.onNodeWithText(fullName).assertIsDisplayed()
-                    
+
                     // Check if at least one "Add" button exists
                     composeTestRule.onAllNodesWithText("Add")
                         .fetchSemanticsNodes()

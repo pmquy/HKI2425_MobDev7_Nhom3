@@ -15,6 +15,8 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.facebook.FacebookApplication
 import com.example.facebook.data.SocketRepository
+import com.example.facebook.fakeRepository.FakeChatGroup
+import com.example.facebook.model.Friend
 import com.example.facebook.model.User
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.screens.*
@@ -45,25 +47,24 @@ class ProfileScreenTest {
         val application = ApplicationProvider.getApplicationContext<FacebookApplication>()
 
         userViewModel = UserViewModel(
-            userRepository = fakeUserRepository(),
-            socketRepository = mockk<SocketRepository>(relaxed = true),
-            userPreferenceRepository = mockk(relaxed = true),
-            application = ApplicationProvider.getApplicationContext()
+            userRepository = application.container.userRepository,
+            socketRepository = application.container.socketRepository,
+            userPreferenceRepository = application.container.userPreferenceRepository,
+            application = application
         )
 
         homeViewModel = HomeViewModel(
-            chatGroupRepository = FakeChatGroup(),
+            chatGroupRepository = application.container.chatGroupRepository,
         )
 
         friendsViewModel = FriendsViewModel(
-            friendRepository = fakeFriendsRepository(),
+            friendRepository = application.container.friendRepository,
             application = ApplicationProvider.getApplicationContext()
         )
 
         // Perform login
         runBlocking {
-            userViewModel.login("ssbkss1010@gmail.com", "mahieu1010")
-            composeTestRule.waitForIdle()
+            userViewModel.login("hieuma535@gmail.com", "mahieu1010")
         }
     }
 
@@ -110,13 +111,12 @@ class ProfileScreenTest {
     }
 
     @Test
-    fun EditInfoDialogTest() {
+    fun editInfoDialogTest() {
         composeTestRule.setContent {    
             EditInfoDialog(
                 user = userViewModel.uiState.value.user,
                 onDismiss = { },
                 onUpdateInfo = { firstName, lastName, phoneNumber ->
-                    // Handle the update info logic here
                 }
             )
             composeTestRule.onNodeWithText("Chỉnh sửa thông tin cá nhân").assertExists().assertIsDisplayed()
@@ -131,12 +131,11 @@ class ProfileScreenTest {
     }
 
     @Test
-    fun EditPasswordDialogTest() {
+    fun editPasswordDialogTest() {
         composeTestRule.setContent {
             EditPasswordDialog(
                 onDismiss = { },
                 onUpdatePassword = { newPassword ->
-                    // Handle the update password logic here
                 }
             )
             composeTestRule.onNodeWithText("Thay đổi mật khẩu").assertExists().assertIsDisplayed()
@@ -149,13 +148,12 @@ class ProfileScreenTest {
     }
 
     @Test
-    fun EditImageDialogTest() {
+    fun editImageDialogTest() {
         composeTestRule.setContent {
             EditImageDialog(
                 user = userViewModel.uiState.value.user,
                 onDismiss = { },
                 onUpdateAvatar = { imageUri ->
-                    // Handle the update image logic here
                 }
             )
             composeTestRule.onNodeWithText("Thay đổi ảnh đại diện").assertExists().assertIsDisplayed()
@@ -165,7 +163,7 @@ class ProfileScreenTest {
     }
 
     @Test
-    fun TextInfoTest() {
+    fun textInfoTest() {
         composeTestRule.setContent {
             TextInfo(
                 label = "Title",
@@ -176,69 +174,78 @@ class ProfileScreenTest {
     }
 
     @Test
-    fun FriendStatusSectionFriendTest() {
+    fun friendStatusSectionFriendTest() {
         composeTestRule.setContent {
-            friendsViewModel.getFriends()
-            val status = friendsViewModel.uiState.value.friends
-            val user = userViewModel.getUserById(status[0].from).collectAsState(initial = null).value
+        friendsViewModel.uiState.value.friends.forEach {
+                if (it.status == "accepted") {
+                    var itUser = ""
+                    itUser = if (userViewModel.uiState.value.user._id == it.from) {
+                        it.to
+                    } else {
+                        it.from
+                    }
+            val user = userViewModel.getUserById(itUser).collectAsState(initial = null).value
             FriendStatusSection(
-                status = status[0].status,
-                user = user ?: User(), // Provide a default User object if user is null
+                status = "friend",
+                user = user ?: User(),
                 friendViewModel = friendsViewModel
             )
-            composeTestRule.onNodeWithText("Bạn và test2 đã là bạn bè").assertExists().assertIsDisplayed()
-            composeTestRule.onNodeWithText("Hủy kết bạn").assertExists().assertIsDisplayed().assertIsEnabled()
+                    if (user != null) {
+                        composeTestRule.onNodeWithText("Bạn và ${user.firstName} đã là bạn bè").assertExists().assertIsDisplayed()
+                        composeTestRule.onNodeWithText("Hủy kết bạn").assertExists().assertIsDisplayed().assertIsEnabled()
+                    }
+            }
         }
     }
-    @Test
-    fun FriendStatusSectionSendTest() {
-        composeTestRule.setContent {
-            FriendStatusSection(
-                status = "send",
-                user = User(
-                    _id = "1",
-                    firstName = "test4",
-                    lastName = "yes",
-                    email = "jjhajhe@m.o"),
-                friendViewModel = friendsViewModel
-            )
-            composeTestRule.onNodeWithText("Bạn đã gửi lời mời kết bạn tới test4").assertExists().assertIsDisplayed().assertIsEnabled()
-            composeTestRule.onNodeWithText("Thu hồi lời mời").assertExists().assertIsDisplayed().assertIsEnabled()
-        }
     }
 
     @Test
-    fun FriendStatusSectionRequestTest() {
+    fun friendStatusSectionRequestOrSendTest() {
         composeTestRule.setContent {
-            FriendStatusSection(
-                status = "request",
-                user = User(
-                    _id = "3",
-                    firstName = "test",
-                    lastName = "no",
-                    email = "jjhajhaa2e@m.o"
-                ),
-                friendViewModel = friendsViewModel
-            )
-            composeTestRule.onNodeWithText("test đã gửi cho bạn lời mời kết bạn").assertExists().assertIsDisplayed()
-            composeTestRule.onNodeWithText("Chấp nhận").assertExists().assertIsDisplayed().assertIsEnabled()
-            composeTestRule.onNodeWithText("Từ chối").assertExists().assertIsDisplayed().assertIsEnabled()
+            friendsViewModel.uiState.value.friends.forEach {
+                if (it.status == "pending") {
+                    var itUser = ""
+                    if (userViewModel.uiState.value.user._id == it.from) {
+                        val user = userViewModel.getUserById(it.from).collectAsState(initial = null).value
+                        FriendStatusSection(
+                            status = "request",
+                            user = user ?: User(),
+                            friendViewModel = friendsViewModel
+                        )
+                        if (user != null) {
+                            composeTestRule.onNodeWithText("${user.firstName} đã gửi cho bạn lời mời kết bạn").assertExists().assertIsDisplayed()
+                            composeTestRule.onNodeWithText("Chấp nhận").assertExists().assertIsDisplayed().assertIsEnabled()
+                            composeTestRule.onNodeWithText("Từ chối").assertExists().assertIsDisplayed().assertIsEnabled()
+                        }
+                    } else {
+                        val user = userViewModel.getUserById(itUser).collectAsState(initial = null).value
+                        FriendStatusSection(
+                            status = "send",
+                            user = user ?: User(),
+                            friendViewModel = friendsViewModel
+                        )
+                        if (user != null) {
+                            composeTestRule.onNodeWithText("Bạn đã gửi lời mời kết bạn tới ${user.firstName}").assertExists().assertIsDisplayed()
+                            composeTestRule.onNodeWithText("Thu hồi lời mời").assertExists().assertIsDisplayed().assertIsEnabled()
+                        }
+                    }
+
+                }
+            }
         }
     }
     @Test
-    fun FriendStatusSectionSuggestTest() {
+    fun friendStatusSectionSuggestTest() {
         composeTestRule.setContent {
+            val user = userViewModel.getUserById("672f79d772a9f050c372927d").value
             FriendStatusSection(
                 status = "suggest",
-                user = User(
-                    _id = "5",
-                    firstName = "test3",
-                    lastName = "no",
-                    email = "jjhaa2e@m.5o"
-                ),
+                user = user ?: User(),
                 friendViewModel = friendsViewModel
             )
-            composeTestRule.onNodeWithText("Bạn với test3 là người lạ").assertExists().assertIsDisplayed()
+            if (user != null) {
+                composeTestRule.onNodeWithText("Bạn với ${user.firstName} là người lạ").assertExists().assertIsDisplayed()
+            }
             composeTestRule.onNodeWithText("Thêm bạn bè").assertExists().assertIsDisplayed().assertIsEnabled()
         }
     }

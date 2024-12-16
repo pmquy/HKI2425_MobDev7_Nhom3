@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.facebook.FacebookApplication
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.screens.FindUserScreen
 import com.example.facebook.ui.screens.FindUserViewModel
@@ -19,6 +20,7 @@ import com.example.facebook.ui.screens.ResultList
 import com.example.facebook.ui.screens.UserViewModel
 import io.mockk.mockk
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -37,20 +39,25 @@ class FindUserScreenTest {
 
     @Before
     fun setUp() {
+        navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+        val application = ApplicationProvider.getApplicationContext<FacebookApplication>()
+
         userViewModel = UserViewModel(
-            userRepository = fakeUserRepository(),
-            socketRepository = mockk(relaxed = true),
-            userPreferenceRepository = mockk(relaxed = true),
-            application = ApplicationProvider.getApplicationContext()
+            userRepository = application.container.userRepository,
+            socketRepository = application.container.socketRepository,
+            userPreferenceRepository = application.container.userPreferenceRepository,
+            application = application
         )
+
 
         findUserViewModel = FindUserViewModel(
-            userRepository = fakeUserRepository(),
-            application = ApplicationProvider.getApplicationContext()
+            userRepository = application.container.userRepository,
+            application = application
         )
+        runBlocking {
+            userViewModel.login("hieuma535@gmail.com", "mahieu1010")
 
-        navController = TestNavHostController(ApplicationProvider.getApplicationContext())
-        navController.navigatorProvider.addNavigator(ComposeNavigator())
+        }
     }
 
     @Test
@@ -98,13 +105,14 @@ class FindUserScreenTest {
 
     @Test
     fun testResultList() {
+        findUserViewModel.setSearch("mah i")
         composeTestRule.setContent {
             ResultList(
                 navController = navController,
-                users = fakeUserRepository().getAllUsers(),
+                users = findUserViewModel.uiState.value.users ?: emptyList(),
             )
         }
-        fakeUserRepository().getAllUsers().forEach { user ->
+        findUserViewModel.uiState.value.users.forEach { user ->
             composeTestRule.onNodeWithText("${user.firstName} ${user.lastName}").assertExists().assertIsDisplayed()
         }
         composeTestRule.waitForIdle()

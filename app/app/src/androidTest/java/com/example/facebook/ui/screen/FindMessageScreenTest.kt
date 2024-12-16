@@ -24,8 +24,12 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import android.util.Log
+import com.example.facebook.FacebookApplication
+import com.example.facebook.fakeRepository.FakeChatGroup
 import com.example.facebook.model.Message
+import com.example.facebook.ui.screens.HomeViewModel
 import com.example.facebook.ui.screens.MessageCard
+import kotlinx.coroutines.runBlocking
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
@@ -37,23 +41,33 @@ class FindMessageScreenTest {
     private lateinit var navController: TestNavHostController
     private lateinit var userViewModel: UserViewModel
     private lateinit var findMessageViewModel: FindMessageViewModel
+    private lateinit var homeViewModel: HomeViewModel
 
     @Before
     fun setUp() {
+        navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+        val application = ApplicationProvider.getApplicationContext<FacebookApplication>()
+
         userViewModel = UserViewModel(
-            userRepository = fakeUserRepository(),
-            socketRepository = mockk(relaxed = true),
-            userPreferenceRepository = mockk(relaxed = true),
-            application = ApplicationProvider.getApplicationContext()
+            userRepository = application.container.userRepository,
+            socketRepository = application.container.socketRepository,
+            userPreferenceRepository = application.container.userPreferenceRepository,
+            application = application
         )
 
         findMessageViewModel = FindMessageViewModel(
-            chatGroupRepository = FakeChatGroup(),
-            application = ApplicationProvider.getApplicationContext()
+            chatGroupRepository = application.container.chatGroupRepository,
+            application = application
         )
 
-        navController = TestNavHostController(ApplicationProvider.getApplicationContext())
-        navController.navigatorProvider.addNavigator(ComposeNavigator())
+        homeViewModel = HomeViewModel(
+            chatGroupRepository = application.container.chatGroupRepository
+        )
+
+        runBlocking {
+            userViewModel.login("hieuma535@gmail.com", "mahieu1010")
+            findMessageViewModel.setChatGroupId("675b0c77331e1496a99df02d")
+        }
 
     }
 
@@ -113,35 +127,28 @@ class FindMessageScreenTest {
             )
         }
         composeTestRule.onNodeWithText("Tìm kiếm tin nhắn").performTextInput("Hello, group!")
-        composeTestRule.onNodeWithText("${findMessageViewModel.uiState.value.messages.size.toString()} tin nhắn khớp").assertExists().assertIsDisplayed()
+        findMessageViewModel.setSearch("Hello, group!")
+        composeTestRule.onNodeWithText("${findMessageViewModel.uiState.value.offset} tin nhắn khớp").assertExists().assertIsDisplayed()
         composeTestRule.waitForIdle()
-        //Log.d("FindMessageScreenTest", "testSearchMessage: ${findMessageViewModel.uiState.value.chatGroupId}")
     }
 
     @Test
-    fun MessageCardTest() {
-    
+    fun messageCardTest() {
+        findMessageViewModel.setSearch("Hello, group!")
+        findMessageViewModel.findMessages()
+        Log.d("hagse", "MessageCardTest: ${findMessageViewModel.uiState.value.messages} ")
         composeTestRule.setContent {
             MessageCard(
                 navController = navController,
                 userViewModel = userViewModel,
-                message = Message(
-                    _id = "message1",
-                    message = "Hello, world!",
-                    chatgroup = "group1",
-                    user = "user1",
-                    createdAt = "2024-12-08T19:30:00.000Z",
-                    updatedAt = "2024-12-08T19:30:00.000Z"
-                )
+                message = findMessageViewModel.uiState.value.messages.firstOrNull()!!,
             )
         }
-        //Log.d("hagse", "MessageCardTest: ${userViewModel.uiState.value.user.firstName} ${userViewModel.uiState.value.user.lastName}")
-        Thread.sleep(1000)
-        // Check if the user's name is displayed
-        composeTestRule.onNodeWithText("test2 mhias").assertExists().assertIsDisplayed()
-    
-        // Check if the message content is displayed
-        composeTestRule.onNodeWithText("Hello, world!").assertExists().assertIsDisplayed()
+        val iduserId = findMessageViewModel.uiState.value.messages.firstOrNull()?.user?: ""
+        val user = "${userViewModel.getUserById(iduserId).value?.lastName} ${userViewModel.getUserById(iduserId).value?.firstName}"
+        composeTestRule.onNodeWithText(user).assertExists().assertIsDisplayed()
+        findMessageViewModel.uiState.value.messages.firstOrNull()
+            ?.let { composeTestRule.onNodeWithText(it.message).assertExists().assertIsDisplayed() }
     
         composeTestRule.waitForIdle()
     }

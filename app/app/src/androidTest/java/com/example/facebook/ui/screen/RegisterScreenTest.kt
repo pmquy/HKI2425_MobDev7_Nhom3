@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.testing.TestNavHostController
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.example.facebook.FacebookApplication
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.screens.AvatarSelection
 import com.example.facebook.ui.screens.LoginScreen
@@ -34,12 +35,13 @@ class SignUpScreenTest {
 
     @Before
     fun setUp() {
-        registerViewModel = RegisterViewModel(
-            userRepository = fakeUserRepository(),
-            application  = ApplicationProvider.getApplicationContext()
-        )
         navController = TestNavHostController(ApplicationProvider.getApplicationContext())
-        navController.navigatorProvider.addNavigator(ComposeNavigator())
+        val application = ApplicationProvider.getApplicationContext<FacebookApplication>()
+
+        registerViewModel = RegisterViewModel(
+            userRepository = application.container.userRepository,
+            application  = application
+        )
     }
 
     @Test

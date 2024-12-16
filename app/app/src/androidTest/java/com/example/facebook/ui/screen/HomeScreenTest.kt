@@ -1,8 +1,10 @@
 package com.example.facebook.ui.screen
 
+import android.util.Log
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -50,7 +52,6 @@ class HomeScreenTest {
             chatGroupRepository = application.container.chatGroupRepository
         )
 
-        // Perform login
         runBlocking {
             userViewModel.login("hieuma535@gmail.com", "mahieu1010")
         }
@@ -62,8 +63,9 @@ class HomeScreenTest {
             HomeScreen(navController = navController, userViewModel = userViewModel, homeViewModel = homeViewModel)
         }
         homeViewModel.uiState.value.chatGroups.firstOrNull()?.name?.let { groupName ->
-            composeTestRule.onNodeWithText(groupName).assertExists()
+            composeTestRule.onNodeWithText(groupName).assertExists().assertIsDisplayed()
         }
+        Log.d("hagse", "HomeScreenTest: ${homeViewModel.uiState.value.chatGroups.size}")
         composeTestRule.onNodeWithText("Facebook").assertExists().assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription("Search").assertExists().assertIsEnabled().assertIsDisplayed()
         composeTestRule.onNodeWithContentDescription("Home").assertExists().assertIsEnabled().assertIsDisplayed()
@@ -186,11 +188,11 @@ class HomeScreenTest {
     @Test
     fun testNavigationToChatGroupScreen() {
         lateinit var navController: NavHostController
-
+    
         val chatGroup = homeViewModel.uiState.value.chatGroups.firstOrNull() ?: return
-
+    
         val chatGroupId = chatGroup._id
-
+    
         composeTestRule.setContent {
             navController = rememberNavController()
             NavHost(
@@ -206,9 +208,17 @@ class HomeScreenTest {
             }
         }
         composeTestRule.waitForIdle()
-
+    
+        // Click vào chat group
         composeTestRule.onNodeWithText(chatGroup.name).performClick()
+        composeTestRule.waitUntil(
+            timeoutMillis = 5000
+        ) {
+            composeTestRule.onAllNodesWithText("Send Message").fetchSemanticsNodes().isNotEmpty()
+        }
 
+        composeTestRule.onNodeWithText("Send Message").assertIsDisplayed()
+    
         composeTestRule.runOnUiThread {
             assertEquals("${FacebookScreen.CHAT_GROUP.name}/${chatGroupId}", navController.currentBackStackEntry?.destination?.route)
         }

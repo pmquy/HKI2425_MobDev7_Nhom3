@@ -11,19 +11,19 @@
       <SelectionState runConfigName="FriendsScreenTest (1)">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="HomeScreenTest">
+      <SelectionState runConfigName="Tests in 'com.example.facebook.ui.screen'">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="ProfileScreenTest">
+      <SelectionState runConfigName="ChatGroupScreenTest">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="LoginScreenTest">
+      <SelectionState runConfigName="testNavigationSearchScreen()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="SignUpScreenTest">
+      <SelectionState runConfigName="testChatGroupScreenDisplaysCorrectly()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
-      <SelectionState runConfigName="VideoCallScreenTest">
+      <SelectionState runConfigName="testNavigationBackToHomeScreen()">
         <option name="selectionMode" value="DROPDOWN" />
       </SelectionState>
     </selectionStates>

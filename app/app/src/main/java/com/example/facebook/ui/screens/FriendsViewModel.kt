@@ -131,11 +131,13 @@ class FriendsViewModel(
                 )
                 if (!response.isSuccessful) throw Exception("Error getting friends")
                 val friends = response.body()!!
-                friends.data.forEach { it.from = if (it.from == application.user?._id) it.to else it.from }
+                friends.data.forEach {
+                    it.from = if (it.from == application.user?._id) it.to else it.from
+                }
 
                 _uiState.update {
                     it.copy(
-                        friends =  friends.data
+                        friends = friends.data
                     )
                 }
             }
@@ -172,7 +174,7 @@ class FriendsViewModel(
         }
     }
 
-    val setSearch : (String) -> Unit = {text ->
+    val setSearch: (String) -> Unit = { text ->
         _uiState.update {
             it.copy(search = text)
         }
@@ -207,7 +209,7 @@ data class FriendsUIState(
     val search: String = ""
 )
 
-enum class FriendSubScreen (val tag: String) {
+enum class FriendSubScreen(val tag: String) {
     SUGGESTS("Gơị ý"),
     REQUESTS("Lời mời"),
     SENTS("Đã gửi"),

@@ -50,7 +50,10 @@ import kotlinx.coroutines.launch
 
 //@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory), navController: NavController) {
+fun LoginScreen(
+    userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory),
+    navController: NavController
+) {
 
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -98,7 +101,9 @@ fun LoginScreen(userViewModel: UserViewModel = viewModel(factory = UserViewModel
                 style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
                 color = Color.Gray,
                 textAlign = TextAlign.Left,
-                modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth()
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+                    .fillMaxWidth()
             )
             HorizontalDivider(
                 modifier = Modifier
@@ -122,7 +127,9 @@ fun LoginScreen(userViewModel: UserViewModel = viewModel(factory = UserViewModel
                         focusManager.moveFocus(FocusDirection.Next)
                     }
                 ),
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
             )
 
             OutlinedTextField(
@@ -133,7 +140,9 @@ fun LoginScreen(userViewModel: UserViewModel = viewModel(factory = UserViewModel
                 placeholder = { Text("Nhập mật khẩu tài khoản") },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
             )
 
             Button(

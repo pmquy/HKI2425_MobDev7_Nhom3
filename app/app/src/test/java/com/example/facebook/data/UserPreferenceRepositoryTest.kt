@@ -37,6 +37,7 @@ class UserPreferenceRepositoryTest {
         verify { mockSharedPreferences.getString("token", null) }
         assertEquals(mockToken, retrievedToken)
     }
+
     @Test
     fun `getToken should return null when no token has been set`() {
         val mockSharedPreferences = mockk<SharedPreferences>()

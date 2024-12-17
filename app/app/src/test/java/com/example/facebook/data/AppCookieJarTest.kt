@@ -29,7 +29,12 @@ class AppCookieJarTest {
         val sharedPreferences = mockk<SharedPreferences>()
         val editor = mockk<SharedPreferences.Editor>(relaxed = true)
 
-        every { context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                "CookiePrefs",
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.edit() } returns editor
         every { sharedPreferences.all } returns emptyMap()
 
@@ -58,7 +63,12 @@ class AppCookieJarTest {
     fun `loadForRequest should return cookies for a specific URL`() {
         val context = mockk<Context>()
         val sharedPreferences = mockk<SharedPreferences>()
-        every { context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                "CookiePrefs",
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.all } returns mapOf("example.com" to "name=value; domain=example.com; name2=value2")
 
         val appCookieJar = AppCookieJar(context)
@@ -81,7 +91,12 @@ class AppCookieJarTest {
     fun `loadForRequest should return empty list when no cookies are found for URL`() {
         val context = mockk<Context>()
         val sharedPreferences = mockk<SharedPreferences>()
-        every { context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                "CookiePrefs",
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.all } returns emptyMap()
 
         val appCookieJar = AppCookieJar(context)
@@ -98,7 +113,12 @@ class AppCookieJarTest {
         val sharedPreferences = mockk<SharedPreferences>()
         val editor = mockk<SharedPreferences.Editor>()
 
-        every { context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                "CookiePrefs",
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.edit() } returns editor
         every { editor.putString(any(), any()) } returns editor
         every { editor.apply() } just Runs
@@ -107,14 +127,18 @@ class AppCookieJarTest {
         val appCookieJar = AppCookieJar(context)
         val url = "https://example.com".toHttpUrl()
         val cookies = listOf(
-            Cookie.Builder().name("cookie1").value("value1").domain("example.com").path("/").build(),
+            Cookie.Builder().name("cookie1").value("value1").domain("example.com").path("/")
+                .build(),
             Cookie.Builder().name("cookie2").value("value2").domain("example.com").path("/").build()
         )
 
         appCookieJar.saveFromResponse(url, cookies)
 
         verify {
-            editor.putString("example.com", "cookie1=value1; domain=example.com; path=/;cookie2=value2; domain=example.com; path=/")
+            editor.putString(
+                "example.com",
+                "cookie1=value1; domain=example.com; path=/;cookie2=value2; domain=example.com; path=/"
+            )
             editor.apply()
         }
     }
@@ -125,7 +149,12 @@ class AppCookieJarTest {
         val mockSharedPreferences = mockk<SharedPreferences>()
         val mockSharedPreferencesEditor = mockk<SharedPreferences.Editor>()
 
-        every { mockContext.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns mockSharedPreferences
+        every {
+            mockContext.getSharedPreferences(
+                "CookiePrefs",
+                Context.MODE_PRIVATE
+            )
+        } returns mockSharedPreferences
         every { mockSharedPreferences.all } returns mapOf(
             "example.com" to "name1=value1; name2=value2",
             "test.com" to "name3=value3"
@@ -153,7 +182,12 @@ class AppCookieJarTest {
         val sharedPreferences = mockk<SharedPreferences>()
         val editor = mockk<SharedPreferences.Editor>()
 
-        every { context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                "CookiePrefs",
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.all } returns emptyMap()
         every { sharedPreferences.edit() } returns editor
         every { editor.putString(any(), any()) } returns editor
@@ -184,7 +218,12 @@ class AppCookieJarTest {
         val context = mockk<Context>()
         val sharedPreferences = mockk<SharedPreferences>()
 
-        every { context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                "CookiePrefs",
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.all } returns mapOf(
             "example.com" to "name1=value1; name2=value2",
             "test.com" to "name3=value3"
@@ -212,7 +251,12 @@ class AppCookieJarTest {
         val sharedPreferences = mockk<SharedPreferences>()
         val editor = mockk<SharedPreferences.Editor>()
 
-        every { context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                "CookiePrefs",
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.edit() } returns editor
         every { editor.putString(any(), any()) } returns editor
         every { editor.apply() } just Runs
@@ -242,7 +286,12 @@ class AppCookieJarTest {
         val sharedPreferences = mockk<SharedPreferences>()
         val editor = mockk<SharedPreferences.Editor>()
 
-        every { context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                "CookiePrefs",
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.all } returns emptyMap()
         every { sharedPreferences.edit() } returns editor
         every { editor.putString(any(), any()) } returns editor
@@ -269,30 +318,36 @@ class AppCookieJarTest {
     }
 
     @Test
-    fun `AppCookieJar should maintain thread-safety when accessing the cookie store`() = runBlocking {
-        val context = mockk<Context>()
-        val sharedPreferences = mockk<SharedPreferences>()
-        val editor = mockk<SharedPreferences.Editor>()
+    fun `AppCookieJar should maintain thread-safety when accessing the cookie store`() =
+        runBlocking {
+            val context = mockk<Context>()
+            val sharedPreferences = mockk<SharedPreferences>()
+            val editor = mockk<SharedPreferences.Editor>()
 
-        every { context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns sharedPreferences
-        every { sharedPreferences.all } returns emptyMap()
-        every { sharedPreferences.edit() } returns editor
-        every { editor.putString(any(), any()) } returns editor
-        every { editor.apply() } just Runs
+            every {
+                context.getSharedPreferences(
+                    "CookiePrefs",
+                    Context.MODE_PRIVATE
+                )
+            } returns sharedPreferences
+            every { sharedPreferences.all } returns emptyMap()
+            every { sharedPreferences.edit() } returns editor
+            every { editor.putString(any(), any()) } returns editor
+            every { editor.apply() } just Runs
 
-        val appCookieJar = AppCookieJar(context)
-        val url1 = "https://example1.com".toHttpUrl()
-        val url2 = "https://example2.com".toHttpUrl()
-        val cookies1 = listOf(mockk<Cookie>())
-        val cookies2 = listOf(mockk<Cookie>())
+            val appCookieJar = AppCookieJar(context)
+            val url1 = "https://example1.com".toHttpUrl()
+            val url2 = "https://example2.com".toHttpUrl()
+            val cookies1 = listOf(mockk<Cookie>())
+            val cookies2 = listOf(mockk<Cookie>())
 
-        val job1 = launch { appCookieJar.saveFromResponse(url1, cookies1) }
-        val job2 = launch { appCookieJar.saveFromResponse(url2, cookies2) }
+            val job1 = launch { appCookieJar.saveFromResponse(url1, cookies1) }
+            val job2 = launch { appCookieJar.saveFromResponse(url2, cookies2) }
 
-        job1.join()
-        job2.join()
+            job1.join()
+            job2.join()
 
-        assertEquals(cookies1, appCookieJar.loadForRequest(url1))
-        assertEquals(cookies2, appCookieJar.loadForRequest(url2))
-    }
+            assertEquals(cookies1, appCookieJar.loadForRequest(url1))
+            assertEquals(cookies2, appCookieJar.loadForRequest(url2))
+        }
 }

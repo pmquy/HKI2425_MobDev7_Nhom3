@@ -7,9 +7,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -17,7 +16,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import retrofit2.Response
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class FileRepositoryTest {
 
     private lateinit var fileRepository: FileRepository
@@ -44,7 +42,10 @@ class FileRepositoryTest {
         val repository: FileRepository = NetworkFileRepository(mockFileApiService)
         val nonExistentId = "non_existent_id"
 
-        coEvery { mockFileApiService.getById(nonExistentId) } returns Response.error(404, ResponseBody.create(null, ""))
+        coEvery { mockFileApiService.getById(nonExistentId) } returns Response.error(
+            404,
+            "".toResponseBody(null)
+        )
 
         val response = repository.getById(nonExistentId)
 
@@ -67,21 +68,28 @@ class FileRepositoryTest {
     }
 
     @Test
-    fun `getSystemFile should return GetSystemFileResponse when given valid parameters`() = runTest {
-        val mockFileApiService = mockk<FileApiService>()
-        val fileRepository: FileRepository = NetworkFileRepository(mockFileApiService)
-        val type = "image"
-        val offset = 0
-        val limit = 10
-        val expectedResponse = mockk<Response<GetSystemFileResponse>>()
+    fun `getSystemFile should return GetSystemFileResponse when given valid parameters`() =
+        runTest {
+            val mockFileApiService = mockk<FileApiService>()
+            val fileRepository: FileRepository = NetworkFileRepository(mockFileApiService)
+            val type = "image"
+            val offset = 0
+            val limit = 10
+            val expectedResponse = mockk<Response<GetSystemFileResponse>>()
 
-        coEvery { mockFileApiService.getSystemFile(type, offset, limit) } returns expectedResponse
+            coEvery {
+                mockFileApiService.getSystemFile(
+                    type,
+                    offset,
+                    limit
+                )
+            } returns expectedResponse
 
-        val result = fileRepository.getSystemFile(type, offset, limit)
+            val result = fileRepository.getSystemFile(type, offset, limit)
 
-        assertEquals(expectedResponse, result)
-        coVerify { mockFileApiService.getSystemFile(type, offset, limit) }
-    }
+            assertEquals(expectedResponse, result)
+            coVerify { mockFileApiService.getSystemFile(type, offset, limit) }
+        }
 
     @Test
     fun `getSystemFile should handle null offset and limit values correctly`() = runTest {
@@ -104,9 +112,16 @@ class FileRepositoryTest {
         val fileRepository: FileRepository = NetworkFileRepository(mockFileApiService)
 
         val invalidType = "invalid_type"
-        val errorResponse = Response.error<GetSystemFileResponse>(400, ResponseBody.create(null, ""))
+        val errorResponse =
+            Response.error<GetSystemFileResponse>(400, "".toResponseBody(null))
 
-        coEvery { mockFileApiService.getSystemFile(invalidType, any(), any()) } returns errorResponse
+        coEvery {
+            mockFileApiService.getSystemFile(
+                invalidType,
+                any(),
+                any()
+            )
+        } returns errorResponse
 
         val result = fileRepository.getSystemFile(invalidType, null, null)
 
@@ -135,7 +150,9 @@ class FileRepositoryTest {
         val fileRepository = mockk<FileRepository>()
         val emptyResponse = GetSystemFileResponse(data = emptyList(), hasMore = false)
 
-        coEvery { fileRepository.getSystemFile(any(), any(), any()) } returns Response.success(emptyResponse)
+        coEvery { fileRepository.getSystemFile(any(), any(), any()) } returns Response.success(
+            emptyResponse
+        )
 
         val response = fileRepository.getSystemFile("non_existent_type", 0, 10)
 
@@ -152,8 +169,14 @@ class FileRepositoryTest {
         val negativeOffset = -5
         val negativeLimit = -10
 
-        coEvery { fileRepository.getSystemFile(type, negativeOffset, negativeLimit) } returns Response.success(
-            GetSystemFileResponse(data =  emptyList(), hasMore =  true)
+        coEvery {
+            fileRepository.getSystemFile(
+                type,
+                negativeOffset,
+                negativeLimit
+            )
+        } returns Response.success(
+            GetSystemFileResponse(data = emptyList(), hasMore = true)
         )
 
         val response = fileRepository.getSystemFile(type, negativeOffset, negativeLimit)

@@ -38,14 +38,14 @@ class ImageViewModel(
                 scale = 1f,
                 rotationState = 1f,
                 offsetX = 0f,
-                offsetY  = 0f,
+                offsetY = 0f,
                 focalX = 0f,
                 focalY = 0f
             )
         }
     }
 
-    val onGesture : (Offset, Offset, Float, Float) -> Unit = { centroid, pan, zoom, rotation ->
+    val onGesture: (Offset, Offset, Float, Float) -> Unit = { centroid, pan, zoom, rotation ->
         _uiState.update {
             it.copy(
                 scale = _uiState.value.scale * zoom,
@@ -62,7 +62,7 @@ class ImageViewModel(
         url: String
     ) {
         // Chạy trong Coroutine
-        viewModelScope.launch (Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 _uiState.update { it.copy(isDownloading = true) }
                 // Tải ảnh từ URL

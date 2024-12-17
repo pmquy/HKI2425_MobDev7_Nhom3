@@ -56,9 +56,11 @@ fun File(
     val file = fileViewModel.getFileById(id).collectAsState().value
     var view by remember { mutableStateOf(false) }
 
-    Box(modifier = modifier.wrapContentSize().testTag("BoxFile")) {
+    Box(modifier = modifier
+        .wrapContentSize()
+        .testTag("BoxFile")) {
 
-        if(file == null || file.url.isEmpty()) {
+        if (file == null || file.url.isEmpty()) {
             CircularProgressIndicator()
             return
         }
@@ -71,7 +73,9 @@ fun File(
                         contentDescription = file.name,
                         contentScale = ContentScale.Crop,
                         loading = { CircularProgressIndicator() },
-                        modifier = Modifier.fillMaxSize().testTag("ImageFile")
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("ImageFile")
                     )
                 } else if (file.status == "unsafe") {
                     SubcomposeAsyncImage(
@@ -79,9 +83,11 @@ fun File(
                         contentDescription = file.name,
                         contentScale = ContentScale.Crop,
                         loading = { CircularProgressIndicator() },
-                        modifier = Modifier.fillMaxSize().testTag("UnsafeFile")
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("UnsafeFile")
                     )
-                    if(allowOrigin) {
+                    if (allowOrigin) {
                         Column(
                             modifier = Modifier.align(Alignment.Center),
                             horizontalAlignment = Alignment.CenterHorizontally
@@ -92,15 +98,16 @@ fun File(
                             }
                         }
                     }
-                }
-                else if(file.status == "processing") {
+                } else if (file.status == "processing") {
                     SubcomposeAsyncImage(
                         model = file.blurUrl,
                         contentDescription = file.name,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize().testTag("ProcessingFile")
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .testTag("ProcessingFile")
                     )
-                    CircularProgressIndicator( modifier = Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 } else {
                     CircularProgressIndicator()
                 }
@@ -172,7 +179,7 @@ fun AudioFile(uri: Uri, description: String) {
             exoPlayer.pause()
         } else {
             isPlaying = true
-            if(exoPlayer.currentPosition >= exoPlayer.duration) {
+            if (exoPlayer.currentPosition >= exoPlayer.duration) {
                 exoPlayer.seekTo(0)
             }
             exoPlayer.play()

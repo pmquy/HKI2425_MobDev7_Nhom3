@@ -12,14 +12,14 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.just
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.*
 import retrofit2.Response
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class FriendRepositoryTest {
 
     private lateinit var friendRepository: FriendRepository
@@ -58,7 +58,9 @@ class FriendRepositoryTest {
         val friendRepository: FriendRepository = NetworkFriendRepository(mockFriendApiService)
         val fromUser = "user123"
 
-        coEvery { mockFriendApiService.decline(FriendAccept(fromUser)) } returns Response.success(null)
+        coEvery { mockFriendApiService.decline(FriendAccept(fromUser)) } returns Response.success(
+            null
+        )
 
         friendRepository.decline(fromUser)
 
@@ -139,8 +141,10 @@ class FriendRepositoryTest {
         assertTrue(result.body()?.data?.any { it.from.contains("John", ignoreCase = true) } == true)
 
         result.body()?.data?.forEach { friend ->
-            assertTrue("Friend name should contain 'John' or be 'Jane Smith'",
-                friend.from.contains("John", ignoreCase = true) || friend.from == "Jane Smith")
+            assertTrue(
+                "Friend name should contain 'John' or be 'Jane Smith'",
+                friend.from.contains("John", ignoreCase = true) || friend.from == "Jane Smith"
+            )
         }
     }
 
@@ -155,7 +159,10 @@ class FriendRepositoryTest {
 
         coEvery { mockFriendRepository.getSuggestions(offset, limit, query) } returns mockResponse
         every { mockResponse.isSuccessful } returns true
-        every { mockResponse.body() } returns GetFriendSuggestionsResponse(data = mockSuggestions, hasMore = false)
+        every { mockResponse.body() } returns GetFriendSuggestionsResponse(
+            data = mockSuggestions,
+            hasMore = false
+        )
 
         val result = mockFriendRepository.getSuggestions(offset, limit, query)
 
@@ -171,8 +178,15 @@ class FriendRepositoryTest {
         val mockFriendApiService = mockk<FriendsApiService>()
         val repository = NetworkFriendRepository(mockFriendApiService)
 
-        val expectedResponse = Response.success(GetFriendSuggestionsResponse(hasMore = false, data = emptyList()))
-        coEvery { mockFriendApiService.getSuggestions(any(), any(), any()) } returns expectedResponse
+        val expectedResponse =
+            Response.success(GetFriendSuggestionsResponse(hasMore = false, data = emptyList()))
+        coEvery {
+            mockFriendApiService.getSuggestions(
+                any(),
+                any(),
+                any()
+            )
+        } returns expectedResponse
 
         val response = repository.getSuggestions(null, null, null)
 
@@ -181,24 +195,31 @@ class FriendRepositoryTest {
     }
 
     @Test
-    fun `getAll and getSuggestions should return empty lists when no friends or suggestions are available`() = runTest {
-        val mockFriendApiService = mockk<FriendsApiService>()
-        val friendRepository: FriendRepository = NetworkFriendRepository(mockFriendApiService)
+    fun `getAll and getSuggestions should return empty lists when no friends or suggestions are available`() =
+        runTest {
+            val mockFriendApiService = mockk<FriendsApiService>()
+            val friendRepository: FriendRepository = NetworkFriendRepository(mockFriendApiService)
 
-        coEvery { mockFriendApiService.getAll(any(), any(), any()) } returns Response.success(
-            GetFriendResponse(data = emptyList(), hasMore = false)
-        )
-        coEvery { mockFriendApiService.getSuggestions(any(), any(), any()) } returns Response.success(
-            GetFriendSuggestionsResponse(data = emptyList(), hasMore =  false)
-        )
+            coEvery { mockFriendApiService.getAll(any(), any(), any()) } returns Response.success(
+                GetFriendResponse(data = emptyList(), hasMore = false)
+            )
+            coEvery {
+                mockFriendApiService.getSuggestions(
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns Response.success(
+                GetFriendSuggestionsResponse(data = emptyList(), hasMore = false)
+            )
 
-        val allFriendsResponse = friendRepository.getAll(null, null, null)
-        val suggestionsResponse = friendRepository.getSuggestions(null, null, null)
+            val allFriendsResponse = friendRepository.getAll(null, null, null)
+            val suggestionsResponse = friendRepository.getSuggestions(null, null, null)
 
-        assertTrue(allFriendsResponse.isSuccessful)
-        assertTrue(allFriendsResponse.body()?.data?.isEmpty() ?: false)
+            assertTrue(allFriendsResponse.isSuccessful)
+            assertTrue(allFriendsResponse.body()?.data?.isEmpty() ?: false)
 
-        assertTrue(suggestionsResponse.isSuccessful)
-        assertTrue(suggestionsResponse.body()?.data?.isEmpty() ?: false)
-    }
+            assertTrue(suggestionsResponse.isSuccessful)
+            assertTrue(suggestionsResponse.body()?.data?.isEmpty() ?: false)
+        }
 }

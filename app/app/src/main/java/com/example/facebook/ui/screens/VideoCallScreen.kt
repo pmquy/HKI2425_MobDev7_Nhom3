@@ -86,7 +86,7 @@ fun VideoCallScreen(
         videoCallViewModel.initVideoCall(id)
     }
 
-    DisposableEffect (Unit) {
+    DisposableEffect(Unit) {
         onDispose {
             videoCallViewModel.endCall(id)
         }
@@ -139,9 +139,19 @@ fun VideoCallScreen(
         floatingActionButtonPosition = FabPosition.Center
     ) {
         Column(modifier = Modifier.padding(it)) {
-            AndroidView(factory = { uiState.value.mainSurfaceViewRenderer }, modifier = Modifier.weight(1f).fillMaxWidth()) {}
+            AndroidView(
+                factory = { uiState.value.mainSurfaceViewRenderer },
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            ) {}
             uiState.value.users.forEach { user ->
-                AndroidView(factory = { user.surfaceViewRenderer }, modifier = Modifier.weight(1f).fillMaxWidth()) {}
+                AndroidView(
+                    factory = { user.surfaceViewRenderer },
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                ) {}
             }
         }
     }

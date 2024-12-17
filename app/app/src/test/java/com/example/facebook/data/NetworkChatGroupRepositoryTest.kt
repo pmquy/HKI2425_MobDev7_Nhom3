@@ -9,7 +9,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaType
@@ -26,7 +25,6 @@ import org.junit.Test
 import retrofit2.Response
 import java.io.File
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class NetworkChatGroupRepositoryTest {
 
     private lateinit var repository: NetworkChatGroupRepository
@@ -154,27 +152,35 @@ class NetworkChatGroupRepositoryTest {
     }
 
     @Test
-    fun `getMessage should fetch messages for a specific chat group with proper offset and limit`() = runTest {
-        val chatgroupApiService = mockk<ChatgroupApiService>()
-        val repository = NetworkChatGroupRepository(chatgroupApiService)
+    fun `getMessage should fetch messages for a specific chat group with proper offset and limit`() =
+        runTest {
+            val chatgroupApiService = mockk<ChatgroupApiService>()
+            val repository = NetworkChatGroupRepository(chatgroupApiService)
 
-        val id = "testId"
-        val offset = 0
-        val limit = 10
-        val query = ""
+            val id = "testId"
+            val offset = 0
+            val limit = 10
+            val query = ""
 
-        val mockResponse = mockk<Response<GetMessagesResponse>> {
-            every { isSuccessful } returns true
-            every { body() } returns GetMessagesResponse(emptyList(), false)
+            val mockResponse = mockk<Response<GetMessagesResponse>> {
+                every { isSuccessful } returns true
+                every { body() } returns GetMessagesResponse(emptyList(), false)
+            }
+
+            coEvery {
+                chatgroupApiService.getMessage(
+                    id,
+                    offset,
+                    limit,
+                    query
+                )
+            } returns mockResponse
+
+            val result = repository.getMessage(id, offset, limit, query)
+
+            coVerify(exactly = 1) { chatgroupApiService.getMessage(id, offset, limit, query) }
+            assertEquals(mockResponse, result)
         }
-
-        coEvery { chatgroupApiService.getMessage(id, offset, limit, query) } returns mockResponse
-
-        val result = repository.getMessage(id, offset, limit, query)
-
-        coVerify(exactly = 1) { chatgroupApiService.getMessage(id, offset, limit, query) }
-        assertEquals(mockResponse, result)
-    }
 
     @Test
     fun `should add multiple members to an existing chat group`() = runTest {
@@ -188,7 +194,12 @@ class NetworkChatGroupRepositoryTest {
             every { isSuccessful } returns true
             every { body() } returns ChatGroup(_id = chatGroupId, name = "Test Group")
         }
-        coEvery { mockChatgroupApiService.addMembers(chatGroupId, members) } returns expectedResponse
+        coEvery {
+            mockChatgroupApiService.addMembers(
+                chatGroupId,
+                members
+            )
+        } returns expectedResponse
 
         // Act
         val result = repository.addMember(chatGroupId, members)
@@ -202,36 +213,38 @@ class NetworkChatGroupRepositoryTest {
     }
 
     @Test
-    fun `removeMember should call chatgroupApiService removeMember with correct parameters`() = runTest {
-        val chatgroupApiService = mockk<ChatgroupApiService>()
-        val repository = NetworkChatGroupRepository(chatgroupApiService)
-        val id = "testGroupId"
-        val member = Member("testUser", "member")
-        val mockResponse = mockk<Response<ChatGroup>>()
+    fun `removeMember should call chatgroupApiService removeMember with correct parameters`() =
+        runTest {
+            val chatgroupApiService = mockk<ChatgroupApiService>()
+            val repository = NetworkChatGroupRepository(chatgroupApiService)
+            val id = "testGroupId"
+            val member = Member("testUser", "member")
+            val mockResponse = mockk<Response<ChatGroup>>()
 
-        coEvery { chatgroupApiService.removeMember(id, member) } returns mockResponse
+            coEvery { chatgroupApiService.removeMember(id, member) } returns mockResponse
 
-        val result = repository.removeMember(id, member)
+            val result = repository.removeMember(id, member)
 
-        coVerify { chatgroupApiService.removeMember(id, member) }
-        assertEquals(mockResponse, result)
-    }
+            coVerify { chatgroupApiService.removeMember(id, member) }
+            assertEquals(mockResponse, result)
+        }
 
     @Test
-    fun `updateMember should call chatgroupApiService updateMember with correct parameters`() = runTest {
-        val chatgroupApiService = mockk<ChatgroupApiService>()
-        val repository = NetworkChatGroupRepository(chatgroupApiService)
-        val id = "testId"
-        val member = Member("user1", "admin")
-        val expectedResponse = mockk<Response<ChatGroup>>()
+    fun `updateMember should call chatgroupApiService updateMember with correct parameters`() =
+        runTest {
+            val chatgroupApiService = mockk<ChatgroupApiService>()
+            val repository = NetworkChatGroupRepository(chatgroupApiService)
+            val id = "testId"
+            val member = Member("user1", "admin")
+            val expectedResponse = mockk<Response<ChatGroup>>()
 
-        coEvery { chatgroupApiService.updateMember(id, member) } returns expectedResponse
+            coEvery { chatgroupApiService.updateMember(id, member) } returns expectedResponse
 
-        val result = repository.updateMember(id, member)
+            val result = repository.updateMember(id, member)
 
-        coVerify { chatgroupApiService.updateMember(id, member) }
-        assertEquals(expectedResponse, result)
-    }
+            coVerify { chatgroupApiService.updateMember(id, member) }
+            assertEquals(expectedResponse, result)
+        }
 
     @Test
     fun `getMember should return list of members for a specific chat group`() = runTest {

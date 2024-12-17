@@ -8,7 +8,6 @@ import io.mockk.mockkObject
 import io.mockk.mockkStatic
 import io.mockk.verify
 import io.socket.client.IO
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import okhttp3.Cookie
 import okhttp3.OkHttpClient
 import org.junit.Assert.assertEquals
@@ -19,7 +18,6 @@ import org.junit.Test
 import retrofit2.Retrofit
 import kotlin.reflect.KProperty1
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class DefaultAppContainerTest {
 
     private lateinit var context: Context
@@ -31,7 +29,12 @@ class DefaultAppContainerTest {
         val context = mockk<Context>()
         val sharedPreferences = mockk<SharedPreferences>()
 
-        every { context.getSharedPreferences("CookiePrefs", Context.MODE_PRIVATE) } returns sharedPreferences
+        every {
+            context.getSharedPreferences(
+                "CookiePrefs",
+                Context.MODE_PRIVATE
+            )
+        } returns sharedPreferences
         every { sharedPreferences.all } returns emptyMap()
 
         val appContainer = DefaultAppContainer(context)
@@ -96,11 +99,19 @@ class DefaultAppContainerTest {
         assertTrue(isPropertyInitialized(appContainer, DefaultAppContainer::chatGroupRepository))
         assertTrue(isPropertyInitialized(appContainer, DefaultAppContainer::fileRepository))
         assertTrue(isPropertyInitialized(appContainer, DefaultAppContainer::friendRepository))
-        assertTrue(isPropertyInitialized(appContainer, DefaultAppContainer::userPreferenceRepository))
+        assertTrue(
+            isPropertyInitialized(
+                appContainer,
+                DefaultAppContainer::userPreferenceRepository
+            )
+        )
     }
 
     // Modified helper function to check if a property is initialized
-    private fun <T : Any, R> isPropertyInitialized(instance: T, property: KProperty1<T, R>): Boolean {
+    private fun <T : Any, R> isPropertyInitialized(
+        instance: T,
+        property: KProperty1<T, R>
+    ): Boolean {
         return try {
             property.get(instance)
             true
@@ -114,7 +125,7 @@ class DefaultAppContainerTest {
         val context = mockk<Context>()
         val sharedPreferences = mockk<SharedPreferences>()
         every { context.getSharedPreferences(any(), any()) } returns sharedPreferences
-        every { sharedPreferences.getAll() } returns emptyMap()
+        every { sharedPreferences.all } returns emptyMap()
 
         val appContainer = DefaultAppContainer(context)
 
@@ -163,7 +174,7 @@ class DefaultAppContainerTest {
         val mockContext = mockk<Context>()
         val mockSharedPreferences = mockk<SharedPreferences>()
         every { mockContext.getSharedPreferences(any(), any()) } returns mockSharedPreferences
-        every { mockSharedPreferences.getAll() } returns emptyMap()
+        every { mockSharedPreferences.all } returns emptyMap()
 
         val container = DefaultAppContainer(mockContext)
 

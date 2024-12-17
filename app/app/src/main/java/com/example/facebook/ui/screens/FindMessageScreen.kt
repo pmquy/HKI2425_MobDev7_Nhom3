@@ -61,7 +61,7 @@ fun FindMessageScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val focusRequester = remember {FocusRequester()}
+    val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val uiState = findMessageViewModel.uiState.collectAsState()
 
@@ -76,7 +76,7 @@ fun FindMessageScreen(
         }
     }
 
-    Scaffold (
+    Scaffold(
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
@@ -86,11 +86,11 @@ fun FindMessageScreen(
                 title = {
                     TextField(
                         value = uiState.value.search,
-                        placeholder = {Text("Tìm kiếm tin nhắn")},
+                        placeholder = { Text("Tìm kiếm tin nhắn") },
                         onValueChange = findMessageViewModel.setSearch,
                         singleLine = true,
                         trailingIcon = {
-                            if(uiState.value.search.isNotEmpty()) Icon(
+                            if (uiState.value.search.isNotEmpty()) Icon(
                                 Icons.Default.Clear,
                                 contentDescription = null,
                                 modifier = Modifier
@@ -112,7 +112,7 @@ fun FindMessageScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {navController.navigateUp()}) {
+                    IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             contentDescription = "Back"
@@ -130,7 +130,7 @@ fun FindMessageScreen(
                 )
             }
     ) { innerPadding ->
-        Column (
+        Column(
             Modifier.padding(innerPadding)
         ) {
             Text(
@@ -155,12 +155,12 @@ fun MessageCard(
     message: Message,
     userViewModel: UserViewModel,
     navController: NavHostController,
-    modifier: Modifier = Modifier)
-{
-    val user : User? = userViewModel.getUserById(message.user).collectAsState().value
+    modifier: Modifier = Modifier
+) {
+    val user: User? = userViewModel.getUserById(message.user).collectAsState().value
 
     if (user != null) {
-        Row (
+        Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(20.dp),
             modifier = Modifier
@@ -201,7 +201,7 @@ fun MessageCard(
     }
 }
 
-fun getDateTime(time: String) : String {
+fun getDateTime(time: String): String {
 //    "2024-11-26-T09:36:27.416Z"
     val year = time.substring(0, 4)
     val month = time.substring(5, 7)

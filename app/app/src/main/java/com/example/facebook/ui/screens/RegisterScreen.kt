@@ -115,7 +115,9 @@ fun SignUpScreen(
                     label = { Text("Mã OTP") },
                     placeholder = { Text("Nhập mã OTP") },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
                 )
                 Button(
                     onClick = handleVerifyOtp,
@@ -163,7 +165,9 @@ fun SignUpScreen(
                             focusManager.moveFocus(FocusDirection.Next)
                         }
                     ),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
                 )
 
                 OutlinedTextField(
@@ -180,7 +184,9 @@ fun SignUpScreen(
                             focusManager.moveFocus(FocusDirection.Next)
                         }
                     ),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
                 )
 
                 OutlinedTextField(
@@ -197,7 +203,9 @@ fun SignUpScreen(
                             focusManager.moveFocus(FocusDirection.Next)
                         }
                     ),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
                 )
 
                 OutlinedTextField(
@@ -214,7 +222,9 @@ fun SignUpScreen(
                             focusManager.moveFocus(FocusDirection.Next)
                         }
                     ),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
                 )
 
                 OutlinedTextField(
@@ -224,18 +234,25 @@ fun SignUpScreen(
                     placeholder = { Text("Nhập mật khẩu tài khoản") },
                     visualTransformation = PasswordVisualTransformation(),
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Next
+                    ),
                     keyboardActions = KeyboardActions(
                         onNext = {
                             focusManager.moveFocus(FocusDirection.Next)
                         }
                     ),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
                 )
                 Text(
                     text = "Mật khẩu cần tối thiểu 8 ký tự",
                     style = TextStyle(fontSize = 12.sp, color = Color.Gray),
-                    modifier = Modifier.align(Alignment.Start).padding(start = 8.dp, bottom = 8.dp)
+                    modifier = Modifier
+                        .align(Alignment.Start)
+                        .padding(start = 8.dp, bottom = 8.dp)
                 )
                 OutlinedTextField(
                     value = uiState.confirmPassword,
@@ -250,7 +267,9 @@ fun SignUpScreen(
                             focusManager.clearFocus()
                         }
                     ),
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp)
                 )
                 Button(
                     onClick = { registerViewModel.setCurrentStep(2) },
@@ -262,7 +281,9 @@ fun SignUpScreen(
                 }
                 Row(
                     horizontalArrangement = Arrangement.Center,
-                    modifier = Modifier.fillMaxWidth().padding(top = 32.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 32.dp)
                 ) {
                     Text(text = "Đã có tài khoản?")
                     Spacer(modifier = Modifier.width(4.dp))
@@ -294,7 +315,9 @@ fun SignUpScreen(
                         style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
                         color = Color.Gray,
                         textAlign = TextAlign.Left,
-                        modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth()
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .fillMaxWidth()
                     )
                     HorizontalDivider(
                         modifier = Modifier
@@ -355,6 +378,7 @@ fun SignUpScreen(
     }
 
 }
+
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun AvatarSelection(registerViewModel: RegisterViewModel) {
@@ -379,7 +403,9 @@ fun AvatarSelection(registerViewModel: RegisterViewModel) {
             style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Bold),
             color = Color.Gray,
             textAlign = TextAlign.Left,
-            modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth()
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth()
         )
         HorizontalDivider(
             modifier = Modifier
@@ -431,6 +457,7 @@ fun AvatarSelection(registerViewModel: RegisterViewModel) {
         }
     }
 }
+
 @Preview(showBackground = true)
 @Composable
 fun PreviewSignUpScreen() {

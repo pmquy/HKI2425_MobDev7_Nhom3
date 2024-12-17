@@ -54,18 +54,34 @@ class VoiceRecorderTest {
 
     @Test
     fun `test permission granted`() {
-        every { ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) } returns PackageManager.PERMISSION_GRANTED
+        every {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            )
+        } returns PackageManager.PERMISSION_GRANTED
 
-        val permissionGranted = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+        val permissionGranted = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
 
         assertTrue(permissionGranted)
     }
 
     @Test
     fun `test permission denied`() {
-        every { ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) } returns PackageManager.PERMISSION_DENIED
+        every {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            )
+        } returns PackageManager.PERMISSION_DENIED
 
-        val permissionDenied = ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_DENIED
+        val permissionDenied = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_DENIED
 
         assertTrue(permissionDenied)
     }

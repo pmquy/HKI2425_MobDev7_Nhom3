@@ -42,7 +42,8 @@ class UserViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = UserViewModel(userRepository, socketRepository, userPreferenceRepository, application)
+        viewModel =
+            UserViewModel(userRepository, socketRepository, userPreferenceRepository, application)
     }
 
     @After
@@ -53,7 +54,16 @@ class UserViewModelTest {
 
     @Test
     fun `getUserById returns correct user`() = runTest {
-        val mockUser = User(_id = "123", firstName = "John", lastName = "Doe", phoneNumber = "", email = "", avatar = "", createdAt = "", updatedAt = "")
+        val mockUser = User(
+            _id = "123",
+            firstName = "John",
+            lastName = "Doe",
+            phoneNumber = "",
+            email = "",
+            avatar = "",
+            createdAt = "",
+            updatedAt = ""
+        )
         coEvery { userRepository.getById("123") } returns Response.success(mockUser)
 
         val userFlow = viewModel.getUserById("123")
@@ -68,7 +78,10 @@ class UserViewModelTest {
 
     @Test
     fun `login failure throws exception`() = runTest {
-        coEvery { userRepository.login(any(), any(), any(), any()) } returns Response.error(400, mockk(relaxed = true))
+        coEvery { userRepository.login(any(), any(), any(), any()) } returns Response.error(
+            400,
+            mockk(relaxed = true)
+        )
 
         assertThrows(Exception::class.java) {
             runTest { viewModel.login("email", "password") }
@@ -77,7 +90,10 @@ class UserViewModelTest {
 
     @Test
     fun `auth failure throws exception`() = runTest {
-        coEvery { userRepository.auth(any(), any()) } returns Response.error(400, mockk(relaxed = true))
+        coEvery { userRepository.auth(any(), any()) } returns Response.error(
+            400,
+            mockk(relaxed = true)
+        )
 
         assertThrows(Exception::class.java) {
             runTest { viewModel.auth() }
@@ -87,7 +103,15 @@ class UserViewModelTest {
     @Test
     fun `handleUpdate success updates user state`() = runTest {
         val updatedUser = User(_id = "123", firstName = "Jane", lastName = "Doe")
-        coEvery { userRepository.update(any(), any(), any(), any(), any()) } returns Response.success(updatedUser)
+        coEvery {
+            userRepository.update(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns Response.success(updatedUser)
 
         viewModel.handleUpdate(firstName = "Jane")
         runCurrent()

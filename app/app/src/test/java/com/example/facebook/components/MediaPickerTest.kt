@@ -1,32 +1,25 @@
-package com.example.facebook.ui.components
+package com.example.facebook.components
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.facebook.model.File
+import com.example.facebook.ui.components.EmojiCategory
+import com.example.facebook.ui.components.FileViewModel
+import io.mockk.coEvery
+import io.mockk.mockk
+import io.mockk.slot
+import io.mockk.verify
+import junit.framework.TestCase.assertEquals
+import kotlinx.coroutines.test.runTest
+import org.junit.Test
 
-enum class EmojiCategory(val list: List<String>) {
-    SMILEY(
-        listOf(
-            "😀",
+class ComponentPickerTest {
+
+    // GifPicker tests
+    @Test
+    fun `test category selection changes emoji list`() {
+        var selectedCategory = EmojiCategory.SMILEY
+        val onClickMock = mockk<(String) -> Unit>(relaxed = true)
+
+        assertEquals(listOf("😀",
             "😃",
             "😄",
             "😁",
@@ -156,12 +149,11 @@ enum class EmojiCategory(val list: List<String>) {
             "😾",
             "🙈",
             "🙉",
-            "🙊"
-        )
-    ),
-    PEOPLE(
-        listOf(
-            "👋",
+            "🙊"), selectedCategory.list)
+
+        selectedCategory = EmojiCategory.PEOPLE
+
+        assertEquals(listOf("👋",
             "🤚",
             "🖐️",
             "✋",
@@ -555,485 +547,65 @@ enum class EmojiCategory(val list: List<String>) {
             "🧑‍🧑‍🧒",
             "🧑‍🧑‍🧒‍🧒",
             "🧑‍🧒",
-            "🧑‍🧒‍🧒"
-        )
-    ),
-    ANIMALS(
-        listOf(
-            "🐵",
-            "🐒",
-            "🦍",
-            "🦧",
-            "🐶",
-            "🐕",
-            "🦮",
-            "🐕‍🦺",
-            "🐩",
-            "🐺",
-            "🦊",
-            "🦝",
-            "🐱",
-            "🐈",
-            "🐈‍⬛",
-            "🦁",
-            "🐯",
-            "🐅",
-            "🐆",
-            "🐴",
-            "🫎",
-            "🫏",
-            "🐎",
-            "🦄",
-            "🦓",
-            "🦌",
-            "🦬",
-            "🐮",
-            "🐂",
-            "🐃",
-            "🐄",
-            "🐷",
-            "🐖",
-            "🐗",
-            "🐽",
-            "🐏",
-            "🐑",
-            "🐐",
-            "🐪",
-            "🐫",
-            "🦙",
-            "🦒",
-            "🐘",
-            "🦣",
-            "🦏",
-            "🦛",
-            "🐭",
-            "🐁",
-            "🐀",
-            "🐹",
-            "🐰",
-            "🐇",
-            "🐿️",
-            "🦫",
-            "🦔",
-            "🦇",
-            "🐻",
-            "🐻‍❄️",
-            "🐨",
-            "🐼",
-            "🦥",
-            "🦦",
-            "🦨",
-            "🦘",
-            "🦡",
-            "🐾",
-            "🦃",
-            "🐔",
-            "🐓",
-            "🐣",
-            "🐤",
-            "🐥",
-            "🐦",
-            "🐧",
-            "🕊️",
-            "🦅",
-            "🦆",
-            "🦢",
-            "🦉",
-            "🦤",
-            "🪶",
-            "🦩",
-            "🦚",
-            "🦜",
-            "🪽",
-            "🐦‍⬛",
-            "🪿",
-            "🐦‍🔥",
-            "🪹",
-            "🪺",
-            "🐸",
-            "🐊",
-            "🐢",
-            "🦎",
-            "🐍",
-            "🐲",
-            "🐉",
-            "🦕",
-            "🦖",
-            "🐳",
-            "🐋",
-            "🐬",
-            "🦭",
-            "🐟",
-            "🐠",
-            "🐡",
-            "🦈",
-            "🐙",
-            "🐚",
-            "🪸",
-            "🪼",
-            "🦀",
-            "🦞",
-            "🦐",
-            "🦑",
-            "🦪",
-            "🐌",
-            "🦋",
-            "🐛",
-            "🐜",
-            "🐝",
-            "🪲",
-            "🐞",
-            "🦗",
-            "🪳",
-            "🕷️",
-            "🕸️",
-            "🦂",
-            "🦟",
-            "🪰",
-            "🪱",
-            "🦠",
-            "💐",
-            "🌸",
-            "💮",
-            "🪷",
-            "🏵️",
-            "🌹",
-            "🥀",
-            "🌺",
-            "🌻",
-            "🌼",
-            "🌷",
-            "🪻",
-            "🌱",
-            "🪴",
-            "🌲",
-            "🌳",
-            "🌴",
-            "🌵",
-            "🌾",
-            "🌿",
-            "☘️",
-            "🍀",
-            "🍁",
-            "🍂",
-            "🍃",
-            "🍄",
-            "🪨",
-            "🪵",
-            "🌑",
-            "🌒",
-            "🌓",
-            "🌔",
-            "🌕",
-            "🌖",
-            "🌗",
-            "🌘",
-            "🌙",
-            "🌚",
-            "🌛",
-            "🌜",
-            "☀️",
-            "🌝",
-            "🌞",
-            "🪐",
-            "⭐",
-            "🌟",
-            "🌠",
-            "🌌",
-            "☁️",
-            "⛅",
-            "⛈️",
-            "🌤️",
-            "🌥️",
-            "🌦️",
-            "🌧️",
-            "🌨️",
-            "🌩️",
-            "🌪️",
-            "🌫️",
-            "🌬️",
-            "🌀",
-            "🌈",
-            "🌂",
-            "☂️",
-            "☔",
-            "⛱️",
-            "⚡",
-            "❄️",
-            "☃️",
-            "⛄",
-            "☄️",
-            "🔥",
-            "💧",
-            "🌊"
-        )
-    ),
-    FOOD(
-        listOf(
-            "🍇",
-            "🍈",
-            "🍉",
-            "🍊",
-            "🍋",
-            "🍋‍🟩",
-            "🍌",
-            "🍍",
-            "🥭",
-            "🍎",
-            "🍏",
-            "🍐",
-            "🍑",
-            "🍒",
-            "🍓",
-            "🫐",
-            "🥝",
-            "🍅",
-            "🫒",
-            "🥥",
-            "🥑",
-            "🍆",
-            "🥔",
-            "🥕",
-            "🌽",
-            "🌶️",
-            "🫑",
-            "🥒",
-            "🥬",
-            "🥦",
-            "🧄",
-            "🧅",
-            "🥜",
-            "🫘",
-            "🌰",
-            "🫚",
-            "🫛",
-            "🍄‍🟫",
-            "🍞",
-            "🥐",
-            "🥖",
-            "🫓",
-            "🥨",
-            "🥯",
-            "🥞",
-            "🧇",
-            "🧀",
-            "🍖",
-            "🍗",
-            "🥩",
-            "🥓",
-            "🍔",
-            "🍟",
-            "🍕",
-            "🌭",
-            "🥪",
-            "🌮",
-            "🌯",
-            "🫔",
-            "🥙",
-            "🧆",
-            "🥚",
-            "🍳",
-            "🥘",
-            "🍲",
-            "🫕",
-            "🥣",
-            "🥗",
-            "🍿",
-            "🧈",
-            "🧂",
-            "🥫",
-            "🍝",
-            "🍱",
-            "🍘",
-            "🍙",
-            "🍚",
-            "🍛",
-            "🍜",
-            "🍠",
-            "🍢",
-            "🍣",
-            "🍤",
-            "🍥",
-            "🥮",
-            "🍡",
-            "🥟",
-            "🥠",
-            "🥡",
-            "🍦",
-            "🍧",
-            "🍨",
-            "🍩",
-            "🍪",
-            "🎂",
-            "🍰",
-            "🧁",
-            "🥧",
-            "🍫",
-            "🍬",
-            "🍭",
-            "🍮",
-            "🍯",
-            "🍼",
-            "🥛",
-            "☕",
-            "🫖",
-            "🍵",
-            "🍶",
-            "🍾",
-            "🍷",
-            "🍸",
-            "🍹",
-            "🍺",
-            "🍻",
-            "🥂",
-            "🥃",
-            "🫗",
-            "🥤",
-            "🧋",
-            "🧃",
-            "🧉",
-            "🥢",
-            "🍽️",
-            "🍴",
-            "🥄",
-            "🔪",
-            "🫙",
-            "🏺"
-        )
-    ),
-    ACTIVITIES(
-        listOf(
-            "🎃",
-            "🎄",
-            "🎆",
-            "🎇",
-            "🧨",
-            "✨",
-            "🎈",
-            "🎉",
-            "🎊",
-            "🎋",
-            "🎍",
-            "🎎",
-            "🎏",
-            "🎐",
-            "🎑",
-            "🧧",
-            "🎁",
-            "🎟️",
-            "🎫",
-            "🏮",
-            "🪔",
-            "🎖️",
-            "🏆",
-            "🏅",
-            "🥇",
-            "🥈",
-            "🥉",
-            "⚽",
-            "⚾",
-            "🥎",
-            "🏀",
-            "🏐",
-            "🏈",
-            "🏉",
-            "🎾",
-            "🥏",
-            "🎳",
-            "🏏",
-            "🏑",
-            "🏒",
-            "🥍",
-            "🏓",
-            "🏸",
-            "🥊",
-            "🥋",
-            "🥅",
-            "⛳",
-            "⛸️",
-            "🎣",
-            "🤿",
-            "🎽",
-            "🎿",
-            "🛷",
-            "🥌",
-            "🎯",
-            "🪀",
-            "🪁",
-            "🔫",
-            "🎱",
-            "🔮",
-            "🪄",
-            "🎮",
-            "🕹️",
-            "🎰",
-            "🎲",
-            "🧩",
-            "🪅",
-            "🪩",
-            "🪆",
-            "♠️",
-            "♥️",
-            "♦️",
-            "♣️",
-            "♟️",
-            "🃏",
-            "🀄",
-            "🎴",
-            "🎭",
-            "🖼️",
-            "🎨"
-        )
-    ),
-}
-
-
-@Composable
-fun EmojiPicker(
-    modifier: Modifier = Modifier,
-    onClick: (String) -> Unit = {},
-) {
-
-
-    var category by remember { mutableStateOf(EmojiCategory.SMILEY) }
-
-    Column(modifier = modifier.testTag("EmojiPicker")) {
-
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(EmojiCategory.entries) {
-                Card(
-                    onClick = { category = it },
-                    colors = if (category == it) CardDefaults.cardColors().copy(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ) else CardDefaults.cardColors().copy(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                ) {
-                    Text(
-                        it.name,
-                        modifier = Modifier.padding(4.dp),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                }
-            }
-        }
-
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(32.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-            items(category.list) {
-                Text(
-                    it,
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .clickable { onClick(it) },
-                    fontSize = 20.sp,
-                )
-            }
-        }
+            "🧑‍🧒‍🧒"), selectedCategory.list)
     }
 
+    @Test
+    fun `test onClick is triggered with correct emoji`() {
+        val onClickMock = mockk<(String) -> Unit>(relaxed = true)
+        val emojiSlot = slot<String>()
+
+        val category = EmojiCategory.FOOD
+        val emoji = category.list[0]
+
+        onClickMock(emoji)
+
+        verify { onClickMock(capture(emojiSlot)) }
+        assertEquals(emoji, emojiSlot.captured)
+    }
+
+    // GifPicker tests
+    @Test
+    fun `GifPicker retrieves gifs from view model`() = runTest {
+        val fileViewModelMock = mockk<FileViewModel>()
+        val mockGifs = listOf(
+            File(_id = "gif1", url = "http://example.com/gif1", type = "gif"),
+            File(_id = "gif2", url = "http://example.com/gif2", type = "gif")
+        )
+        coEvery { fileViewModelMock.getSystemFile("gif", any(), any()) } returns mockGifs
+
+        var fetchedGifs: List<File> = emptyList()
+        fileViewModelMock.getSystemFile("gif", 0, 50).also { fetchedGifs = it }
+
+        assertEquals(2, fetchedGifs.size)
+        assertEquals("gif1", fetchedGifs[0]._id)
+        assertEquals("gif2", fetchedGifs[1]._id)
+    }
+
+    @Test
+    fun `GifPicker onClick triggers with correct gif id`() {
+        val fileViewModelMock = mockk<FileViewModel>()
+        val onClickMock = mockk<(String) -> Unit>(relaxed = true)
+        val gifIdSlot = slot<String>()
+
+        val mockGif = File(_id = "gif1", url = "http://example.com/gif1", type = "gif")
+        coEvery { fileViewModelMock.getSystemFile("gif", 0, 50) } returns listOf(mockGif)
+
+        onClickMock(mockGif._id)
+
+        verify { onClickMock(capture(gifIdSlot)) }
+        assertEquals("gif1", gifIdSlot.captured)
+    }
+    @Test
+    fun `test GIF onClick is triggered correctly`() {
+        val onClickMock = mockk<(String) -> Unit>(relaxed = true)
+        val gifIdSlot = slot<String>()
+
+        val gifId = "1"
+        onClickMock(gifId)
+
+        verify { onClickMock(capture(gifIdSlot)) }
+        assertEquals(gifId, gifIdSlot.captured)
+    }
 }
+

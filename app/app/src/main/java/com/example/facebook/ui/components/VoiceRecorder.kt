@@ -50,20 +50,25 @@ private enum class RecorderState {
 }
 
 
-
-
 @Composable
 fun VoiceRecorder(modifier: Modifier = Modifier, onDone: (Pair<File, String>?) -> Unit) {
 
     val context = LocalContext.current
-    var granted by remember { mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) }
+    var granted by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.RECORD_AUDIO
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
     val permissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) {
         granted = it
     }
 
-    when{
+    when {
         granted -> {
             var state by remember { mutableStateOf(RecorderState.START) }
             var recorder: MediaRecorder? by remember { mutableStateOf(null) }
@@ -71,7 +76,7 @@ fun VoiceRecorder(modifier: Modifier = Modifier, onDone: (Pair<File, String>?) -
             var timeCount by remember { mutableLongStateOf(0) }
 
             LaunchedEffect(state, timeCount) {
-                if(state == RecorderState.RECORDING){
+                if (state == RecorderState.RECORDING) {
                     delay(100)
                     timeCount += 100
                 }
@@ -143,17 +148,34 @@ fun VoiceRecorder(modifier: Modifier = Modifier, onDone: (Pair<File, String>?) -
 
                     when (state) {
                         RecorderState.START, RecorderState.DONE -> {
-                            IconButton(onStartRecorder, colors = IconButtonDefaults.filledIconButtonColors()) {
-                                Icon(painterResource(R.drawable.baseline_mic_24), contentDescription = "")
+                            IconButton(
+                                onStartRecorder,
+                                colors = IconButtonDefaults.filledIconButtonColors()
+                            ) {
+                                Icon(
+                                    painterResource(R.drawable.baseline_mic_24),
+                                    contentDescription = ""
+                                )
                             }
                         }
+
                         RecorderState.RECORDING -> {
-                            IconButton(onPauseRecorder, colors = IconButtonDefaults.filledIconButtonColors()) {
-                                Icon(painterResource(R.drawable.baseline_pause_24), contentDescription = "")
+                            IconButton(
+                                onPauseRecorder,
+                                colors = IconButtonDefaults.filledIconButtonColors()
+                            ) {
+                                Icon(
+                                    painterResource(R.drawable.baseline_pause_24),
+                                    contentDescription = ""
+                                )
                             }
                         }
+
                         RecorderState.PAUSED -> {
-                            IconButton(onResumeRecorder, colors = IconButtonDefaults.filledIconButtonColors()) {
+                            IconButton(
+                                onResumeRecorder,
+                                colors = IconButtonDefaults.filledIconButtonColors()
+                            ) {
                                 Icon(Icons.Default.PlayArrow, contentDescription = "")
                             }
                         }
@@ -163,20 +185,25 @@ fun VoiceRecorder(modifier: Modifier = Modifier, onDone: (Pair<File, String>?) -
 
                     if (state != RecorderState.START && state != RecorderState.DONE) {
                         IconButton(onStopRecorder) {
-                            Icon(painterResource(R.drawable.baseline_stop_24), contentDescription = "")
+                            Icon(
+                                painterResource(R.drawable.baseline_stop_24),
+                                contentDescription = ""
+                            )
                         }
                     }
                 }
 
                 Text(text = "Time: ${timeCount / 1000f} seconds")
 
-                if(state == RecorderState.DONE){
+                if (state == RecorderState.DONE) {
                     AudioFile(Uri.fromFile(file!!), "")
                 }
             }
         }
+
         ActivityCompat.shouldShowRequestPermissionRationale(
-            context as Activity, Manifest.permission.RECORD_AUDIO) -> {
+            context as Activity, Manifest.permission.RECORD_AUDIO
+        ) -> {
             Text("Permission is needed to record audio")
             Button(
                 onClick = {
@@ -186,6 +213,7 @@ fun VoiceRecorder(modifier: Modifier = Modifier, onDone: (Pair<File, String>?) -
                 Text("Grant Permission")
             }
         }
+
         else -> {
             permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
         }

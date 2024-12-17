@@ -8,14 +8,12 @@ import com.example.facebook.network.FriendsApiService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class NetworkFriendRepositoryTest {
 
     private lateinit var repository: NetworkFriendRepository
@@ -43,7 +41,9 @@ class NetworkFriendRepositoryTest {
         val networkFriendRepository = NetworkFriendRepository(friendApiService)
         val existingUser = "existingUser"
 
-        coEvery { friendApiService.accept(FriendAccept(existingUser)) } returns Response.success(null)
+        coEvery { friendApiService.accept(FriendAccept(existingUser)) } returns Response.success(
+            null
+        )
 
         // Act
         networkFriendRepository.accept(existingUser)
@@ -58,7 +58,9 @@ class NetworkFriendRepositoryTest {
         val repository = NetworkFriendRepository(mockFriendApiService)
         val fromUser = "user123"
 
-        coEvery { mockFriendApiService.decline(FriendAccept(fromUser)) } returns Response.success(null)
+        coEvery { mockFriendApiService.decline(FriendAccept(fromUser)) } returns Response.success(
+            null
+        )
 
         repository.decline(fromUser)
 
@@ -142,21 +144,22 @@ class NetworkFriendRepositoryTest {
     }
 
     @Test
-    fun `getSuggestions should call friendApiService getSuggestions with default pagination`() = runTest {
-        // Arrange
-        val mockFriendApiService = mockk<FriendsApiService>()
-        val repository = NetworkFriendRepository(mockFriendApiService)
-        val mockResponse = mockk<Response<GetFriendSuggestionsResponse>>()
+    fun `getSuggestions should call friendApiService getSuggestions with default pagination`() =
+        runTest {
+            // Arrange
+            val mockFriendApiService = mockk<FriendsApiService>()
+            val repository = NetworkFriendRepository(mockFriendApiService)
+            val mockResponse = mockk<Response<GetFriendSuggestionsResponse>>()
 
-        coEvery { mockFriendApiService.getSuggestions(null, null, null) } returns mockResponse
+            coEvery { mockFriendApiService.getSuggestions(null, null, null) } returns mockResponse
 
-        // Act
-        val result = repository.getSuggestions(null, null, null)
+            // Act
+            val result = repository.getSuggestions(null, null, null)
 
-        // Assert
-        coVerify { mockFriendApiService.getSuggestions(null, null, null) }
-        assertEquals(mockResponse, result)
-    }
+            // Assert
+            coVerify { mockFriendApiService.getSuggestions(null, null, null) }
+            assertEquals(mockResponse, result)
+        }
 
     @Test
     fun `getSuggestions should return friend suggestions with custom parameters`() = runTest {

@@ -1,17 +1,16 @@
 package com.example.facebook.data
 
-import io.mockk.*
-import io.mockk.impl.annotations.MockK
-import kotlinx.coroutines.test.runTest
 import android.util.Log
+import io.mockk.MockKAnnotations
 import io.mockk.every
+import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.slot
 import io.mockk.verify
 import io.socket.client.Socket
 import io.socket.emitter.Emitter
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -19,7 +18,6 @@ import org.junit.runner.RunWith
 import org.mockito.junit.MockitoJUnitRunner
 
 @RunWith(MockitoJUnitRunner::class)
-@OptIn(ExperimentalCoroutinesApi::class)
 class SocketRepositoryTest {
 
     @MockK
@@ -38,7 +36,6 @@ class SocketRepositoryTest {
         socketRepository = SocketRepository(mockSocket)
 
     }
-
 
 
     @Test
@@ -85,7 +82,12 @@ class SocketRepositoryTest {
 
         // Capture the connection error listener
         val listenerSlot = slot<Emitter.Listener>()
-        every { mockSocket.on(Socket.EVENT_CONNECT_ERROR, capture(listenerSlot)) } returns mockSocket
+        every {
+            mockSocket.on(
+                Socket.EVENT_CONNECT_ERROR,
+                capture(listenerSlot)
+            )
+        } returns mockSocket
 
         // Create the SocketRepository instance, which will set up the listeners
         SocketRepository(mockSocket)
@@ -210,22 +212,23 @@ class SocketRepositoryTest {
     }
 
     @Test
-    fun `waitForConnection should wait for connection when socket is not already connected`() = runTest {
-        every { mockSocket.connected() } returns false
-        every { mockSocket.once(Socket.EVENT_CONNECT, any()) } answers {
-            val listener = secondArg<Emitter.Listener>()
-            listener.call()
-            mockk<Emitter>() // Return a mocked Emitter object
-        }
-        every { mockSocket.connect() } returns mockk()
+    fun `waitForConnection should wait for connection when socket is not already connected`() =
+        runTest {
+            every { mockSocket.connected() } returns false
+            every { mockSocket.once(Socket.EVENT_CONNECT, any()) } answers {
+                val listener = secondArg<Emitter.Listener>()
+                listener.call()
+                mockk<Emitter>() // Return a mocked Emitter object
+            }
+            every { mockSocket.connect() } returns mockk()
 
-        socketRepository.waitForConnection()
+            socketRepository.waitForConnection()
 
-        verify(exactly = 1) {
-            mockSocket.once(Socket.EVENT_CONNECT, any())
-            mockSocket.connect()
+            verify(exactly = 1) {
+                mockSocket.once(Socket.EVENT_CONNECT, any())
+                mockSocket.connect()
+            }
         }
-    }
 
     @Test
     fun `waitForConnection should immediately return if socket is already connected`() = runTest {
@@ -244,3 +247,4 @@ class SocketRepositoryTest {
         verify(exactly = 3) { mockSocket.on(any(), any()) }
     }
 }
+

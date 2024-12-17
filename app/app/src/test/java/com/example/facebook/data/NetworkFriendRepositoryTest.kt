@@ -8,14 +8,12 @@ import com.example.facebook.network.FriendsApiService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class NetworkFriendRepositoryTest {
 
     private lateinit var repository: NetworkFriendRepository
@@ -25,14 +23,14 @@ class NetworkFriendRepositoryTest {
     fun setup() {
         repository = NetworkFriendRepository(mockFriendApiService)
     }
-    
+
     @Test
     fun `request should call friendApiService with correct parameters`() = runTest {
         val to = "validUser"
         coEvery { mockFriendApiService.request(FriendRequest(to)) } returns mockk()
-    
+
         repository.request(to)
-    
+
         coVerify { mockFriendApiService.request(FriendRequest(to)) }
     }
 
@@ -43,7 +41,9 @@ class NetworkFriendRepositoryTest {
         val networkFriendRepository = NetworkFriendRepository(friendApiService)
         val existingUser = "existingUser"
 
-        coEvery { friendApiService.accept(FriendAccept(existingUser)) } returns Response.success(null)
+        coEvery { friendApiService.accept(FriendAccept(existingUser)) } returns Response.success(
+            null
+        )
 
         // Act
         networkFriendRepository.accept(existingUser)
@@ -51,63 +51,65 @@ class NetworkFriendRepositoryTest {
         // Assert
         coVerify(exactly = 1) { friendApiService.accept(FriendAccept(existingUser)) }
     }
-    
+
     @Test
     fun `decline should call friendApiService decline with correct parameters`() = runTest {
         val mockFriendApiService = mockk<FriendsApiService>()
         val repository = NetworkFriendRepository(mockFriendApiService)
         val fromUser = "user123"
-    
-        coEvery { mockFriendApiService.decline(FriendAccept(fromUser)) } returns Response.success(null)
-    
+
+        coEvery { mockFriendApiService.decline(FriendAccept(fromUser)) } returns Response.success(
+            null
+        )
+
         repository.decline(fromUser)
-    
+
         coVerify { mockFriendApiService.decline(FriendAccept(fromUser)) }
     }
-    
+
     @Test
     fun `revoke should call friendApiService revoke with correct parameter`() = runTest {
         val friendApiService = mockk<FriendsApiService>()
         val repository = NetworkFriendRepository(friendApiService)
         val to = "user123"
-    
+
         coEvery { friendApiService.revoke(any()) } returns Response.success(null)
-    
+
         repository.revoke(to)
-    
+
         coVerify { friendApiService.revoke(FriendRequest(to)) }
-    }    
-    
+    }
+
     @Test
     fun `disfriend should call friendApiService disfriend with correct parameter`() = runTest {
         val friendApiService = mockk<FriendsApiService>()
         val repository = NetworkFriendRepository(friendApiService)
         val from = "user123"
-    
+
         coEvery { friendApiService.disfriend(FriendAccept(from)) } returns Response.success(null)
-    
+
         repository.disfriend(from)
-    
+
         coVerify { friendApiService.disfriend(FriendAccept(from)) }
     }
-    
+
     @Test
     fun `getAll should retrieve all friends with default pagination`() = runTest {
         // Arrange
         val mockResponse = mockk<Response<GetFriendResponse>>()
         val mockFriendsApiService = mockk<FriendsApiService>()
         coEvery { mockFriendsApiService.getAll(null, null, null) } returns mockResponse
-    
+
         val repository = NetworkFriendRepository(mockFriendsApiService)
-    
+
         // Act
         val result = repository.getAll(null, null, null)
-    
+
         // Assert
         coVerify { mockFriendsApiService.getAll(null, null, null) }
         assertEquals(mockResponse, result)
     }
-    
+
 
     @Test
     fun `getAll should retrieve friends with custom offset and limit`() = runTest {
@@ -122,7 +124,7 @@ class NetworkFriendRepositoryTest {
         coVerify { mockFriendApiService.getAll(offset, limit, null) }
         assertEquals(mockResponse, result)
     }
-    
+
     @Test
     fun `getAll should filter friends list based on search query`() = runTest {
         // Arrange
@@ -130,34 +132,35 @@ class NetworkFriendRepositoryTest {
         val repository = NetworkFriendRepository(friendApiService)
         val mockResponse = mockk<Response<GetFriendResponse>>()
         val searchQuery = "John"
-        
+
         coEvery { friendApiService.getAll(any(), any(), eq(searchQuery)) } returns mockResponse
-    
+
         // Act
         val result = repository.getAll(offset = null, limit = null, q = searchQuery)
-    
+
         // Assert
         coVerify { friendApiService.getAll(null, null, searchQuery) }
         assertEquals(mockResponse, result)
     }
-    
+
     @Test
-    fun `getSuggestions should call friendApiService getSuggestions with default pagination`() = runTest {
-        // Arrange
-        val mockFriendApiService = mockk<FriendsApiService>()
-        val repository = NetworkFriendRepository(mockFriendApiService)
-        val mockResponse = mockk<Response<GetFriendSuggestionsResponse>>()
+    fun `getSuggestions should call friendApiService getSuggestions with default pagination`() =
+        runTest {
+            // Arrange
+            val mockFriendApiService = mockk<FriendsApiService>()
+            val repository = NetworkFriendRepository(mockFriendApiService)
+            val mockResponse = mockk<Response<GetFriendSuggestionsResponse>>()
 
-        coEvery { mockFriendApiService.getSuggestions(null, null, null) } returns mockResponse
+            coEvery { mockFriendApiService.getSuggestions(null, null, null) } returns mockResponse
 
-        // Act
-        val result = repository.getSuggestions(null, null, null)
+            // Act
+            val result = repository.getSuggestions(null, null, null)
 
-        // Assert
-        coVerify { mockFriendApiService.getSuggestions(null, null, null) }
-        assertEquals(mockResponse, result)
-    }
-    
+            // Assert
+            coVerify { mockFriendApiService.getSuggestions(null, null, null) }
+            assertEquals(mockResponse, result)
+        }
+
     @Test
     fun `getSuggestions should return friend suggestions with custom parameters`() = runTest {
         val offset = 10

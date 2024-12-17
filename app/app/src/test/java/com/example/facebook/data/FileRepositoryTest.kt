@@ -7,9 +7,8 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -17,7 +16,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import retrofit2.Response
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class FileRepositoryTest {
 
     private lateinit var fileRepository: FileRepository
@@ -46,7 +44,7 @@ class FileRepositoryTest {
 
         coEvery { mockFileApiService.getById(nonExistentId) } returns Response.error(
             404,
-            ResponseBody.create(null, "")
+            "".toResponseBody(null)
         )
 
         val response = repository.getById(nonExistentId)
@@ -115,7 +113,7 @@ class FileRepositoryTest {
 
         val invalidType = "invalid_type"
         val errorResponse =
-            Response.error<GetSystemFileResponse>(400, ResponseBody.create(null, ""))
+            Response.error<GetSystemFileResponse>(400, "".toResponseBody(null))
 
         coEvery {
             mockFileApiService.getSystemFile(

@@ -1,5 +1,5 @@
-import com.example.facebook.data.NetworkUserRepository
-import com.example.facebook.data.UserRepository
+package com.example.facebook.data
+
 import com.example.facebook.model.GetUsersResponse
 import com.example.facebook.model.LoginRequest
 import com.example.facebook.model.OtpRequest
@@ -12,7 +12,7 @@ import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okhttp3.MultipartBody
-import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -52,13 +52,15 @@ class UserRepositoryTest {
         // Assert
         assertTrue(result.isSuccessful)
         assertEquals(mockUser, result.body())
-        coVerify { userApiService.login(
-            LoginRequest(email = email, password = password),
-            token = token,
-            socketId = socketId
-        ) }
+        coVerify {
+            userApiService.login(
+                LoginRequest(email = email, password = password),
+                token = token,
+                socketId = socketId
+            )
+        }
     }
-    
+
     @Test
     fun `login should return error when credentials are incorrect`() = runTest {
         val userRepository = mockk<UserRepository>()
@@ -67,13 +69,17 @@ class UserRepositoryTest {
         val token = null
         val socketId = null
 
-        coEvery { userRepository.login(email, password, token, socketId) } returns Response.error(401, ResponseBody.create(null, "Unauthorized"))
+        coEvery { userRepository.login(email, password, token, socketId) } returns Response.error(
+            401,
+            "Unauthorized".toResponseBody(null)
+        )
 
         val response = userRepository.login(email, password, token, socketId)
 
         assertFalse(response.isSuccessful)
         assertEquals(401, response.code())
     }
+
     @Test
     fun `auth should return successful response with valid token`() = runTest {
         val mockUserApiService = mockk<UserApiService>()
@@ -94,6 +100,7 @@ class UserRepositoryTest {
         assertEquals(mockUser, result.body())
         coVerify(exactly = 1) { mockUserApiService.auth(token, socketId) }
     }
+
     @Test
     fun `register should create a new user with all required fields`() = runTest {
         val userRepository = mockk<UserRepository>()
@@ -103,8 +110,9 @@ class UserRepositoryTest {
         val password = "password123"
         val phoneNumber = "1234567890"
         val avatar = Pair(java.io.File("path/to/avatar.jpg"), "image/jpeg")
-        val expectedUser = User(_id = "1", firstName = firstName, lastName = lastName, email = email)
-    
+        val expectedUser =
+            User(_id = "1", firstName = firstName, lastName = lastName, email = email)
+
         coEvery {
             userRepository.register(
                 firstName = firstName,
@@ -115,17 +123,20 @@ class UserRepositoryTest {
                 avatar = avatar
             )
         } returns Response.success(expectedUser)
-    
-        val response = userRepository.register(firstName, lastName, email, password, phoneNumber, avatar)
-    
+
+        val response =
+            userRepository.register(firstName, lastName, email, password, phoneNumber, avatar)
+
         assertTrue(response.isSuccessful)
         assertEquals(expectedUser, response.body())
     }
+
     @Test
     fun `register should handle existing email address`() = runTest {
         val userRepository = mockk<UserRepository>()
         val existingEmail = "existing@example.com"
-        val errorResponse = Response.error<User>(409, ResponseBody.create(null, "Email already exists"))
+        val errorResponse =
+            Response.error<User>(409, "Email already exists".toResponseBody(null))
 
         coEvery {
             userRepository.register(
@@ -140,6 +151,7 @@ class UserRepositoryTest {
         assertFalse(result.isSuccessful)
         assertEquals(409, result.code())
     }
+
     @Test
     fun `verifyOtp should return successful response for valid email and OTP`() = runTest {
         val email = "test@example.com"
@@ -150,7 +162,14 @@ class UserRepositoryTest {
             every { body() } returns mockUser
         }
 
-        coEvery { userApiService.verifyOtp(OtpRequest(email = email, otp = otp)) } returns mockResponse
+        coEvery {
+            userApiService.verifyOtp(
+                OtpRequest(
+                    email = email,
+                    otp = otp
+                )
+            )
+        } returns mockResponse
 
         val repository = NetworkUserRepository(userApiService)
         val result = repository.verifyOtp(email, otp)
@@ -158,10 +177,12 @@ class UserRepositoryTest {
         assertTrue(result.isSuccessful)
         assertEquals(mockUser, result.body())
     }
+
     @Test
     fun `update should update user information partially with only provided fields`() = runTest {
         val userRepository = mockk<UserRepository>()
-        val updatedUser = User(_id = "1", firstName = "John", lastName = "Doe", email = "john@example.com")
+        val updatedUser =
+            User(_id = "1", firstName = "John", lastName = "Doe", email = "john@example.com")
 
         coEvery {
             userRepository.update(
@@ -193,6 +214,7 @@ class UserRepositoryTest {
             )
         }
     }
+
     @Test
     fun `logout should invalidate user session`() = runTest {
         val userApiService = mockk<UserApiService>()
@@ -205,6 +227,7 @@ class UserRepositoryTest {
         coVerify(exactly = 1) { userApiService.logout() }
         assertTrue(response.isSuccessful)
     }
+
     @Test
     fun `getUsers should retrieve a list of users with pagination and search`() = runTest {
         val mockUserApiService = mockk<UserApiService>()
@@ -275,7 +298,9 @@ class UserRepositoryTest {
                 any(),
                 any(),
                 any(),
-                match { it is MultipartBody.Part && it.body.contentType()?.toString() == avatarMimeType }
+                match {
+                    it is MultipartBody.Part && it.body.contentType()?.toString() == avatarMimeType
+                }
             )
         }
 
@@ -304,7 +329,9 @@ class UserRepositoryTest {
                 any(),
                 any(),
                 any(),
-                match { it is MultipartBody.Part && it.body.contentType()?.toString() == avatarMimeType }
+                match {
+                    it is MultipartBody.Part && it.body.contentType()?.toString() == avatarMimeType
+                }
             )
         }
     }

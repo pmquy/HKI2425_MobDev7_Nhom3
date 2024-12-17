@@ -1,31 +1,24 @@
-import com.example.facebook.data.NetworkMessageRepository
+package com.example.facebook.data
+
 import com.example.facebook.model.Message
 import com.example.facebook.network.MessageApiService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import retrofit2.Response
 import java.io.File
-import java.io.IOException
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class NetworkMessageRepositoryTest {
-    
+
     private lateinit var repository: NetworkMessageRepository
     private val messageApiService = mockk<MessageApiService>()
 
@@ -51,78 +44,80 @@ class NetworkMessageRepositoryTest {
 
 
     @Test
-    fun `create should call messageApiService create with correct parameters for text message without files`() = runTest {
-        val message = "Test message"
-        val chatgroup = "testChatGroup"
-        val expectedResponse = mockk<Response<Message>>()
-    
-        coEvery {
-            messageApiService.create(
-                any(),
-                any(),
-                any(),
-                emptyList()
-            )
-        } returns expectedResponse
-    
-        val result = repository.create(message, chatgroup, emptyList(), emptyList())
-    
-        coVerify {
-            messageApiService.create(
-                any(),
-                any(),
-                withArg { map ->
-                    assertTrue(map is HashMap<String, RequestBody>)
-                    assertTrue(map.isEmpty())
-                },
-                eq(emptyList())
-            )
+    fun `create should call messageApiService create with correct parameters for text message without files`() =
+        runTest {
+            val message = "Test message"
+            val chatgroup = "testChatGroup"
+            val expectedResponse = mockk<Response<Message>>()
+
+            coEvery {
+                messageApiService.create(
+                    any(),
+                    any(),
+                    any(),
+                    emptyList()
+                )
+            } returns expectedResponse
+
+            val result = repository.create(message, chatgroup, emptyList(), emptyList())
+
+            coVerify {
+                messageApiService.create(
+                    any(),
+                    any(),
+                    withArg { map ->
+                        assertTrue(map is HashMap<String, RequestBody>)
+                        assertTrue(map.isEmpty())
+                    },
+                    eq(emptyList())
+                )
+            }
+
+            assertEquals(expectedResponse, result)
         }
-    
-        assertEquals(expectedResponse, result)
-    }
-    
+
     @Test
-    fun `create should successfully create a new message with text content and system files`() = runTest {
-        val messageApiService = mockk<MessageApiService>()
-        val repository = NetworkMessageRepository(messageApiService)
-    
-        val message = "Test message"
-        val chatgroup = "test_chatgroup_id"
-        val systemFiles = listOf("file1.txt", "file2.txt")
-        val files = emptyList<Pair<File, String>>()
-    
-        val expectedResponse = mockk<Response<Message>> {
-            every { isSuccessful } returns true
-            every { body() } returns Message(_id = "1", message = message)
+    fun `create should successfully create a new message with text content and system files`() =
+        runTest {
+            val messageApiService = mockk<MessageApiService>()
+            val repository = NetworkMessageRepository(messageApiService)
+
+            val message = "Test message"
+            val chatgroup = "test_chatgroup_id"
+            val systemFiles = listOf("file1.txt", "file2.txt")
+            val files = emptyList<Pair<File, String>>()
+
+            val expectedResponse = mockk<Response<Message>> {
+                every { isSuccessful } returns true
+                every { body() } returns Message(_id = "1", message = message)
+            }
+
+            coEvery {
+                messageApiService.create(
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns expectedResponse
+
+            val result = repository.create(message, chatgroup, systemFiles, files)
+
+            coVerify {
+                messageApiService.create(
+                    any(),
+                    any(),
+                    withArg<HashMap<String, RequestBody>> { map ->
+                        assertEquals(2, map.size)
+                        assertTrue(map.containsKey("files[0]"))
+                        assertTrue(map.containsKey("files[1]"))
+                    },
+                    emptyList()
+                )
+            }
+
+            assertEquals(expectedResponse, result)
         }
-    
-        coEvery { 
-            messageApiService.create(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns expectedResponse
-    
-        val result = repository.create(message, chatgroup, systemFiles, files)
-    
-        coVerify {
-            messageApiService.create(
-                any(),
-                any(),
-                withArg<HashMap<String, RequestBody>> { map ->
-                    assertEquals(2, map.size)
-                    assertTrue(map.containsKey("files[0]"))
-                    assertTrue(map.containsKey("files[1]"))
-                },
-                emptyList()
-            )
-        }
-    
-        assertEquals(expectedResponse, result)
-    }
 
 
     @Test
@@ -134,13 +129,13 @@ class NetworkMessageRepositoryTest {
             Pair(File("path1.jpg"), "image/jpeg"),
             Pair(File("path2.png"), "image/png")
         )
-        
+
         val expectedResponse = mockk<Response<Message>> {
             every { isSuccessful } returns true
             every { body() } returns Message(_id = "1", message = message)
         }
-    
-        coEvery { 
+
+        coEvery {
             messageApiService.create(
                 any(),
                 any(),
@@ -148,25 +143,25 @@ class NetworkMessageRepositoryTest {
                 any()
             )
         } returns expectedResponse
-    
+
         val result = repository.create(message, chatgroup, systemFiles, files)
-    
-        coVerify { 
+
+        coVerify {
             messageApiService.create(
                 any(),
                 any(),
                 match<HashMap<String, RequestBody>> { map ->
                     map.size == 2 &&
-                    map.keys.containsAll(listOf("files[0]", "files[1]")) &&
-                    map.values.all { it is RequestBody }
+                            map.keys.containsAll(listOf("files[0]", "files[1]")) &&
+                            map.values.all { it is RequestBody }
                 },
                 match<List<MultipartBody.Part>> { parts ->
                     parts.size == 2 &&
-                    parts.all { it is MultipartBody.Part }
+                            parts.all { it is MultipartBody.Part }
                 }
             )
         }
-    
+
         assertEquals(expectedResponse, result)
     }
 
@@ -180,7 +175,7 @@ class NetworkMessageRepositoryTest {
             Pair(File("path1.jpg"), "image/jpeg"),
             Pair(File("path2.pdf"), "application/pdf")
         )
-    
+
         val mockResponse = mockk<Response<Message>>()
         coEvery {
             messageApiService.create(
@@ -190,34 +185,39 @@ class NetworkMessageRepositoryTest {
                 any()
             )
         } returns mockResponse
-    
+
         val result = repository.create(message, chatgroup, systemFiles, files)
-    
+
         coVerify {
             messageApiService.create(
-                withArg { 
+                withArg {
                     it.contentType().toString() == "text/plain" && it.contentLength() > 0
                 },
-                withArg { 
+                withArg {
                     it.contentType().toString() == "text/plain" && it.contentLength() > 0
                 },
                 withArg<HashMap<String, RequestBody>> { map ->
                     map.size == 2 &&
-                    map.all { (key, value) -> 
-                        key.startsWith("files[") && 
-                        value.contentType().toString() == "text/plain"
-                    }
+                            map.all { (key, value) ->
+                                key.startsWith("files[") &&
+                                        value.contentType().toString() == "text/plain"
+                            }
                 },
                 withArg<List<MultipartBody.Part>> { parts ->
                     parts.size == 2 &&
-                    parts.all { it.body.contentType() in listOf("image/jpeg".toMediaType(), "application/pdf".toMediaType()) }
+                            parts.all {
+                                it.body.contentType() in listOf(
+                                    "image/jpeg".toMediaType(),
+                                    "application/pdf".toMediaType()
+                                )
+                            }
                 }
             )
         }
-    
+
         assertEquals(mockResponse, result)
     }
-    
+
     @Test
     fun `updateById should call messageApiService updateById with correct parameters`() = runTest {
         val id = "testId"
@@ -226,16 +226,16 @@ class NetworkMessageRepositoryTest {
             every { isSuccessful } returns true
             every { body() } returns message
         }
-        
+
         coEvery { messageApiService.updateById(id, message) } returns mockResponse
-        
+
         val repository = NetworkMessageRepository(messageApiService)
         val result = repository.updateById(id, message)
-        
+
         coVerify { messageApiService.updateById(id, message) }
         assertEquals(mockResponse, result)
-    }    
-    
+    }
+
     @Test
     fun `deleteById should call messageApiService deleteById with correct parameter`() = runTest {
         val messageId = "testMessageId"
@@ -243,14 +243,14 @@ class NetworkMessageRepositoryTest {
             every { isSuccessful } returns true
         }
         coEvery { messageApiService.deleteById(messageId) } returns mockResponse
-    
+
         val repository = NetworkMessageRepository(messageApiService)
         val result = repository.deleteById(messageId)
-    
+
         coVerify(exactly = 1) { messageApiService.deleteById(messageId) }
         assertTrue(result.isSuccessful)
-    }    
-    
+    }
+
     @Test
     fun `getAll should return all messages`() = runTest {
         // Arrange
@@ -260,10 +260,10 @@ class NetworkMessageRepositoryTest {
         )
         val mockResponse = Response.success(mockMessages)
         coEvery { messageApiService.getAll() } returns mockResponse
-    
+
         // Act
         val result = repository.getAll()
-    
+
         // Assert
         assertTrue(result.isSuccessful)
         assertEquals(mockMessages, result.body())
@@ -276,9 +276,9 @@ class NetworkMessageRepositoryTest {
         val chatgroup = "test-chatgroup"
         val emptySystemFiles = emptyList<String>()
         val files = listOf(Pair(File("test.txt"), "text/plain"))
-        
+
         val expectedResponse = mockk<Response<Message>>()
-        
+
         coEvery {
             messageApiService.create(
                 any(),
@@ -295,7 +295,7 @@ class NetworkMessageRepositoryTest {
             messageApiService.create(
                 any(),
                 any(),
-                eq(HashMap<String, RequestBody>()),
+                eq(HashMap()),
                 any()
             )
         }

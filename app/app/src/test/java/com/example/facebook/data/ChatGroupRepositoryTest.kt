@@ -17,7 +17,6 @@ import org.junit.Assert.*
 import retrofit2.Response
 import java.io.File
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ChatGroupRepositoryTest {
 
     private lateinit var chatGroupRepository: ChatGroupRepository
@@ -87,7 +86,9 @@ class ChatGroupRepositoryTest {
         val newAvatar = Pair(File("new_avatar.jpg"), "image/jpeg")
         val updatedChatGroup = ChatGroup(_id = id, name = newName)
 
-        coEvery { repository.updateById(id, newName, newAvatar) } returns Response.success(updatedChatGroup)
+        coEvery { repository.updateById(id, newName, newAvatar) } returns Response.success(
+            updatedChatGroup
+        )
 
         val response = repository.updateById(id, newName, newAvatar)
 
@@ -97,19 +98,20 @@ class ChatGroupRepositoryTest {
     }
 
     @Test
-    fun `deleteById should return successful response when deleting existing chat group`() = runTest {
-        val chatGroupRepository = mockk<ChatGroupRepository>()
-        val chatGroupId = "test-group-id"
-        val response = mockk<Response<Void>>()
+    fun `deleteById should return successful response when deleting existing chat group`() =
+        runTest {
+            val chatGroupRepository = mockk<ChatGroupRepository>()
+            val chatGroupId = "test-group-id"
+            val response = mockk<Response<Void>>()
 
-        coEvery { chatGroupRepository.deleteById(chatGroupId) } returns response
-        every { response.isSuccessful } returns true
+            coEvery { chatGroupRepository.deleteById(chatGroupId) } returns response
+            every { response.isSuccessful } returns true
 
-        val result = chatGroupRepository.deleteById(chatGroupId)
+            val result = chatGroupRepository.deleteById(chatGroupId)
 
-        coVerify(exactly = 1) { chatGroupRepository.deleteById(chatGroupId) }
-        assertTrue(result.isSuccessful)
-    }
+            coVerify(exactly = 1) { chatGroupRepository.deleteById(chatGroupId) }
+            assertTrue(result.isSuccessful)
+        }
 
     @Test
     fun `getAll should retrieve chat groups with pagination and search query`() = runTest {
@@ -139,25 +141,40 @@ class ChatGroupRepositoryTest {
     }
 
     @Test
-    fun `getMessage should fetch messages for a specific chat group with pagination and search query`() = runTest {
-        val chatGroupRepository = mockk<ChatGroupRepository>()
-        val chatGroupId = "test_group_id"
-        val offset = 0
-        val limit = 10
-        val query = "search_query"
-        val mockResponse = mockk<Response<GetMessagesResponse>>()
-        val mockGetMessagesResponse = mockk<GetMessagesResponse>()
+    fun `getMessage should fetch messages for a specific chat group with pagination and search query`() =
+        runTest {
+            val chatGroupRepository = mockk<ChatGroupRepository>()
+            val chatGroupId = "test_group_id"
+            val offset = 0
+            val limit = 10
+            val query = "search_query"
+            val mockResponse = mockk<Response<GetMessagesResponse>>()
+            val mockGetMessagesResponse = mockk<GetMessagesResponse>()
 
-        coEvery { chatGroupRepository.getMessage(chatGroupId, offset, limit, query) } returns mockResponse
-        every { mockResponse.isSuccessful } returns true
-        every { mockResponse.body() } returns mockGetMessagesResponse
+            coEvery {
+                chatGroupRepository.getMessage(
+                    chatGroupId,
+                    offset,
+                    limit,
+                    query
+                )
+            } returns mockResponse
+            every { mockResponse.isSuccessful } returns true
+            every { mockResponse.body() } returns mockGetMessagesResponse
 
-        val result = chatGroupRepository.getMessage(chatGroupId, offset, limit, query)
+            val result = chatGroupRepository.getMessage(chatGroupId, offset, limit, query)
 
-        coVerify(exactly = 1) { chatGroupRepository.getMessage(chatGroupId, offset, limit, query) }
-        assertTrue(result.isSuccessful)
-        assertEquals(mockGetMessagesResponse, result.body())
-    }
+            coVerify(exactly = 1) {
+                chatGroupRepository.getMessage(
+                    chatGroupId,
+                    offset,
+                    limit,
+                    query
+                )
+            }
+            assertTrue(result.isSuccessful)
+            assertEquals(mockGetMessagesResponse, result.body())
+        }
 
     @Test
     fun `addMember should add new members to an existing chat group`() = runTest {
@@ -169,7 +186,9 @@ class ChatGroupRepositoryTest {
         )
         val updatedChatGroup = ChatGroup(_id = chatGroupId, name = "Test Group")
 
-        coEvery { chatGroupRepository.addMember(chatGroupId, newMembers) } returns Response.success(updatedChatGroup)
+        coEvery { chatGroupRepository.addMember(chatGroupId, newMembers) } returns Response.success(
+            updatedChatGroup
+        )
 
         val response = chatGroupRepository.addMember(chatGroupId, newMembers)
 
@@ -185,7 +204,12 @@ class ChatGroupRepositoryTest {
         val memberToRemove = Member("user123", "member")
         val updatedChatGroup = ChatGroup(_id = chatGroupId, name = "Test Group")
 
-        coEvery { chatGroupRepository.removeMember(chatGroupId, memberToRemove) } returns Response.success(updatedChatGroup)
+        coEvery {
+            chatGroupRepository.removeMember(
+                chatGroupId,
+                memberToRemove
+            )
+        } returns Response.success(updatedChatGroup)
 
         val response = chatGroupRepository.removeMember(chatGroupId, memberToRemove)
 
@@ -201,7 +225,12 @@ class ChatGroupRepositoryTest {
         val updatedMember = Member("user1", "admin")
         val updatedChatGroup = ChatGroup(_id = chatGroupId, name = "Test Group")
 
-        coEvery { chatGroupRepository.updateMember(chatGroupId, updatedMember) } returns Response.success(updatedChatGroup)
+        coEvery {
+            chatGroupRepository.updateMember(
+                chatGroupId,
+                updatedMember
+            )
+        } returns Response.success(updatedChatGroup)
 
         val response = chatGroupRepository.updateMember(chatGroupId, updatedMember)
 

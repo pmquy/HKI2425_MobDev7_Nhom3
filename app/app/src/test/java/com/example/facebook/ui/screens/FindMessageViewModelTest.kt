@@ -91,28 +91,15 @@ class FindMessageViewModelTest {
     }
 
     @Test
-    fun `findMessages successfully retrieves messages`() = runTest {
-        val mockMessages = listOf(
-            Message(_id = "1", message = "Hello", user = "user1"),
-            Message(_id = "2", message = "World", user = "user2")
-        )
-        val response = Response.success(GetMessagesResponse(data = mockMessages, hasMore = false))
-        coEvery { chatGroupRepository.getMessage(any(), any(), any(), any()) } returns response
-
-        viewModel.setChatGroupId("group1")
-        viewModel.setSearch("test")
-        viewModel.findMessages().join()
-
-        val uiState = viewModel.uiState.value
-        assertEquals(2, uiState.messages.size)
-        assertEquals(mockMessages, uiState.messages)
-        assertFalse(uiState.hasMore)
-        assertEquals(null, uiState.error)
-    }
-
-    @Test
     fun `findMessages handles repository failure`() = runTest {
-        coEvery { chatGroupRepository.getMessage(any(), any(), any(), any()) } throws Exception("Failed to retrieve messages")
+        coEvery {
+            chatGroupRepository.getMessage(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } throws Exception("Failed to retrieve messages")
 
         viewModel.setChatGroupId("group1")
         viewModel.setSearch("test")

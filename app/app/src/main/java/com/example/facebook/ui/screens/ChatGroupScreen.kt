@@ -278,7 +278,9 @@ fun ChatGroupInfo(
                         text = uiState.chatGroup.name,
                         style = MaterialTheme.typography.headlineLarge,
                         fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(4.dp).fillMaxWidth(),
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .fillMaxWidth(),
                         textAlign = TextAlign.Center
                     )
                 }
@@ -480,7 +482,7 @@ fun MemberListScreen(
                                 },
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f),
-                                maxLines = 1 ,
+                                maxLines = 1,
                             )
                             if (user._id != chatGroupViewModel.currentUserId()) {
                                 Button(
@@ -558,7 +560,7 @@ fun AddMemberFromFriendList(
                                 user.firstName + " " + user.lastName,
                                 overflow = TextOverflow.Ellipsis,
                                 modifier = Modifier.weight(1f),
-                                maxLines = 1 ,
+                                maxLines = 1,
                             )
                             Button(
                                 {
@@ -685,34 +687,41 @@ fun CreateMessage(
             ) {
                 Icon(
                     Icons.Default.Add,
-                    modifier = Modifier.clickable {
-                        chatGroupViewModel.setInputType(InputType.FILE)
-                    }
+                    modifier = Modifier
+                        .clickable {
+                            chatGroupViewModel.setInputType(InputType.FILE)
+                        }
                         .testTag("ADDFILE"),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
                 )
                 Icon(
                     painterResource(R.drawable.baseline_camera_alt_24),
-                    modifier = Modifier.clickable {
-                        chatGroupViewModel.setInputType(InputType.TAKE_PICTURE)
-                    }.testTag("CAM"),
+                    modifier = Modifier
+                        .clickable {
+                            chatGroupViewModel.setInputType(InputType.TAKE_PICTURE)
+                        }
+                        .testTag("CAM"),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
                 )
                 Icon(
                     painterResource(R.drawable.baseline_image_24),
-                    modifier = Modifier.clickable {
-                        chatGroupViewModel.setInputType(InputType.IMAGE)
-                    }.testTag("IMG"),
+                    modifier = Modifier
+                        .clickable {
+                            chatGroupViewModel.setInputType(InputType.IMAGE)
+                        }
+                        .testTag("IMG"),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
                 )
                 Icon(
                     painterResource(R.drawable.baseline_mic_24),
-                    modifier = Modifier.clickable {
-                        chatGroupViewModel.setInputType(InputType.MIC)
-                    }.testTag("MIC"),
+                    modifier = Modifier
+                        .clickable {
+                            chatGroupViewModel.setInputType(InputType.MIC)
+                        }
+                        .testTag("MIC"),
                     tint = MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
                 )

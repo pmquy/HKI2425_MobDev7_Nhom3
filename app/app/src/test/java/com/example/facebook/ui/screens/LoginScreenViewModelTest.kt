@@ -59,7 +59,14 @@ class LoginViewModelTest {
         val email = "wrong@example.com"
         val password = "wrongPassword"
 
-        coEvery { userRepository.login(email, password, any(), any()) } throws Exception("Authentication failed")
+        coEvery {
+            userRepository.login(
+                email,
+                password,
+                any(),
+                any()
+            )
+        } throws Exception("Authentication failed")
 
         viewModel.login(email, password)
     }
@@ -84,7 +91,15 @@ class LoginViewModelTest {
     @Test(expected = Exception::class)
     fun `handleUpdate with error response should throw exception`() = runTest {
 
-        coEvery { userRepository.update(any(), any(), any(), any(), any()) } throws Exception("Update failed")
+        coEvery {
+            userRepository.update(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } throws Exception("Update failed")
 
         viewModel.handleUpdate(firstName = "Caio")
     }

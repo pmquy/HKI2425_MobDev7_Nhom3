@@ -10,21 +10,18 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.slot
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.asRequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.junit.Assert.*
 import retrofit2.Response
 import java.io.File
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class NetworkUserRepositoryTest {
 
     private lateinit var repository: NetworkUserRepository
@@ -60,6 +57,7 @@ class NetworkUserRepositoryTest {
         assertTrue(result.isSuccessful)
         assertEquals(mockUser, result.body())
     }
+
     @Test
     fun `login should return error response when credentials are invalid`() = runTest {
         // Arrange
@@ -67,7 +65,7 @@ class NetworkUserRepositoryTest {
         val password = "wrongpassword"
         val token = null
         val socketId = null
-        val errorResponse = Response.error<User>(401, ResponseBody.create(null, "Unauthorized"))
+        val errorResponse = Response.error<User>(401, "Unauthorized".toResponseBody(null))
 
         coEvery { userApiService.login(any(), any(), any()) } returns errorResponse
 
@@ -150,7 +148,14 @@ class NetworkUserRepositoryTest {
             )
         } returns mockResponse
 
-        val result = networkUserRepository.register(firstName, lastName, email, password, phoneNumber, avatar)
+        val result = networkUserRepository.register(
+            firstName,
+            lastName,
+            email,
+            password,
+            phoneNumber,
+            avatar
+        )
 
         coVerify {
             userApiService.register(
@@ -184,23 +189,34 @@ class NetworkUserRepositoryTest {
             )
         }
 
-        assertTrue(firstNameSlot.captured.contentType()?.toString()?.startsWith("text/plain") == true)
+        assertTrue(
+            firstNameSlot.captured.contentType()?.toString()?.startsWith("text/plain") == true
+        )
         assertEquals(firstName.length.toLong(), firstNameSlot.captured.contentLength())
 
-        assertTrue(lastNameSlot.captured.contentType()?.toString()?.startsWith("text/plain") == true)
+        assertTrue(
+            lastNameSlot.captured.contentType()?.toString()?.startsWith("text/plain") == true
+        )
         assertEquals(lastName.length.toLong(), lastNameSlot.captured.contentLength())
 
         assertTrue(emailSlot.captured.contentType()?.toString()?.startsWith("text/plain") == true)
         assertEquals(email.length.toLong(), emailSlot.captured.contentLength())
 
-        assertTrue(passwordSlot.captured.contentType()?.toString()?.startsWith("text/plain") == true)
+        assertTrue(
+            passwordSlot.captured.contentType()?.toString()?.startsWith("text/plain") == true
+        )
         assertEquals(password.length.toLong(), passwordSlot.captured.contentLength())
 
-        assertTrue(phoneNumberSlot.captured.contentType()?.toString()?.startsWith("text/plain") == true)
+        assertTrue(
+            phoneNumberSlot.captured.contentType()?.toString()?.startsWith("text/plain") == true
+        )
         assertEquals(phoneNumber.length.toLong(), phoneNumberSlot.captured.contentLength())
 
         assertEquals(avatarMimeType, avatarSlot.captured.body.contentType()?.toString())
-        assertTrue(avatarSlot.captured.headers?.get("Content-Disposition")?.contains("filename=\"avatar.jpg\"") == true)
+        assertTrue(
+            avatarSlot.captured.headers?.get("Content-Disposition")
+                ?.contains("filename=\"avatar.jpg\"") == true
+        )
     }
 
     @Test
@@ -272,37 +288,63 @@ class NetworkUserRepositoryTest {
     }
 
     @Test
-    fun `verifyOtp should call userApiService verifyOtp with correct parameters and return response`() = runTest {
-        val email = "test@example.com"
-        val otp = "123456"
-        val mockUser = mockk<User>()
-        val mockResponse = mockk<Response<User>> {
-            every { isSuccessful } returns true
-            every { body() } returns mockUser
+    fun `verifyOtp should call userApiService verifyOtp with correct parameters and return response`() =
+        runTest {
+            val email = "test@example.com"
+            val otp = "123456"
+            val mockUser = mockk<User>()
+            val mockResponse = mockk<Response<User>> {
+                every { isSuccessful } returns true
+                every { body() } returns mockUser
+            }
+
+            coEvery {
+                userApiService.verifyOtp(
+                    OtpRequest(
+                        email = email,
+                        otp = otp
+                    )
+                )
+            } returns mockResponse
+
+            val repository = NetworkUserRepository(userApiService)
+            val result = repository.verifyOtp(email, otp)
+
+            coVerify { userApiService.verifyOtp(OtpRequest(email = email, otp = otp)) }
+            assertEquals(mockResponse, result)
+            assertTrue(result.isSuccessful)
+            assertEquals(mockUser, result.body())
         }
-
-        coEvery { userApiService.verifyOtp(OtpRequest(email = email, otp = otp)) } returns mockResponse
-
-        val repository = NetworkUserRepository(userApiService)
-        val result = repository.verifyOtp(email, otp)
-
-        coVerify { userApiService.verifyOtp(OtpRequest(email = email, otp = otp)) }
-        assertEquals(mockResponse, result)
-        assertTrue(result.isSuccessful)
-        assertEquals(mockUser, result.body())
-    }
 
     @Test
     fun `all API calls should handle network errors gracefully`() = runTest {
-        val errorResponseUser = Response.error<User>(500, ResponseBody.create(null, ""))
-        val errorResponseVoid = Response.error<Void>(500, ResponseBody.create(null, ""))
-        val errorResponseGetUsers = Response.error<GetUsersResponse>(500, ResponseBody.create(null, ""))
+        val errorResponseUser = Response.error<User>(500, "".toResponseBody(null))
+        val errorResponseVoid = Response.error<Void>(500, "".toResponseBody(null))
+        val errorResponseGetUsers =
+            Response.error<GetUsersResponse>(500, "".toResponseBody(null))
 
         coEvery { userApiService.login(any(), any(), any()) } returns errorResponseUser
         coEvery { userApiService.auth(any(), any()) } returns errorResponseUser
         coEvery { userApiService.getById(any()) } returns errorResponseUser
-        coEvery { userApiService.register(any(), any(), any(), any(), any(), any()) } returns errorResponseUser
-        coEvery { userApiService.update(any(), any(), any(), any(), any()) } returns errorResponseUser
+        coEvery {
+            userApiService.register(
+                any(),
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns errorResponseUser
+        coEvery {
+            userApiService.update(
+                any(),
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } returns errorResponseUser
         coEvery { userApiService.logout() } returns errorResponseVoid
         coEvery { userApiService.getUsers(any(), any(), any()) } returns errorResponseGetUsers
         coEvery { userApiService.verifyOtp(any()) } returns errorResponseUser
@@ -310,7 +352,8 @@ class NetworkUserRepositoryTest {
         val loginResult = repository.login("email", "password", null, null)
         val authResult = repository.auth(null, null)
         val getByIdResult = repository.getById("id")
-        val registerResult = repository.register("first", "last", "email", "password", "phone", null)
+        val registerResult =
+            repository.register("first", "last", "email", "password", "phone", null)
         val updateResult = repository.update(null, null, null, null, null)
         val logoutResult = repository.logout()
         val getUsersResult = repository.getUsers(0, 10, "")

@@ -6,9 +6,8 @@ import com.example.facebook.network.FileApiService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
-import okhttp3.ResponseBody
+import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -17,7 +16,6 @@ import org.junit.Test
 import retrofit2.Response
 import java.io.IOException
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class NetworkFileRepositoryTest {
 
     private lateinit var repository: NetworkFileRepository
@@ -31,7 +29,8 @@ class NetworkFileRepositoryTest {
     @Test
     fun `getById should successfully retrieve a file by its ID`() = runTest {
         val fileId = "testFileId"
-        val expectedFile = File(_id = fileId, name = "testFile.txt", url = "http://example.com/testFile.txt")
+        val expectedFile =
+            File(_id = fileId, name = "testFile.txt", url = "http://example.com/testFile.txt")
         val expectedResponse = Response.success(expectedFile)
 
         coEvery { fileApiService.getById(fileId) } returns expectedResponse
@@ -49,7 +48,10 @@ class NetworkFileRepositoryTest {
         val repository = NetworkFileRepository(fileApiService)
         val nonExistentId = "non_existent_id"
 
-        coEvery { fileApiService.getById(nonExistentId) } returns Response.error(404, ResponseBody.create(null, "File not found"))
+        coEvery { fileApiService.getById(nonExistentId) } returns Response.error(
+            404,
+            "File not found".toResponseBody(null)
+        )
 
         val response = repository.getById(nonExistentId)
 
@@ -91,9 +93,11 @@ class NetworkFileRepositoryTest {
     fun `getSystemFile should return empty response when no files match given type`() = runTest {
         val fileApiService = mockk<FileApiService>()
         val repository = NetworkFileRepository(fileApiService)
-        val emptyResponse = GetSystemFileResponse(data =  emptyList(), hasMore = false)
+        val emptyResponse = GetSystemFileResponse(data = emptyList(), hasMore = false)
 
-        coEvery { fileApiService.getSystemFile(any(), any(), any()) } returns Response.success(emptyResponse)
+        coEvery { fileApiService.getSystemFile(any(), any(), any()) } returns Response.success(
+            emptyResponse
+        )
 
         val result = repository.getSystemFile("non_existent_type", 0, 10)
 
@@ -141,7 +145,13 @@ class NetworkFileRepositoryTest {
         val fileApiService = mockk<FileApiService>()
         val repository = NetworkFileRepository(fileApiService)
 
-        coEvery { fileApiService.getSystemFile(any(), any(), any()) } throws IllegalArgumentException("Invalid file type")
+        coEvery {
+            fileApiService.getSystemFile(
+                any(),
+                any(),
+                any()
+            )
+        } throws IllegalArgumentException("Invalid file type")
 
         repository.getSystemFile("invalidType", 0, 10)
     }
@@ -162,20 +172,27 @@ class NetworkFileRepositoryTest {
     }
 
     @Test
-    fun `getSystemFile should correctly process and return responses for different file types`() = runTest {
-        val mockFileApiService = mockk<FileApiService>()
-        val repository = NetworkFileRepository(mockFileApiService)
+    fun `getSystemFile should correctly process and return responses for different file types`() =
+        runTest {
+            val mockFileApiService = mockk<FileApiService>()
+            val repository = NetworkFileRepository(mockFileApiService)
 
-        val testType = "image"
-        val testOffset = 0
-        val testLimit = 10
-        val mockResponse = mockk<Response<GetSystemFileResponse>>()
+            val testType = "image"
+            val testOffset = 0
+            val testLimit = 10
+            val mockResponse = mockk<Response<GetSystemFileResponse>>()
 
-        coEvery { mockFileApiService.getSystemFile(testType, testOffset, testLimit) } returns mockResponse
+            coEvery {
+                mockFileApiService.getSystemFile(
+                    testType,
+                    testOffset,
+                    testLimit
+                )
+            } returns mockResponse
 
-        val result = repository.getSystemFile(testType, testOffset, testLimit)
+            val result = repository.getSystemFile(testType, testOffset, testLimit)
 
-        assertEquals(mockResponse, result)
-        coVerify { mockFileApiService.getSystemFile(testType, testOffset, testLimit) }
-    }
+            assertEquals(mockResponse, result)
+            coVerify { mockFileApiService.getSystemFile(testType, testOffset, testLimit) }
+        }
 }

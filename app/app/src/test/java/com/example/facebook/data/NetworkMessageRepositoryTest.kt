@@ -1,11 +1,11 @@
-import com.example.facebook.data.NetworkMessageRepository
+package com.example.facebook.data
+
 import com.example.facebook.model.Message
 import com.example.facebook.network.MessageApiService
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
@@ -14,12 +14,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import org.mockito.Mockito.verify
-import org.mockito.Mockito.`when`
 import retrofit2.Response
 import java.io.File
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class NetworkMessageRepositoryTest {
 
     private lateinit var repository: NetworkMessageRepository
@@ -47,78 +44,80 @@ class NetworkMessageRepositoryTest {
 
 
     @Test
-    fun `create should call messageApiService create with correct parameters for text message without files`() = runTest {
-        val message = "Test message"
-        val chatgroup = "testChatGroup"
-        val expectedResponse = mockk<Response<Message>>()
+    fun `create should call messageApiService create with correct parameters for text message without files`() =
+        runTest {
+            val message = "Test message"
+            val chatgroup = "testChatGroup"
+            val expectedResponse = mockk<Response<Message>>()
 
-        coEvery {
-            messageApiService.create(
-                any(),
-                any(),
-                any(),
-                emptyList()
-            )
-        } returns expectedResponse
+            coEvery {
+                messageApiService.create(
+                    any(),
+                    any(),
+                    any(),
+                    emptyList()
+                )
+            } returns expectedResponse
 
-        val result = repository.create(message, chatgroup, emptyList(), emptyList())
+            val result = repository.create(message, chatgroup, emptyList(), emptyList())
 
-        coVerify {
-            messageApiService.create(
-                any(),
-                any(),
-                withArg { map ->
-                    assertTrue(map is HashMap<String, RequestBody>)
-                    assertTrue(map.isEmpty())
-                },
-                eq(emptyList())
-            )
+            coVerify {
+                messageApiService.create(
+                    any(),
+                    any(),
+                    withArg { map ->
+                        assertTrue(map is HashMap<String, RequestBody>)
+                        assertTrue(map.isEmpty())
+                    },
+                    eq(emptyList())
+                )
+            }
+
+            assertEquals(expectedResponse, result)
         }
-
-        assertEquals(expectedResponse, result)
-    }
 
     @Test
-    fun `create should successfully create a new message with text content and system files`() = runTest {
-        val messageApiService = mockk<MessageApiService>()
-        val repository = NetworkMessageRepository(messageApiService)
+    fun `create should successfully create a new message with text content and system files`() =
+        runTest {
+            val messageApiService = mockk<MessageApiService>()
+            val repository = NetworkMessageRepository(messageApiService)
 
-        val message = "Test message"
-        val chatgroup = "test_chatgroup_id"
-        val systemFiles = listOf("file1.txt", "file2.txt")
-        val files = emptyList<Pair<File, String>>()
+            val message = "Test message"
+            val chatgroup = "test_chatgroup_id"
+            val systemFiles = listOf("file1.txt", "file2.txt")
+            val files = emptyList<Pair<File, String>>()
 
-        val expectedResponse = mockk<Response<Message>> {
-            every { isSuccessful } returns true
-            every { body() } returns Message(_id = "1", message = message)
+            val expectedResponse = mockk<Response<Message>> {
+                every { isSuccessful } returns true
+                every { body() } returns Message(_id = "1", message = message)
+            }
+
+            coEvery {
+                messageApiService.create(
+                    any(),
+                    any(),
+                    any(),
+                    any()
+                )
+            } returns expectedResponse
+
+            val result = repository.create(message, chatgroup, systemFiles, files)
+
+            coVerify {
+                messageApiService.create(
+                    any(),
+                    any(),
+                    withArg<HashMap<String, RequestBody>> { map ->
+                        assertEquals(2, map.size)
+                        assertTrue(map.containsKey("files[0]"))
+                        assertTrue(map.containsKey("files[1]"))
+                    },
+                    emptyList()
+                )
+            }
+
+            assertEquals(expectedResponse, result)
         }
-
-        coEvery {
-            messageApiService.create(
-                any(),
-                any(),
-                any(),
-                any()
-            )
-        } returns expectedResponse
-
-        val result = repository.create(message, chatgroup, systemFiles, files)
-
-        coVerify {
-            messageApiService.create(
-                any(),
-                any(),
-                withArg<HashMap<String, RequestBody>> { map ->
-                    assertEquals(2, map.size)
-                    assertTrue(map.containsKey("files[0]"))
-                    assertTrue(map.containsKey("files[1]"))
-                },
-                emptyList()
-            )
-        }
-
-        assertEquals(expectedResponse, result)
-    }
 
 
     @Test
@@ -206,7 +205,12 @@ class NetworkMessageRepositoryTest {
                 },
                 withArg<List<MultipartBody.Part>> { parts ->
                     parts.size == 2 &&
-                            parts.all { it.body.contentType() in listOf("image/jpeg".toMediaType(), "application/pdf".toMediaType()) }
+                            parts.all {
+                                it.body.contentType() in listOf(
+                                    "image/jpeg".toMediaType(),
+                                    "application/pdf".toMediaType()
+                                )
+                            }
                 }
             )
         }
@@ -291,7 +295,7 @@ class NetworkMessageRepositoryTest {
             messageApiService.create(
                 any(),
                 any(),
-                eq(HashMap<String, RequestBody>()),
+                eq(HashMap()),
                 any()
             )
         }

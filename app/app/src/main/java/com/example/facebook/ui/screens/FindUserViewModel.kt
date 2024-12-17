@@ -25,7 +25,7 @@ class FindUserViewModel(
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(FindUserUIState())
     val uiState = _uiState.asStateFlow()
-    var searchJob : Job? = null
+    var searchJob: Job? = null
 
     private val LIMIT = 100
 

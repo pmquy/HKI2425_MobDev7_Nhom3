@@ -55,23 +55,30 @@ class CreateChatGroupViewModelTest {
     }
 
     @Test
-    fun `createChatGroup should call chatGroupRepository create with correct parameters`() = runTest {
-        val name = "Test Group"
-        val user = "user1"
-        val avatar = Pair(File("path1"), "name1")
-        val chatGroup = ChatGroup(_id = "testId", name = name)
+    fun `createChatGroup should call chatGroupRepository create with correct parameters`() =
+        runTest {
+            val name = "Test Group"
+            val user = "user1"
+            val avatar = Pair(File("path1"), "name1")
+            val chatGroup = ChatGroup(_id = "testId", name = name)
 
-        viewModel.setName(name)
-        viewModel.addMember(user)
-        viewModel.setAvatar(avatar)
+            viewModel.setName(name)
+            viewModel.addMember(user)
+            viewModel.setAvatar(avatar)
 
-        coEvery { chatGroupRepository.create(name, listOf(Member(user, "member")), avatar) } returns mockk {
-            every { isSuccessful } returns true
-            every { body() } returns chatGroup
+            coEvery {
+                chatGroupRepository.create(
+                    name,
+                    listOf(Member(user, "member")),
+                    avatar
+                )
+            } returns mockk {
+                every { isSuccessful } returns true
+                every { body() } returns chatGroup
+            }
+
+            viewModel.createChatGroup()
         }
-
-        viewModel.createChatGroup()
-    }
 
     @Test
     fun `addMember should update uiState correctly`() {

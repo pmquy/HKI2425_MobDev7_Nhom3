@@ -50,7 +50,8 @@ class CreateChatGroupViewModel(
     }
 
     fun removeMember(user: String) {
-        _uiState.value = _uiState.value.copy(users = _uiState.value.users.filter { it.user != user })
+        _uiState.value =
+            _uiState.value.copy(users = _uiState.value.users.filter { it.user != user })
     }
 
     fun checkMember(user: String): Boolean {

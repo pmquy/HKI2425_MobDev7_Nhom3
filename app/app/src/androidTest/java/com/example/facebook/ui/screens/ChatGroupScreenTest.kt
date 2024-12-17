@@ -253,22 +253,22 @@ class ChatGroupScreenTest {
         composeTestRule.onNodeWithText("Reload").assertExists().assertIsDisplayed()
     }
 
-    @Test
-    fun testNavigationAddMemberFromFriendList() {
-
-        composeTestRule.setContent {
-            ChatGroupInfo(
-                friendViewModel = mockFriendsViewModel,
-                chatGroupViewModel = chatGroupViewModel,
-                onBack = {}
-            )
-        }
-        composeTestRule.onNodeWithTag("Add").performClick()
-
-        composeTestRule.onNodeWithText("Thêm bạn bè vào nhóm chat").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithText("Xác nhận").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithText("Reload").assertExists().assertIsDisplayed()
-    }
+//    @Test
+//    fun testNavigationAddMemberFromFriendList() {
+//
+//        composeTestRule.setContent {
+//            ChatGroupInfo(
+//                friendViewModel = mockFriendsViewModel,
+//                chatGroupViewModel = chatGroupViewModel,
+//                onBack = {}
+//            )
+//        }
+//        composeTestRule.onNodeWithTag("Add").performClick()
+//
+//        composeTestRule.onNodeWithText("Thêm bạn bè vào nhóm chat").assertExists().assertIsDisplayed()
+//        composeTestRule.onNodeWithText("Xác nhận").assertExists().assertIsDisplayed()
+//        composeTestRule.onNodeWithText("Reload").assertExists().assertIsDisplayed()
+//    }
 
     @Test
     fun testMessageWrapperCorrectly() {

@@ -61,7 +61,9 @@ class FileViewModelTest {
             File(_id = "file2", url = "http://example.com/file2", type = "video")
         )
         val response = GetSystemFileResponse(hasMore = false, data = mockFiles)
-        coEvery { fileRepository.getSystemFile(any(), any(), any()) } returns Response.success(response)
+        coEvery { fileRepository.getSystemFile(any(), any(), any()) } returns Response.success(
+            response
+        )
 
         val result = viewModel.getSystemFile("image", 0, 10)
 
@@ -77,7 +79,9 @@ class FileViewModelTest {
             File(_id = "file2", url = "http://example.com/file2", type = "video")
         )
         val response = GetSystemFileResponse(hasMore = true, data = mockFiles)
-        coEvery { fileRepository.getSystemFile(any(), any(), any()) } returns Response.success(response)
+        coEvery { fileRepository.getSystemFile(any(), any(), any()) } returns Response.success(
+            response
+        )
 
         val result = viewModel.getSystemFile("image", 0, 10)
         assertEquals(2, result.size)
@@ -92,6 +96,7 @@ class FileViewModelTest {
     fun `init adds socket event listener for file_update`() {
         verify { socketRepository.addEventListener("file_update", any()) }
     }
+
     @Test
     fun `retrieve non-existing file returns null`() = runTest {
         coEvery { fileRepository.getById("invalid_id") } returns Response.success(null)

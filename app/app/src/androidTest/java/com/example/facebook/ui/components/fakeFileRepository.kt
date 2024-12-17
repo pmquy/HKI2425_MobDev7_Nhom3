@@ -21,7 +21,7 @@ class fakeFileRepository : FileRepository {
         _id = "1",
         url = "https://example.com/1",
         blurUrl = "https://example.com/1/blur",
-        type = "image",
+        type = "video",
         status = "active",
         name = "file1",
         description = "file1 description",

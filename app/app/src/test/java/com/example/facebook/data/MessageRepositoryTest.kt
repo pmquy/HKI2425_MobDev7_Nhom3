@@ -8,11 +8,9 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
-import okhttp3.ResponseBody
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -23,7 +21,6 @@ import org.junit.Test
 import retrofit2.Response
 import java.io.File
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class MessageRepositoryTest {
 
     @MockK
@@ -120,8 +117,14 @@ class MessageRepositoryTest {
                     assertEquals(files.size, it.size)
                     it.forEachIndexed { index, part ->
                         assertTrue(part is MultipartBody.Part)
-                        assertTrue(part.headers?.get("Content-Disposition")?.contains("name=\"files\"") == true)
-                        assertTrue(part.headers?.get("Content-Disposition")?.contains("filename=\"${files[index].first.name}\"") == true)
+                        assertTrue(
+                            part.headers?.get("Content-Disposition")
+                                ?.contains("name=\"files\"") == true
+                        )
+                        assertTrue(
+                            part.headers?.get("Content-Disposition")
+                                ?.contains("filename=\"${files[index].first.name}\"") == true
+                        )
                     }
                 }
             )
@@ -140,7 +143,8 @@ class MessageRepositoryTest {
             messageRepository.create(message, chatgroup, emptySystemFiles, emptyUserFiles)
         } returns Response.success(Message(_id = "1", message = message, chatgroup = chatgroup))
 
-        val response = messageRepository.create(message, chatgroup, emptySystemFiles, emptyUserFiles)
+        val response =
+            messageRepository.create(message, chatgroup, emptySystemFiles, emptyUserFiles)
 
         assertTrue(response.isSuccessful)
         assertNotNull(response.body())
@@ -169,7 +173,12 @@ class MessageRepositoryTest {
         val nonExistentId = "non_existent_id"
         val updatedMessage = Message(_id = nonExistentId, message = "Updated content")
 
-        coEvery { messageRepository.updateById(nonExistentId, updatedMessage) } returns Response.error(404, ResponseBody.create(null, "Message not found"))
+        coEvery {
+            messageRepository.updateById(
+                nonExistentId,
+                updatedMessage
+            )
+        } returns Response.error(404, "Message not found".toResponseBody(null))
 
         val response = messageRepository.updateById(nonExistentId, updatedMessage)
 
@@ -198,7 +207,10 @@ class MessageRepositoryTest {
 
         val nonExistentId = "non_existent_id"
 
-        coEvery { mockMessageApiService.deleteById(nonExistentId) } returns Response.error(404, ResponseBody.create(null, "Not Found"))
+        coEvery { mockMessageApiService.deleteById(nonExistentId) } returns Response.error(
+            404,
+            "Not Found".toResponseBody(null)
+        )
 
         val response = messageRepository.deleteById(nonExistentId)
 
@@ -246,3 +258,4 @@ class MessageRepositoryTest {
         assertEquals(message, response.body()?.message)
     }
 }
+

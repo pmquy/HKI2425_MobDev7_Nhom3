@@ -25,9 +25,9 @@ class FindMessageViewModel(
     private val chatGroupRepository: ChatGroupRepository,
     private val application: FacebookApplication
 ) : ViewModel() {
-    private val _uiState =  MutableStateFlow(FindMessageUIState())
+    private val _uiState = MutableStateFlow(FindMessageUIState())
     val uiState = _uiState.asStateFlow()
-    var searchJob : Job? = null
+    var searchJob: Job? = null
 
     private val LIMIT = 100
 
@@ -59,7 +59,7 @@ class FindMessageViewModel(
                         error = null  // Clear error if successful
                     )
                 }
-            } catch (e: Exception)  {
+            } catch (e: Exception) {
                 _uiState.update {
                     it.copy(error = e.message)  // Update UIState with the error message instead of displaying a Toast
                 }

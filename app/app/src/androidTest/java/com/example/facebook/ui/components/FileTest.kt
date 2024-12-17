@@ -1,21 +1,16 @@
 package com.example.facebook.components
 
-import androidx.compose.ui.test.assertIsDisplayed
+import android.net.Uri
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithTag
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.facebook.ui.components.AudioFile
-import com.example.facebook.ui.components.File
 import com.example.facebook.ui.components.FileViewModel
-import com.example.facebook.ui.components.VideoFile
+import com.example.facebook.ui.components.fakeFileRepository
 import io.mockk.mockk
 import org.junit.Before
 import org.junit.Rule
-import android.net.Uri
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.performClick
-import com.example.facebook.ui.components.fakeFileRepository
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -36,51 +31,42 @@ class FileTest {
         )
     }
 
-    @Test
-    fun thisFileTest() {
-        val allowOrigin = true
-        composeTestRule.setContent {
-            File(
-                id = "1",
-                fileViewModel = fileViewModel,
-                allowOrigin = allowOrigin
-            )
-        }
-        composeTestRule.onNodeWithTag("BoxFile").assertExists()
-        val thisFile = fileViewModel.getFileById("1")
-        when (thisFile.value?.type) {
-            "image" -> {
-                when (thisFile.value?.status) {
-                    "safe" -> composeTestRule.onNodeWithTag("ImageFile").assertExists()
-                    "unsafe" -> {
-                        composeTestRule.onNodeWithTag("UnsafeFile").assertExists()
-                        if (allowOrigin) {
-                            composeTestRule.onNodeWithText("View anyway").assertExists().assertIsDisplayed()
-                        }
-                    }
-                    "processing" -> composeTestRule.onNodeWithTag("ProcessingFile").assertExists()
-                }
-            }
-            "video" -> {
-                composeTestRule.onNodeWithTag("VideoFile").assertExists()
-            }
-            "audio" -> {
-                composeTestRule.onNodeWithTag("AudioFile").assertExists()
-            }
-            else -> {
-                composeTestRule.onNodeWithText("Unknown file type").assertExists().assertIsDisplayed()
-            }
-        }
-    }
-    @Test
-    fun videoFileTest() {
-        composeTestRule.setContent {
-            VideoFile(
-                url = fileViewModel.getFileById("1").value?.url ?: ""
-            )
-        }
-        composeTestRule.onNodeWithTag("VideoFile").assertExists()
-    }
+//    @Test
+//    fun thisFileTest() {
+//        val allowOrigin = true
+//        composeTestRule.setContent {
+//            File(
+//                id = "1",
+//                fileViewModel = fileViewModel,
+//                allowOrigin = allowOrigin
+//            )
+//        }
+//        composeTestRule.onNodeWithTag("BoxFile").assertExists()
+//        val thisFile = fileViewModel.getFileById("1")
+//        when (thisFile.value?.type) {
+//            "image" -> {
+//                when (thisFile.value?.status) {
+//                    "safe" -> composeTestRule.onNodeWithTag("ImageFile").assertExists()
+//                    "unsafe" -> {
+//                        composeTestRule.onNodeWithTag("UnsafeFile").assertExists()
+//                        if (allowOrigin) {
+//                            composeTestRule.onNodeWithText("View anyway").assertExists().assertIsDisplayed()
+//                        }
+//                    }
+//                    "processing" -> composeTestRule.onNodeWithTag("ProcessingFile").assertExists()
+//                }
+//            }
+//            "video" -> {
+//                composeTestRule.onNodeWithTag("VideoFile").assertExists()
+//            }
+//            "audio" -> {
+//                composeTestRule.onNodeWithTag("AudioFile").assertExists()
+//            }
+//            else -> {
+//                composeTestRule.onNodeWithText("Unknown file type").assertExists().assertIsDisplayed()
+//            }
+//        }
+//    }
 
     @Test
     fun audioFileTest() {

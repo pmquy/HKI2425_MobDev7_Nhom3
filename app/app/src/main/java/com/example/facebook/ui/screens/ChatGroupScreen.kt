@@ -37,7 +37,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
@@ -169,15 +168,6 @@ fun ChatGroupScreen(
                         }
                     },
                     actions = {
-                        IconButton(onClick = {}) {
-                            Icon(Icons.Default.Call, contentDescription = "Call")
-                        }
-                        IconButton(onClick = { navController.navigate("${FacebookScreen.VIDEO_CALL.name}/$id") }) {
-                            Icon(
-                                painterResource(R.drawable.video_call),
-                                contentDescription = "Video Call"
-                            )
-                        }
                         IconButton(onClick = { navController.navigate("${FacebookScreen.FIND_MESSAGE.name}/$id") }) {
                             Icon(Icons.Default.Search, contentDescription = "Info")
                         }

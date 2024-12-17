@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
@@ -76,20 +75,16 @@ fun HomeScreen(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Facebook")
+                        Text("Zola")
                         IconButton({navController.navigate(FacebookScreen.FRIEND_SEARCHING.name)}) {
                             Icon(Icons.Default.Search, contentDescription = "Search")
                         }
-                        Spacer(modifier = Modifier.width(40.dp))
-                        //IconButton({}) { Icon(Icons.Default.Home, contentDescription = "Home") }
+                        Spacer(modifier = Modifier.weight(1f))
                         IconButton({navController.navigate(FacebookScreen.FRIENDS.name)}) {
                             Icon(Icons.Default.Person, contentDescription = "Friends")
                         }
                         IconButton({navController.navigate("${FacebookScreen.PROFILE.name}/${state.user._id}")}) {
                             Icon(Icons.Default.Settings, contentDescription = "Settings")
-                        }
-                        IconButton({}) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
                         }
 
                     }

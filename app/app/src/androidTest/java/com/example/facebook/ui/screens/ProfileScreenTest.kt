@@ -69,7 +69,7 @@ class ProfileScreenTest {
     }
 
     @Test
-    fun profileScreenTestDisplays_FirstTest() {
+    fun friendProfileDisplaysTest() {
         composeTestRule.setContent {
             ProfileScreen(navController = navController,
                 userViewModel = userViewModel,

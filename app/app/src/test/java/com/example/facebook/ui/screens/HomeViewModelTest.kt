@@ -54,7 +54,8 @@ class HomeViewModelTest {
 
     @Test
     fun `getAll retrieves chat groups correctly`() = runTest {
-        val chatGroups = listOf(ChatGroup(_id = "1", name = "Group 1"), ChatGroup(_id = "2", name = "Group 2"))
+        val chatGroups =
+            listOf(ChatGroup(_id = "1", name = "Group 1"), ChatGroup(_id = "2", name = "Group 2"))
         val response = Response.success(GetAllChatGroupsResponse(data = chatGroups, hasMore = true))
         coEvery { chatGroupRepository.getAll(any(), any(), any()) } returns response
 
@@ -70,7 +71,8 @@ class HomeViewModelTest {
     @Test
     fun `getAll updates hasMore correctly when no more data`() = runTest {
         val chatGroups = listOf(ChatGroup(_id = "1", name = "Group 1"))
-        val response = Response.success(GetAllChatGroupsResponse(data = chatGroups, hasMore = false))
+        val response =
+            Response.success(GetAllChatGroupsResponse(data = chatGroups, hasMore = false))
         coEvery { chatGroupRepository.getAll(any(), any(), any()) } returns response
 
         viewModel.getAll()
@@ -83,7 +85,13 @@ class HomeViewModelTest {
 
     @Test
     fun `getAll handles failure correctly`() = runTest {
-        coEvery { chatGroupRepository.getAll(any(), any(), any()) } throws Exception("Failed to retrieve messages")
+        coEvery {
+            chatGroupRepository.getAll(
+                any(),
+                any(),
+                any()
+            )
+        } throws Exception("Failed to retrieve messages")
 
         try {
             viewModel.getAll()
@@ -107,7 +115,8 @@ class HomeViewModelTest {
             ChatGroup(_id = "1", name = "Group 1"),
             ChatGroup(_id = "2", name = "Group 2")
         )
-        val response = Response.success(GetAllChatGroupsResponse(data = mockChatGroups, hasMore = false))
+        val response =
+            Response.success(GetAllChatGroupsResponse(data = mockChatGroups, hasMore = false))
         coEvery { chatGroupRepository.getAll(any(), any(), any()) } returns response
 
         viewModel.getAll()
@@ -120,7 +129,13 @@ class HomeViewModelTest {
 
     @Test(expected = Exception::class)
     fun `getAll throws exception on failure`() = runTest {
-        coEvery { chatGroupRepository.getAll(any(), any(), any()) } throws Exception("Failed to retrieve chat groups")
+        coEvery {
+            chatGroupRepository.getAll(
+                any(),
+                any(),
+                any()
+            )
+        } throws Exception("Failed to retrieve chat groups")
 
         viewModel.getAll()
     }
@@ -131,7 +146,8 @@ class HomeViewModelTest {
             ChatGroup(_id = "1", name = "Group 1"),
             ChatGroup(_id = "2", name = "Group 2")
         )
-        val response = Response.success(GetAllChatGroupsResponse(data = mockChatGroups, hasMore = true))
+        val response =
+            Response.success(GetAllChatGroupsResponse(data = mockChatGroups, hasMore = true))
         coEvery { chatGroupRepository.getAll(any(), any(), any()) } returns response
 
         viewModel.getAll()
@@ -145,7 +161,8 @@ class HomeViewModelTest {
 
     @Test
     fun `handle empty chat groups response`() = runTest {
-        val response = Response.success(GetAllChatGroupsResponse(data = emptyList(), hasMore = false))
+        val response =
+            Response.success(GetAllChatGroupsResponse(data = emptyList(), hasMore = false))
         coEvery { chatGroupRepository.getAll(any(), any(), any()) } returns response
 
         viewModel.getAll()

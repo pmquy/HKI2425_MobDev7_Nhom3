@@ -112,7 +112,14 @@ class FindMessageViewModelTest {
 
     @Test
     fun `findMessages handles repository failure`() = runTest {
-        coEvery { chatGroupRepository.getMessage(any(), any(), any(), any()) } throws Exception("Failed to retrieve messages")
+        coEvery {
+            chatGroupRepository.getMessage(
+                any(),
+                any(),
+                any(),
+                any()
+            )
+        } throws Exception("Failed to retrieve messages")
 
         viewModel.setChatGroupId("group1")
         viewModel.setSearch("test")

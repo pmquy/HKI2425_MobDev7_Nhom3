@@ -76,7 +76,9 @@ class ChatGroupViewModelTest {
     fun `createMessage should handle message creation successfully`() = runTest {
         val mockMessage = Message(_id = "1", message = "Sending", user = "testUserId")
 
-        coEvery { messageRepository.create(any(), any(), any(), any()) } returns Response.success(mockMessage)
+        coEvery { messageRepository.create(any(), any(), any(), any()) } returns Response.success(
+            mockMessage
+        )
 
         viewModel.createMessage("Sending", listOf(), listOf())
         advanceUntilIdle()
@@ -91,7 +93,9 @@ class ChatGroupViewModelTest {
         val updatedName = "Updated Name"
         val updatedChatGroup = ChatGroup(_id = "testChatGroupId", name = updatedName)
 
-        coEvery { chatGroupRepository.updateById(any(), any(), any()) } returns Response.success(updatedChatGroup)
+        coEvery { chatGroupRepository.updateById(any(), any(), any()) } returns Response.success(
+            updatedChatGroup
+        )
 
         viewModel.handleUpdate(updatedName, null)
         advanceUntilIdle()
@@ -137,7 +141,9 @@ class ChatGroupViewModelTest {
         val updatedName = "New Group Name"
         val updatedChatGroup = ChatGroup(_id = "testChatGroupId", name = updatedName)
 
-        coEvery { chatGroupRepository.updateById(any(), any(), any()) } returns Response.success(updatedChatGroup)
+        coEvery { chatGroupRepository.updateById(any(), any(), any()) } returns Response.success(
+            updatedChatGroup
+        )
 
         viewModel.handleUpdate(updatedName, null)
         advanceUntilIdle()

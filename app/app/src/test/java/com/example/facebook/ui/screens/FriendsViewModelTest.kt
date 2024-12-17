@@ -69,7 +69,9 @@ class FriendsViewModelTest {
         val mockFriends = listOf(Friend(from = "user1", to = "user2", status = "accepted"))
         val getFriendResponse = GetFriendResponse(data = mockFriends, hasMore = false)
 
-        coEvery { friendRepository.getAll(0, 100, any()) } returns Response.success(getFriendResponse)
+        coEvery { friendRepository.getAll(0, 100, any()) } returns Response.success(
+            getFriendResponse
+        )
 
         viewModel.getFriends()
         testDispatcher.scheduler.runCurrent()

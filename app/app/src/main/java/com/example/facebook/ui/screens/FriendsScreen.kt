@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -165,6 +166,7 @@ fun FriendsScreen(
                 modifier = Modifier
                     .padding(20.dp)
                     .fillMaxWidth()
+                    .testTag("FriendSubScreen")
             ) {
                 FriendSubScreen.entries.forEach {
                     Card  (
@@ -233,7 +235,7 @@ fun FriendSents(
     userViewModel: UserViewModel,
     navController: NavHostController,
     filter: (User) -> Boolean = {true},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier.testTag("Sents")
 ) {
     FriendList(
         friends,
@@ -267,7 +269,7 @@ fun FriendSuggestion(
     userViewModel: UserViewModel,
     navController: NavHostController,
     filter: (User) -> Boolean = {true},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier.testTag("Suggestions")
 ) {
     FriendList(
         friends,
@@ -297,7 +299,7 @@ fun FriendRequestList(
     userViewModel: UserViewModel,
     navController: NavHostController,
     filter: (User) -> Boolean = {true},
-    modifier: Modifier = Modifier)
+    modifier: Modifier = Modifier.testTag("Requests"))
 {
     FriendList(
         friends,
@@ -338,7 +340,7 @@ fun AllFriendsList(
     userViewModel: UserViewModel,
     navController: NavHostController,
     filter: (User) -> Boolean = {true},
-    modifier: Modifier = Modifier)
+    modifier: Modifier = Modifier.testTag("AllFriends"))
 {
     FriendList(
         friends,

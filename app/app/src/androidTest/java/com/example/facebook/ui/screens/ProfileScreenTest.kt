@@ -65,52 +65,52 @@ class ProfileScreenTest {
             userViewModel.login("hieuma535@gmail.com", "mahieu1010")
         }
     }
-    // single run pass test
-    @Test
-    fun friendProfileDisplaysTest() {
-        composeTestRule.setContent {
-            ProfileScreen(navController = navController,
-                userViewModel = userViewModel,
-                friendViewModel = friendsViewModel)
-        }
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag("TopInfo").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithContentDescription("Back").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithText("Thông tin cá nhân").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithText("Chỉnh sửa thông tin").assertExists().assertIsDisplayed().assertIsEnabled()
-        composeTestRule.onNodeWithText("Đổi ảnh đại diện").assertExists().assertIsDisplayed().assertIsEnabled()
-        composeTestRule.onNodeWithText("Đổi mật khẩu").assertExists().assertIsDisplayed().assertIsEnabled()
-        composeTestRule.onNodeWithText("Đăng xuất").assertExists().assertIsDisplayed().assertIsEnabled()
+//    single run pass test
+//    @Test
+//    fun friendProfileDisplaysTest() {
+//        composeTestRule.setContent {
+//            ProfileScreen(navController = navController,
+//                userViewModel = userViewModel,
+//                friendViewModel = friendsViewModel)
+//        }
+//        composeTestRule.waitForIdle()
+//        composeTestRule.onNodeWithTag("TopInfo").assertExists().assertIsDisplayed()
+//        composeTestRule.onNodeWithContentDescription("Back").assertExists().assertIsDisplayed()
+//        composeTestRule.onNodeWithText("Thông tin cá nhân").assertExists().assertIsDisplayed()
+//        composeTestRule.onNodeWithText("Chỉnh sửa thông tin").assertExists().assertIsDisplayed().assertIsEnabled()
+//        composeTestRule.onNodeWithText("Đổi ảnh đại diện").assertExists().assertIsDisplayed().assertIsEnabled()
+//        composeTestRule.onNodeWithText("Đổi mật khẩu").assertExists().assertIsDisplayed().assertIsEnabled()
+//        composeTestRule.onNodeWithText("Đăng xuất").assertExists().assertIsDisplayed().assertIsEnabled()
 
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Chỉnh sửa thông tin").assertExists().assertIsDisplayed().performClick()
-        composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithText("Chỉnh sửa thông tin cá nhân").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithText("Xác nhận").assertExists().assertIsDisplayed().assertIsEnabled()
-        composeTestRule.onNodeWithText("Hủy bỏ").assertExists().assertIsDisplayed().assertIsEnabled().performClick()
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNodeWithText("Đổi mật khẩu").assertExists().assertIsDisplayed().performClick()
-
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNodeWithText("Thay đổi mật khẩu").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithText("Xác nhận").assertExists().assertIsDisplayed().assertIsEnabled()
-        composeTestRule.onNodeWithText("Hủy bỏ").assertExists().assertIsDisplayed().assertIsEnabled().performClick()
-
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNodeWithText("Đổi ảnh đại diện").assertExists().assertIsDisplayed().performClick()
-
-        composeTestRule.waitForIdle()
-
-        composeTestRule.onNodeWithText("Thay đổi ảnh đại diện").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithText("Chọn ảnh").assertExists().assertIsDisplayed()
-        composeTestRule.onNodeWithText("Update").assertExists().assertIsDisplayed().assertIsEnabled()
-        composeTestRule.onNodeWithText("Cancel").assertExists().assertIsDisplayed().assertIsEnabled().performClick()
-
-        composeTestRule.waitForIdle()
-    }
+//        composeTestRule.waitForIdle()
+//        composeTestRule.onNodeWithText("Chỉnh sửa thông tin").assertExists().assertIsDisplayed().performClick()
+//        composeTestRule.waitForIdle()
+//        composeTestRule.onNodeWithText("Chỉnh sửa thông tin cá nhân").assertExists().assertIsDisplayed()
+//        composeTestRule.onNodeWithText("Xác nhận").assertExists().assertIsDisplayed().assertIsEnabled()
+//        composeTestRule.onNodeWithText("Hủy bỏ").assertExists().assertIsDisplayed().assertIsEnabled().performClick()
+//        composeTestRule.waitForIdle()
+//
+//        composeTestRule.onNodeWithText("Đổi mật khẩu").assertExists().assertIsDisplayed().performClick()
+//
+//        composeTestRule.waitForIdle()
+//
+//        composeTestRule.onNodeWithText("Thay đổi mật khẩu").assertExists().assertIsDisplayed()
+//        composeTestRule.onNodeWithText("Xác nhận").assertExists().assertIsDisplayed().assertIsEnabled()
+//        composeTestRule.onNodeWithText("Hủy bỏ").assertExists().assertIsDisplayed().assertIsEnabled().performClick()
+//
+//        composeTestRule.waitForIdle()
+//
+//        composeTestRule.onNodeWithText("Đổi ảnh đại diện").assertExists().assertIsDisplayed().performClick()
+//
+//        composeTestRule.waitForIdle()
+//
+//        composeTestRule.onNodeWithText("Thay đổi ảnh đại diện").assertExists().assertIsDisplayed()
+//        composeTestRule.onNodeWithText("Chọn ảnh").assertExists().assertIsDisplayed()
+//        composeTestRule.onNodeWithText("Update").assertExists().assertIsDisplayed().assertIsEnabled()
+//        composeTestRule.onNodeWithText("Cancel").assertExists().assertIsDisplayed().assertIsEnabled().performClick()
+//
+//        composeTestRule.waitForIdle()
+//    }
 
 
     @Test

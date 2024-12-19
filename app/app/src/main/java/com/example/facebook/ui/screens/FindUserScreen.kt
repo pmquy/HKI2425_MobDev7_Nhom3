@@ -65,7 +65,7 @@ fun FindUserScreen(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    val focusRequester = remember {FocusRequester()}
+    val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val uiState = findUserViewModel.uiState.collectAsState()
 
@@ -77,7 +77,7 @@ fun FindUserScreen(
         }
     }
 
-    Scaffold (
+    Scaffold(
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
@@ -87,11 +87,11 @@ fun FindUserScreen(
                 title = {
                     TextField(
                         value = uiState.value.search,
-                        placeholder = {Text("Tìm kiếm")},
+                        placeholder = { Text("Tìm kiếm") },
                         onValueChange = findUserViewModel.setSearch,
                         singleLine = true,
                         trailingIcon = {
-                            if(uiState.value.search.isNotEmpty()) Icon(
+                            if (uiState.value.search.isNotEmpty()) Icon(
                                 Icons.Default.Clear,
                                 contentDescription = null,
                                 modifier = Modifier
@@ -113,7 +113,7 @@ fun FindUserScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {navController.navigateUp()}) {
+                    IconButton(onClick = { navController.navigateUp() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             contentDescription = "Back"
@@ -147,11 +147,11 @@ fun ResultList(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
-    LazyColumn (
+    LazyColumn(
         modifier = modifier
     ) {
-        items(users) { user->
-            Row (
+        items(users) { user ->
+            Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 modifier = Modifier

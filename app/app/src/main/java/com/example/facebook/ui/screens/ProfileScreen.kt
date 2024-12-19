@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -74,15 +75,17 @@ fun ProfileScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     var id = navController.currentBackStackEntry?.arguments?.getString("id")
-    if(id.isNullOrEmpty()) id = userViewModel.application.user._id
+    if (id.isNullOrEmpty()) id = userViewModel.application.user._id
     val user = userViewModel.getUserById(id).collectAsState().value
-    val randomImageId by remember { mutableStateOf((1..4).random())}
-    val coverPhoto = painterResource(id = when (randomImageId) {
-        1 -> R.drawable.pic1
-        2 -> R.drawable.pic2
-        3 -> R.drawable.pic3
-        else -> R.drawable.pic4
-    })
+    val randomImageId by remember { mutableStateOf((1..4).random()) }
+    val coverPhoto = painterResource(
+        id = when (randomImageId) {
+            1 -> R.drawable.pic1
+            2 -> R.drawable.pic2
+            3 -> R.drawable.pic3
+            else -> R.drawable.pic4
+        }
+    )
     val handleLogout: () -> Unit = {
         coroutineScope.launch {
             try {
@@ -97,11 +100,16 @@ fun ProfileScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("${user?.firstName} ${user?.lastName}") },
+                title = {
+                    Text(
+                        "${user?.firstName} ${user?.lastName}",
+                        modifier = Modifier.testTag("TopInfo")
+                    )
+                },
                 navigationIcon = {
-                        IconButton(onClick = { navController.navigateUp() }) {
-                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                        }
+                    IconButton(onClick = { navController.navigateUp() }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -146,8 +154,8 @@ fun ProfileScreen(
                         File(
                             user.avatar,
                             modifier = Modifier
-                                    .size(62.dp)
-                                    .clip(CircleShape),
+                                .size(62.dp)
+                                .clip(CircleShape),
                             allowOrigin = false
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -170,8 +178,9 @@ fun ProfileScreen(
                     text = "Thông tin cá nhân",
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start,
-                    modifier = Modifier.padding(start = 16.dp, top = 15.dp, bottom = 15.dp).
-                        fillMaxWidth()
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 15.dp, bottom = 15.dp)
+                        .fillMaxWidth()
                 )
                 Column(
                     modifier = Modifier
@@ -239,7 +248,8 @@ fun ProfileScreen(
                     text = "Thông tin cá nhân",
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Start,
-                    modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 15.dp)
+                    modifier = Modifier
+                        .padding(start = 16.dp, top = 8.dp, bottom = 15.dp)
                         .fillMaxWidth()
                 )
                 Column(
@@ -256,42 +266,47 @@ fun ProfileScreen(
                 var showEditPasswordDialog by remember { mutableStateOf(false) }
                 var showEditImageDialog by remember { mutableStateOf(false) }
                 Button(
-                    onClick = {showEditInfoDialog = true} ,
+                    onClick = { showEditInfoDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp).align(Alignment.CenterHorizontally)
+                        .padding(bottom = 8.dp)
+                        .align(Alignment.CenterHorizontally)
                 ) {
                     Text("Chỉnh sửa thông tin")
                 }
                 Button(
-                    onClick = {showEditImageDialog = true} ,
+                    onClick = { showEditImageDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp).align(Alignment.CenterHorizontally)
+                        .padding(bottom = 8.dp)
+                        .align(Alignment.CenterHorizontally)
                 ) {
                     Text("Đổi ảnh đại diện")
                 }
                 Button(
-                    onClick = {showEditPasswordDialog = true} ,
+                    onClick = { showEditPasswordDialog = true },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp).align(Alignment.CenterHorizontally)
+                        .padding(bottom = 8.dp)
+                        .align(Alignment.CenterHorizontally)
                 ) {
                     Text("Đổi mật khẩu")
                 }
 
-                if(showEditInfoDialog) {
+                if (showEditInfoDialog) {
                     EditInfoDialog(
                         user = user,
                         onDismiss = { showEditInfoDialog = false },
                         onUpdateInfo = { firstName, lastName, phoneNumber ->
                             userViewModel.handleUpdate(
-                                firstName = firstName, lastName = lastName, phoneNumber = phoneNumber
+                                firstName = firstName,
+                                lastName = lastName,
+                                phoneNumber = phoneNumber
                             )
                         },
                     )
                 }
-                if(showEditPasswordDialog) {
+                if (showEditPasswordDialog) {
                     EditPasswordDialog(
                         onDismiss = { showEditPasswordDialog = false },
                         onUpdatePassword = {
@@ -300,7 +315,7 @@ fun ProfileScreen(
                         }
                     )
                 }
-                if(showEditImageDialog) {
+                if (showEditImageDialog) {
                     EditImageDialog(
                         user = user,
                         onDismiss = { showEditImageDialog = false },
@@ -313,7 +328,8 @@ fun ProfileScreen(
                 Button(
                     onClick = handleLogout,
                     modifier = Modifier
-                        .padding(vertical = 8.dp).align(Alignment.CenterHorizontally),
+                        .padding(vertical = 8.dp)
+                        .align(Alignment.CenterHorizontally),
                     colors = ButtonDefaults.buttonColors(Color.Red)
                 ) {
                     Text("Đăng xuất")
@@ -322,6 +338,7 @@ fun ProfileScreen(
         }
     }
 }
+
 @Composable
 fun EditInfoDialog(
     user: User,
@@ -350,7 +367,7 @@ fun EditInfoDialog(
                 OutlinedTextField(value = phoneNumber,
                     label = { Text("Số điện thoại") },
                     placeholder = { Text("Số điện thoại") },
-                    onValueChange = {phoneNumber = it})
+                    onValueChange = { phoneNumber = it })
             }
         },
         confirmButton = {
@@ -368,6 +385,7 @@ fun EditInfoDialog(
         }
     )
 }
+
 @Composable
 fun EditPasswordDialog(
     onDismiss: () -> Unit,
@@ -417,6 +435,7 @@ fun EditPasswordDialog(
         }
     )
 }
+
 @Composable
 fun EditImageDialog(
     user: User,
@@ -464,6 +483,7 @@ fun EditImageDialog(
         }
     )
 }
+
 @Composable
 fun TextInfo(label: String, value: String) {
     Column {
@@ -485,7 +505,9 @@ fun TextInfo(label: String, value: String) {
                 modifier = Modifier.weight(3f)
             )
         }
-        HorizontalDivider(modifier = Modifier.fillMaxWidth().padding( vertical = 8.dp))
+        HorizontalDivider(modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp))
     }
 }
 
@@ -504,6 +526,7 @@ fun FriendStatusSection(
                     Text("Hủy kết bạn")
                 }
             }
+
             "send" -> {
                 Text("Bạn đã gửi lời mời kết bạn tới ${user.firstName}")
                 Spacer(modifier = Modifier.height(8.dp))
@@ -511,6 +534,7 @@ fun FriendStatusSection(
                     Text("Thu hồi lời mời")
                 }
             }
+
             "request" -> {
                 Text("${user.firstName} đã gửi cho bạn lời mời kết bạn")
                 Spacer(modifier = Modifier.height(8.dp))
@@ -523,6 +547,7 @@ fun FriendStatusSection(
                     }
                 }
             }
+
             "suggest" -> {
                 Text("Bạn với ${user.firstName} là người lạ")
                 Spacer(modifier = Modifier.height(8.dp))

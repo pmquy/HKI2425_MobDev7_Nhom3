@@ -76,14 +76,14 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Zola")
-                        IconButton({navController.navigate(FacebookScreen.FRIEND_SEARCHING.name)}) {
+                        IconButton({ navController.navigate(FacebookScreen.FRIEND_SEARCHING.name) }) {
                             Icon(Icons.Default.Search, contentDescription = "Search")
                         }
                         Spacer(modifier = Modifier.weight(1f))
-                        IconButton({navController.navigate(FacebookScreen.FRIENDS.name)}) {
+                        IconButton({ navController.navigate(FacebookScreen.FRIENDS.name) }) {
                             Icon(Icons.Default.Person, contentDescription = "Friends")
                         }
-                        IconButton({navController.navigate("${FacebookScreen.PROFILE.name}/${state.user._id}")}) {
+                        IconButton({ navController.navigate("${FacebookScreen.PROFILE.name}/${state.user._id}") }) {
                             Icon(Icons.Default.Settings, contentDescription = "Settings")
                         }
 

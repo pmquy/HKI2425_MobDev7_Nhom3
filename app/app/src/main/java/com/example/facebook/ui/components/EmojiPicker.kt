@@ -19,10 +19,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-private enum class EmojiCategory(val list: List<String>) {
+enum class EmojiCategory(val list: List<String>) {
     SMILEY(
         listOf(
             "😀",
@@ -996,7 +997,7 @@ fun EmojiPicker(
 
     var category by remember { mutableStateOf(EmojiCategory.SMILEY) }
 
-    Column(modifier = modifier) {
+    Column(modifier = modifier.testTag("EmojiPicker")) {
 
         LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             items(EmojiCategory.entries) {

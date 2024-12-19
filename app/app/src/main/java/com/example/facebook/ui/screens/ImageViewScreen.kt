@@ -74,11 +74,11 @@ fun ImageViewScreen(
     val uiState by imageViewModel.uiState.collectAsState()
     var view by remember { mutableStateOf(false) }
 
-    LaunchedEffect (Unit) {
+    LaunchedEffect(Unit) {
         imageViewModel.reset()
     }
 
-    Scaffold (
+    Scaffold(
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
@@ -86,7 +86,7 @@ fun ImageViewScreen(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    Row (
+                    Row(
                         horizontalArrangement = Arrangement.End,
                         modifier = Modifier.fillMaxWidth()
                     ) {
@@ -127,7 +127,7 @@ fun ImageViewScreen(
             )
         }
     ) { innerPadding ->
-        Box (
+        Box(
             modifier = modifier
                 .wrapContentSize()
                 .padding(innerPadding)

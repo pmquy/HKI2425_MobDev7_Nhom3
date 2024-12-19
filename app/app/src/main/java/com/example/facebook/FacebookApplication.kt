@@ -4,6 +4,7 @@ import android.app.Application
 import com.example.facebook.data.AppContainer
 import com.example.facebook.data.DefaultAppContainer
 import com.example.facebook.model.User
+import com.google.android.gms.common.GooglePlayServicesUtil.isGooglePlayServicesAvailable
 import com.google.firebase.messaging.FirebaseMessaging
 
 class FacebookApplication: Application() {
@@ -12,8 +13,10 @@ class FacebookApplication: Application() {
     override fun onCreate() {
         super.onCreate()
         container = DefaultAppContainer(applicationContext)
-        FirebaseMessaging.getInstance().token.addOnCompleteListener {
-            container.userPreferenceRepository.setToken(it.result)
+        if(isGooglePlayServicesAvailable(applicationContext) == 1) {
+            FirebaseMessaging.getInstance().token.addOnCompleteListener {
+                container.userPreferenceRepository.setToken(it.result)
+            }
         }
     }
 }

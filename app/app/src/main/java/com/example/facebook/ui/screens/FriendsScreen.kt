@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -83,7 +84,7 @@ fun FriendsScreen(
         }
     }
 
-    LaunchedEffect (isSearching) {
+    LaunchedEffect(isSearching) {
         try {
             focusRequester.requestFocus()
         } catch (e: Exception) {
@@ -91,7 +92,7 @@ fun FriendsScreen(
         }
     }
 
-    Scaffold (
+    Scaffold(
         topBar = {
             TopAppBar(
                 colors = topAppBarColors(
@@ -99,7 +100,7 @@ fun FriendsScreen(
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
                 title = {
-                    if(!isSearching) Row (
+                    if (!isSearching) Row(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text("Friends")
@@ -109,11 +110,11 @@ fun FriendsScreen(
                         }
                     } else TextField(
                         value = uiState.value.search,
-                        placeholder = {Text("Tìm kiếm")},
+                        placeholder = { Text("Tìm kiếm") },
                         onValueChange = friendsViewModel.setSearch,
                         singleLine = true,
                         trailingIcon = {
-                            if(uiState.value.search.isNotEmpty()) Icon(
+                            if (uiState.value.search.isNotEmpty()) Icon(
                                 Icons.Default.Clear,
                                 contentDescription = null,
                                 modifier = Modifier
@@ -139,8 +140,7 @@ fun FriendsScreen(
                         onClick = {
                             if (isSearching) {
                                 isSearching = false
-                            }
-                            else {
+                            } else {
                                 navController.navigateUp()
                             }
                         }
@@ -154,7 +154,7 @@ fun FriendsScreen(
             )
         }
     ) { contentPadding ->
-        Column (
+        Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
@@ -165,16 +165,19 @@ fun FriendsScreen(
                 modifier = Modifier
                     .padding(20.dp)
                     .fillMaxWidth()
+                    .testTag("FriendSubScreen")
             ) {
                 FriendSubScreen.entries.forEach {
-                    Card  (
+                    Card(
                         onClick = {
                             friendsViewModel.changeSubScreen(it)
                         },
                         content = {
-                            Text(it.tag,
+                            Text(
+                                it.tag,
                                 color = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.padding(10.dp))
+                                modifier = Modifier.padding(10.dp)
+                            )
                         },
                         modifier = Modifier
                             .background(color = MaterialTheme.colorScheme.surface)
@@ -188,8 +191,8 @@ fun FriendsScreen(
                     .startsWith(uiState.value.search.toLowerCase(Locale.ROOT))
 
                         || "${user.lastName} ${user.firstName}"
-                            .toLowerCase(Locale.ROOT)
-                            .startsWith(uiState.value.search.toLowerCase(Locale.ROOT))
+                    .toLowerCase(Locale.ROOT)
+                    .startsWith(uiState.value.search.toLowerCase(Locale.ROOT))
             }
 
             when (uiState.value.currentSubScreen) {
@@ -200,22 +203,25 @@ fun FriendsScreen(
                     navController = navController,
                     filter = filter
                 )
+
                 FriendSubScreen.REQUESTS -> FriendRequestList(
-                    friends = uiState.value.requests.map {friend -> friend.from},
+                    friends = uiState.value.requests.map { friend -> friend.from },
                     friendsViewModel = friendsViewModel,
                     userViewModel = userViewModel,
                     navController = navController,
                     filter = filter
                 )
+
                 FriendSubScreen.SENTS -> FriendSents(
-                    friends = uiState.value.sends.map {friend -> friend.to},
+                    friends = uiState.value.sends.map { friend -> friend.to },
                     friendsViewModel = friendsViewModel,
                     userViewModel = userViewModel,
                     navController = navController,
                     filter = filter
                 )
+
                 FriendSubScreen.ALL -> AllFriendsList(
-                    friends = uiState.value.friends.map {friend -> friend.from},
+                    friends = uiState.value.friends.map { friend -> friend.from },
                     friendsViewModel = friendsViewModel,
                     userViewModel = userViewModel,
                     navController = navController,
@@ -232,8 +238,8 @@ fun FriendSents(
     friendsViewModel: FriendsViewModel,
     userViewModel: UserViewModel,
     navController: NavHostController,
-    filter: (User) -> Boolean = {true},
-    modifier: Modifier = Modifier
+    filter: (User) -> Boolean = { true },
+    modifier: Modifier = Modifier.testTag("Sents")
 ) {
     FriendList(
         friends,
@@ -266,8 +272,8 @@ fun FriendSuggestion(
     friendsViewModel: FriendsViewModel,
     userViewModel: UserViewModel,
     navController: NavHostController,
-    filter: (User) -> Boolean = {true},
-    modifier: Modifier = Modifier
+    filter: (User) -> Boolean = { true },
+    modifier: Modifier = Modifier.testTag("Suggestions")
 ) {
     FriendList(
         friends,
@@ -296,14 +302,14 @@ fun FriendRequestList(
     friendsViewModel: FriendsViewModel,
     userViewModel: UserViewModel,
     navController: NavHostController,
-    filter: (User) -> Boolean = {true},
-    modifier: Modifier = Modifier)
-{
+    filter: (User) -> Boolean = { true },
+    modifier: Modifier = Modifier.testTag("Requests")
+) {
     FriendList(
         friends,
         userViewModel,
         navController,
-        { friend->
+        { friend ->
             Row {
                 Button(
                     onClick = {
@@ -321,7 +327,8 @@ fun FriendRequestList(
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer)
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 ) {
                     Text("Xoá")
                 }
@@ -337,9 +344,9 @@ fun AllFriendsList(
     friendsViewModel: FriendsViewModel,
     userViewModel: UserViewModel,
     navController: NavHostController,
-    filter: (User) -> Boolean = {true},
-    modifier: Modifier = Modifier)
-{
+    filter: (User) -> Boolean = { true },
+    modifier: Modifier = Modifier.testTag("AllFriends")
+) {
     FriendList(
         friends,
         userViewModel,
@@ -370,17 +377,18 @@ fun FriendList(
     userViewModel: UserViewModel,
     navController: NavHostController,
     friendCardButtons: @Composable RowScope.(User) -> Unit,
-    filter: (User) -> Boolean = {true},
-    modifier: Modifier = Modifier)
-{
+    filter: (User) -> Boolean = { true },
+    modifier: Modifier = Modifier
+) {
     LazyColumn() {
         items(friends) { friend ->
-            val user : User? = userViewModel.getUserById(friend).collectAsState().value
+            val user: User? = userViewModel.getUserById(friend).collectAsState().value
             if (user != null && filter(user)) {
                 FriendCard(
                     user,
                     navController,
-                    friendCardButtons)
+                    friendCardButtons
+                )
             }
         }
     }
@@ -391,9 +399,9 @@ fun FriendCard(
     user: User,
     navController: NavHostController,
     otherContent: @Composable RowScope.(user: User) -> Unit,
-    modifier: Modifier = Modifier)
-{
-    Row (
+    modifier: Modifier = Modifier
+) {
+    Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(20.dp),
         modifier = Modifier

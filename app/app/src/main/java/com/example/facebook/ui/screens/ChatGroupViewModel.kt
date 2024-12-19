@@ -175,7 +175,7 @@ class ChatGroupViewModel(
     }
 
     fun handleUpdate(
-        name : String? = null,
+        name: String? = null,
         avatar: Pair<File, String>? = null,
     ) {
         viewModelScope.launch {
@@ -209,8 +209,10 @@ class ChatGroupViewModel(
     }
 
     fun removeMember(user: String) {
-        _uiState.value = _uiState.value.copy(users = _uiState.value.users.filter { it.user != user })
+        _uiState.value =
+            _uiState.value.copy(users = _uiState.value.users.filter { it.user != user })
     }
+
     companion object {
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {

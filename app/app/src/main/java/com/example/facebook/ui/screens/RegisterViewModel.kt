@@ -41,9 +41,11 @@ class RegisterViewModel(
     val setFirstName: (String) -> Unit =
         { _uiState.value = _uiState.value.copy(firstName = it) }
     val setLastName: (String) -> Unit = { _uiState.value = _uiState.value.copy(lastName = it) }
-    val setAvatar: (Pair<File, String>) -> Unit = { _uiState.value = _uiState.value.copy(avatar = it) }
+    val setAvatar: (Pair<File, String>) -> Unit =
+        { _uiState.value = _uiState.value.copy(avatar = it) }
     val setOtp: (String) -> Unit = { _uiState.value = _uiState.value.copy(otp = it) }
-    val setPhoneNumber: (String) -> Unit = { _uiState.value = _uiState.value.copy(phoneNumber = it) }
+    val setPhoneNumber: (String) -> Unit =
+        { _uiState.value = _uiState.value.copy(phoneNumber = it) }
     val setCurrentStep: (Int) -> Unit = { _uiState.value = _uiState.value.copy(currentStep = it) }
     suspend fun otp() {
         val response = userRepository.verifyOtp(uiState.value.email, uiState.value.otp)

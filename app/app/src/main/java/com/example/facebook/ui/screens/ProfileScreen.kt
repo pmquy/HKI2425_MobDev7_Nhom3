@@ -1,5 +1,6 @@
 package com.example.facebook.ui.screens
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -34,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -62,6 +64,7 @@ import com.example.facebook.model.User
 import com.example.facebook.ui.FacebookScreen
 import com.example.facebook.ui.components.File
 import com.example.facebook.ui.components.ImagePicker
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -71,12 +74,16 @@ import java.io.File
 fun ProfileScreen(
     userViewModel: UserViewModel = viewModel(factory = UserViewModel.Factory),
     friendViewModel: FriendsViewModel = viewModel(factory = FriendsViewModel.Factory),
+    profileViewModel: ProfileViewModel = viewModel(factory = ProfileViewModel.Factory),
     navController: NavHostController,
 ) {
     val coroutineScope = rememberCoroutineScope()
     var id = navController.currentBackStackEntry?.arguments?.getString("id")
     if (id.isNullOrEmpty()) id = userViewModel.application.user._id
-    val user = userViewModel.getUserById(id).collectAsState().value
+    LaunchedEffect(id) {
+        profileViewModel.getUserById(id)
+    }
+    val user = profileViewModel.uiState.collectAsState().value.user
     val randomImageId by remember { mutableStateOf((1..4).random()) }
     val coverPhoto = painterResource(
         id = when (randomImageId) {
@@ -86,6 +93,7 @@ fun ProfileScreen(
             else -> R.drawable.pic4
         }
     )
+
     val handleLogout: () -> Unit = {
         coroutineScope.launch {
             try {
@@ -298,11 +306,15 @@ fun ProfileScreen(
                         user = user,
                         onDismiss = { showEditInfoDialog = false },
                         onUpdateInfo = { firstName, lastName, phoneNumber ->
-                            userViewModel.handleUpdate(
-                                firstName = firstName,
-                                lastName = lastName,
-                                phoneNumber = phoneNumber
-                            )
+                            coroutineScope.launch {
+                                profileViewModel.handleUpdate(
+                                    firstName = firstName,
+                                    lastName = lastName,
+                                    phoneNumber = phoneNumber
+                                )
+                                delay(500)
+                                Log.wtf("Profile Screen", user.toString())
+                            }
                         },
                     )
                 }
@@ -310,7 +322,9 @@ fun ProfileScreen(
                     EditPasswordDialog(
                         onDismiss = { showEditPasswordDialog = false },
                         onUpdatePassword = {
-                            userViewModel.handleUpdate(password = it)
+                            coroutineScope.launch {
+                                profileViewModel.handleUpdate(password = it)
+                            }
                             showEditPasswordDialog = false
                         }
                     )
@@ -320,7 +334,9 @@ fun ProfileScreen(
                         user = user,
                         onDismiss = { showEditImageDialog = false },
                         onUpdateAvatar = {
-                            userViewModel.handleUpdate(avatar = it)
+                            coroutineScope.launch {
+                                profileViewModel.handleUpdate(avatar = it)
+                            }
                             showEditImageDialog = false
                         }
                     )

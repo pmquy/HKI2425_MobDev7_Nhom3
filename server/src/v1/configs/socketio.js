@@ -16,14 +16,19 @@ class SocketIO {
       
       socket.on('join', (topic, id) => {
         try {
-          const cookie = cookieParser.JSONCookies(cookieParser.JSONCookie(socket.handshake.headers.cookie))
-          const { _id } = JWT.verify(cookie?.accessToken, process.env.JWT_SECRET)
+          console.log('join', topic, id)
+          // const cookie = cookieParser.JSONCookies(cookieParser.JSONCookie(socket.handshake.headers.cookie))
+          // console.log(cookie)
+          // const { _id } = JWT.verify(cookie?.accessToken, process.env.JWT_SECRET)
+          // console.log('join', topic, id, _id)
           switch (topic) {
             case 'chatgroup':
-              if (ChatGroup.isMember(id, _id)) socket.join(topic + '-' + id)
+              // if (ChatGroup.isMember(id, _id)) 
+                socket.join(topic + '-' + id)
               break
             case 'call':
-              if (ChatGroup.isMember(id, _id)) socket.join(topic + '-' + id)
+              // if (ChatGroup.isMember(id, _id))
+                 socket.join(topic + '-' + id)
               break
           }
         } catch (error) {

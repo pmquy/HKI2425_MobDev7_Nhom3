@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.example.facebook.model.User
 import com.example.facebook.network.ChatgroupApiService
 import com.example.facebook.network.FileApiService
+import com.example.facebook.network.FriendsApiService
 import com.example.facebook.network.MessageApiService
 import com.example.facebook.network.UserApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -26,7 +27,10 @@ interface AppContainer {
     val fileRepository: FileRepository
     val chatGroupRepository: ChatGroupRepository
     val messageRepository: MessageRepository
+    val friendRepository: FriendRepository
+    val userPreferenceRepository: UserPreferenceRepository
     val user: User?
+    val appCookieJar: AppCookieJar
 }
 
 class AppCookieJar(context: Context) : CookieJar {
@@ -56,21 +60,22 @@ class AppCookieJar(context: Context) : CookieJar {
         editor.apply()
     }
 
-    private fun loadCookies() {
+    fun loadCookies() {
         for ((key, value) in sharedPreferences.all) {
             val cookieStrings = (value as String).split(";")
             val cookies = cookieStrings.mapNotNull { Cookie.parse("http://$key".toHttpUrl(), it) }
             cookieStore[key] = cookies
         }
     }
+
 }
 
 class DefaultAppContainer(context: Context) : AppContainer {
-    private val baseUrl = "http://192.168.44.102:3000/"
-    private val cookieJar = AppCookieJar(context)
+    private val baseUrl = "https://hki2425-mobdev7-nhom3.onrender.com/"
+    override val appCookieJar = AppCookieJar(context)
 
     private val okHttpClient = OkHttpClient.Builder()
-        .cookieJar(cookieJar)
+        .cookieJar(appCookieJar)
         .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
         .writeTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
         .build()
@@ -84,7 +89,7 @@ class DefaultAppContainer(context: Context) : AppContainer {
         .build()
 
     override val socketRepository: SocketRepository by lazy {
-        val cookies = cookieJar.loadForRequest(baseUrl.toHttpUrl())
+        val cookies = appCookieJar.loadForRequest(baseUrl.toHttpUrl())
         val cookieMap = cookies.associate { it.name to it.value }
         val cookieJson = Json.encodeToString(cookieMap)
         val options = IO.Options()
@@ -108,6 +113,14 @@ class DefaultAppContainer(context: Context) : AppContainer {
 
     override val fileRepository: FileRepository by lazy {
         NetworkFileRepository(retrofit.create(FileApiService::class.java))
+    }
+
+    override val friendRepository: FriendRepository by lazy {
+        NetworkFriendRepository(retrofit.create(FriendsApiService::class.java))
+    }
+
+    override val userPreferenceRepository: UserPreferenceRepository by lazy {
+        UserPreferenceRepository(context.getSharedPreferences("UserPrefs", Context.MODE_PRIVATE))
     }
 
     override val user = null

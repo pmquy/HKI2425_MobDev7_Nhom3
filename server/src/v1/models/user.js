@@ -16,6 +16,8 @@ const User = new mongoose.Schema({
   password: String,
 }, { timestamps: true, versionKey: false })
 
+User.index({ firstName: "text", lastName: "text" })
+
 User.post('findOneAndDelete', async function (doc) {
   File.findByIdAndDelete(doc.avatar).then(() => { })
 })

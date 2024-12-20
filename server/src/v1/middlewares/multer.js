@@ -23,9 +23,8 @@ const IMAGE_PROCESSING = 'IMAGE_PROCESSING';
           Authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNjBlMjg4OGUtZmQ2NS00ZGU3LWFkNGUtMzRlYWVkZDkyOGRmIiwidHlwZSI6ImFwaV90b2tlbiJ9.l0nFCh_L0YSELnE5KjTAcy8dPu1HQX0xsIrXWTBZ6c0"
         }
       }).then(res => res.json())
-
       const isSafe = !res.content.results.image__explicit_content.results.some(e => e.items?.length)
-      SocketIO.io.emit("file_update", _id, { status: isSafe ? "safe" : "unsafe" })
+      console.log(SocketIO.io.emit("file_update", _id, { status: isSafe ? "safe" : "unsafe" }))
       await File.findByIdAndUpdate(_id, { status: isSafe ? "safe" : "unsafe" })
       RabbitMQ.channel.ack(message)
     } catch (error) {
@@ -45,20 +44,25 @@ const IMAGE_PROCESSING = 'IMAGE_PROCESSING';
         body: fs.readFileSync(path)
       }).then(res => res.json());
 
-      console.log(res1.results.channels[0].alternatives[0].transcript)
+      let description = res1.results.channels[0].alternatives[0].transcript
+      
 
-      const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBQm4dj0r3MaXTbhzHoZ6jLQVvbE448Pzc', {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        method: 'POST',
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `Tóm tắt đoạn văn ${res1.results.channels[0].alternatives[0].transcript} bằng một câu ngắn bằng ngôn ngữ gốc (Giữ nguyên nếu văn bản dưới 20 từ)` }] }]
+      if(description.length > 30) {
+        description = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyBQm4dj0r3MaXTbhzHoZ6jLQVvbE448Pzc', {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: `Tóm tắt đoạn văn ${description} ngắn nhất có thể bằng ngôn ngữ gốc` }] }]
+          })
         })
-      })
-        .then(res => res.json())
-      SocketIO.io.emit("file_update", _id, { description: res.candidates[0].content.parts[0].text })
-      await File.findByIdAndUpdate(_id, { description: res.candidates[0].content.parts[0].text })
+          .then(res => res.json())
+          .then(res => res.candidates[0].content.parts[0].text)
+      }
+
+      SocketIO.io.emit("file_update", _id, { description })
+      await File.findByIdAndUpdate(_id, { description })
       fs.unlinkSync(path, () => { })
       RabbitMQ.channel.ack(message)
     } catch (error) {
@@ -120,33 +124,21 @@ const upload = multer({
       },
       filename: (req, file, cb) => {
         file.mimetype = file.mimetype.split('/')[0]
-        cb(null, Date.now() + file.originalname)
+        cb(null, file.originalname)
       }
     }),
   limits: 10 * 1024,
 })
 
-/** 
- * Create a file in the database with the given file
- * 
- * @param {*} f 
- * @returns id of the file
- */
 async function getFile(f) {
   const file = await File.create({
     type: f.mimetype,
     name: f.originalname,
   })
-  console.log(f)
   RabbitMQ.channel.sendToQueue(FILE_CREATING, Buffer.from(JSON.stringify({ _id: file._id, path: `./uploads/${f.filename}`, mimetype: f.mimetype })))
   return file._id.toString()
 }
 
-/**
- * 
- * @param {String} fieldName - name of the field in the form
- * @returns array of middleware that will handle single file upload
- */
 const single = (fieldName) => {
   return [
     upload.single(fieldName),
@@ -161,12 +153,6 @@ const single = (fieldName) => {
   ]
 }
 
-/**
- * 
- * @param {String} fieldName - name of the field in the form
- * @param {Number} maxCount - maximum number of files to be uploaded
- * @returns array of middleware that will handle multiple file upload
- */
 const array = (fieldName, maxCount) => {
   return [
     upload.array(fieldName, maxCount),

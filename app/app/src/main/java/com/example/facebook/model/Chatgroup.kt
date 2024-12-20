@@ -10,6 +10,14 @@ data class Member(
     val updatedAt: String = "",
 )
 
+
+@Serializable
+data class LastMessage(
+    val name: String = "",
+    val content: String = "",
+    val createdAt: String = "",
+)
+
 @Serializable
 data class ChatGroup(
     val _id: String = "",
@@ -18,6 +26,7 @@ data class ChatGroup(
     val users: List<Member> = listOf(),
     val createdAt: String = "",
     val updatedAt: String = "",
+    val lastMessage: LastMessage? = null,
 )
 
 @Serializable

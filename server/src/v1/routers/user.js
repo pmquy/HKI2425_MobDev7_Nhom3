@@ -4,12 +4,13 @@ const { single } = require('../middlewares/multer');
 const auth = require('../middlewares/auth');
 
 router.post('/login', controller.login);
+router.post('/otp', controller.otp);
 router.post('/logout', auth({ required: true }), controller.logout);
 router.get('/auth', auth({ required: true }), controller.auth);
-router.get('/:id', controller.getById);
+router.get('/:id', auth({ required: true }), controller.getById);
 router.get('/', auth({ required: true }), controller.getAll);
 router.post('/', ...single('avatar'), controller.create);
-router.put('/', auth({ required: true }), controller.update);
+router.put('/', auth({ required: true }), ...single('avatar'), controller.update);
 router.delete('/', auth({ required: true }), controller.delete);
 
 
@@ -83,7 +84,7 @@ Response:
 URL: /
 Method: GET
 Query:
-  - page: number, mặc định là 0
+  - offset: number, mặc định là 0
   - limit: number, mặc định là 10
   - q: string, mặc định là '{}'
 Response:

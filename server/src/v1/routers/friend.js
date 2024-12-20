@@ -6,6 +6,7 @@ router.post('/accept', controller.accept);
 router.post('/revoke', controller.revoke);
 router.post('/decline', controller.decline);
 router.post('/disfriend', controller.disfriend);
+router.get('/suggestions', controller.getSuggestions);
 router.get('/', controller.getAll);
 
 /*
@@ -63,7 +64,17 @@ Response:
   - 200: Object { message: string }
   - 500: Object { message: string }
 
-
+6. Lấy danh sách gợi ý kết bạn
+URL: /suggestions
+Method: GET
+Content-Type: application/json
+Body:
+- offset: number, mặc định là 0
+- limit: number, mặc định là 10
+- q: string, mặc định là '{}'
+Response:
+  -200 : [String] // List of user id
+  -500: Object { message: string }
 */
 
 module.exports = router;

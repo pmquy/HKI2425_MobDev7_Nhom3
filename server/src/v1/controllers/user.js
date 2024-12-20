@@ -3,6 +3,8 @@ const BCRYPT = require('bcrypt')
 const JWT = require('jsonwebtoken')
 const Redis = require('../configs/redis')
 const Mailer = require('../configs/mailer')
+const File = require('../models/file')
+const Friend = require('../models/friend')
 
 const TOKEN_SECRET = process.env.JWT_SECRET
 const TOKEN_EXPIRY = '30d'
@@ -19,6 +21,7 @@ class Controller {
     this.logout = this.logout.bind(this)
     this.getById = this.getById.bind(this)
     this.getAll = this.getAll.bind(this)
+    this.otp = this.otp.bind(this)
   }
 
   #createSchema = JOI.object({
@@ -26,7 +29,7 @@ class Controller {
     lastName: JOI.string().required(),
     phoneNumber: JOI.string().required(),
     email: JOI.string().email().required(),
-    avatar: JOI.string().default("6724e8b3290173e98590e225"),
+    avatar: JOI.string().default("67400340428abd4234ad1160"),
     password: JOI.string().min(5).max(12).required()
   }).unknown(false).required().custom((value, helpers) =>
     BCRYPT.hash(value.password, 10)
@@ -43,23 +46,24 @@ class Controller {
   async create(req, res, next) {
     try {
       const value = await this.#createSchema.validateAsync(req.body)
-      if(await this.model.findOne({ email: value.email })) throw new Error('Email already exists')
+      if (await this.model.findOne({ email: value.email })) throw new Error('Email already exists')
       const otp = Math.round(Math.random() * 100000)
-      await Redis.client.set(`register-${value.email}`, JSON.stringify({ otp, user: value }), { EX: 60 * 5 },)
-      await Mailer.sendMail({
+      res.json({ message: 'OTP sent to your email' })
+      Redis.client.set(`register-${value.email}`, JSON.stringify({ otp, user: value }), { EX: 60 * 5 },)
+      Mailer.sendMail({
         to: value.email,
         subject: 'OTP for registration',
-        text: `Your OTP is ${otp}`
+        text: `Your OTP is ${otp}. The OTP will expire in 5 minutes`
       })
-      res.json({message: 'OTP sent to your email'})
     } catch (error) {
+      req.body.avatar && File.findByIdAndDelete(req.body.avatar).then(() => { }).catch(console.error)
       next(error)
     }
   }
 
   #otpSchema = JOI.object({
     email: JOI.string().email().required(),
-    otp: JOI.number().required()
+    otp: JOI.string().required()
   }).unknown(false).required()
 
   async otp(req, res, next) {
@@ -78,7 +82,7 @@ class Controller {
 
   #loginSchema = JOI.object({
     email: JOI.string().email().required(),
-    password: JOI.string().min(5).max(12).required()
+    password: JOI.string().required()
   }).unknown(false).required()
 
   async login(req, res, next) {
@@ -107,12 +111,15 @@ class Controller {
     password: JOI.string().min(5).max(12),
     avatar: JOI.string(),
     phoneNumber: JOI.string()
-  }).unknown(false).required().custom((value, helpers) =>
-    BCRYPT.hash(value.password, 10)
-      .then(hashed => {
-        value.password = hashed
-        return value
-      })
+  }).unknown(false).required().custom((value, helpers) => {
+    if (value.password)
+      return BCRYPT.hash(value.password, 10)
+        .then(hashed => {
+          value.password = hashed
+          return value
+        })
+    else return value
+  }
   )
 
   async update(req, res, next) {
@@ -165,7 +172,16 @@ class Controller {
     try {
       const user = await this.model.findById(req.params.id).select('-password -_system')
       if (!user) throw new Error('User not found')
-      res.json(user)
+      let friendStatus = 'suggest'
+      const from = await Friend.findOne({ from: req.user._id, to: req.params.id })
+      const to = await Friend.findOne({ from: req.params.id, to: req.user._id })
+      if (from?.status === 'accepted' || to?.status === 'accepted') friendStatus = 'friend'
+      else if (from?.status === 'pending') friendStatus = 'send'
+      else if (to?.status === 'pending') friendStatus = 'request'
+      res.json({
+        ...user.toObject(),
+        friendStatus
+      })
     } catch (error) {
       next(error)
     }
@@ -173,21 +189,23 @@ class Controller {
 
   #getAllSchema = JOI.object({
     limit: JOI.number().default(10),
-    page: JOI.number().default(0),
+    offset: JOI.number().default(0),
     q: JOI.string().default('{}')
   }).unknown(false).required()
 
   async getAll(req, res, next) {
     try {
-      const value = await this.#getAllSchema.validateAsync(req.query)
-      const limit = value.limit
-      const page = value.page
-      const query = JSON.parse(value.q)
+      const { limit, offset, q } = await this.#getAllSchema.validateAsync(req.query)
+      const query = JSON.parse(q)
+      if (query.name) {
+        query.$text = { $search: query.name }
+        delete query.name
+      }
       const count = await this.model.countDocuments(query)
-      const users = await this.model.find(query).select('-password -_system').limit(limit).skip(page * limit)
+      const users = await this.model.find(query).select('-password -_system').limit(limit).skip(offset)
       res.json({
         data: users,
-        hasMore: count > (page + 1) * limit
+        hasMore: count > offset + limit
       })
     } catch (error) {
       next(error)

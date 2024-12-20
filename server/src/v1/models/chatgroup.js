@@ -8,6 +8,9 @@ const ChatGroup = new mongoose.Schema({
     role: { type: String, default: 'member', enum: ['member', 'admin'] }
   }, { _id: false, timestamps: true })],
   avatar: String,
+  _system: {
+    lastMessageTimeStamp: { type: Date, default: Date.now, index: true }
+  }
 }, { timestamps: true, versionKey: false })
 
 
@@ -41,7 +44,7 @@ ChatGroup.statics = {
 }
 
 ChatGroup.post("deleteOne", { document: true, query: false }, async function (doc) {
-  Message.find({ chatgroup: doc._id }).then(messages => Promise.all(messages.map(e => e.deleteOne())))
+  Message.find({ chatgroup: doc._id }).then(messages => Promise.all(messages.map(e => e.deleteOne()))).catch(console.error)
 })
 
 

@@ -3,6 +3,7 @@ const ChatGroup = require('../models/chatgroup')
 const SocketIO = require('../configs/socketio')
 const Firebase = require('../configs/firebase')
 const RabbitMQ = require('../configs/rabbitmq')
+const Redis = require('../configs/redis')
 const Joi = require('joi')
 const File = require('../models/file')
 
@@ -20,7 +21,7 @@ class Controller {
 
 
   #createSchema = JOI.object({
-    message: JOI.string().default('').when('files', { is: Joi.array().min(1), otherwise: Joi.required() }),
+    message: JOI.when('files', { is: JOI.array().min(1), then: JOI.string().allow(''), otherwise: JOI.string() }).required(),
     chatgroup: JOI.string().required(),
     files: JOI.array().items(JOI.string()).default([]),
   }).unknown(false).required()
@@ -33,16 +34,23 @@ class Controller {
       try {
         const { message, sender, users } = JSON.parse(msg.content.toString())
         const file = message.files[0] && await File.findById(message.files[0])
-        if (file?.type === 'audio' && !file.description) throw new Error("Processing the file")
-        Firebase.sendEachForMulticast({
-          title: sender.firstName + ' ' + sender.lastName,
-          body: file?.type === 'image' ? 'Đã gửi một hình ảnh' : file?.type === 'audio' ? file.description : file?.type === 'video' ? 'Đã gửi một video' : file ? 'Đã gửi một tệp tin' : message.message,
-          imageUrl: file?.type === 'image' ? file.url : undefined
-        }, users.map(u => u.user)).catch(e => console.error(e))
+        if (file?.type === 'audio' && file.description == undefined) throw new Error("Processing the file")
+
         RabbitMQ.channel.ack(msg)
+        Firebase.sendEachForMulticast(
+          users,
+          {
+            type: "new_message",
+            chatgroup: message.chatgroup,
+            title: sender.firstName + ' ' + sender.lastName,
+            body: file?.type === 'image' ? 'Đã gửi một hình ảnh' : file?.type === 'audio' ? file.description : file?.type === 'video' ? 'Đã gửi một video' : file ? 'Đã gửi một tệp tin' : message.message,
+          }
+        )
+          .catch(console.error)
+
       } catch (error) {
         console.error(error)
-        setTimeout(() => RabbitMQ.channel.nack(msg), 2000)
+        setTimeout(() => RabbitMQ.channel.nack(msg), 1000)
       }
     })
   }
@@ -55,8 +63,14 @@ class Controller {
       if (!chatgroup.hasMember(req.user._id)) throw new Error('You are not a member of this group')
       const result = await this.model.create({ ...value, user: req.user._id })
       res.json(result)
-      SocketIO.io.to(`chatgroup-${result.chatgroup}`).emit('new_message', result)
-      RabbitMQ.channel.sendToQueue(this.#MESSAGE_NOTIFICATION, Buffer.from(JSON.stringify({ message: result, sender: req.user, users: chatgroup.users })))
+      Redis.client.json.set(`last-message-${chatgroup._id}`, '.', {
+        name: req.user.lastName,
+        content: value.message ? value.message : 'Đã gửi một tệp tin',
+        createdAt: result.createdAt
+      })
+      chatgroup.updateOne({ _system: { lastMessageTimeStamp: result.createdAt } }).then(() => { }).catch(console.error)
+      console.log(SocketIO.io.to(`chatgroup-${result.chatgroup}`).emit('new_message', result))
+      RabbitMQ.channel.sendToQueue(this.#MESSAGE_NOTIFICATION, Buffer.from(JSON.stringify({ message: result, sender: req.user, users: chatgroup.users.filter(e => e.user != req.user._id).map(e => e.user) })))
     } catch (error) {
       next(error)
     }
@@ -95,20 +109,20 @@ class Controller {
   }
 
   #getAllSchema = JOI.object({
-    page: JOI.number().default(0),
+    offset: JOI.number().default(0),
     limit: JOI.number().default(10),
     q: JOI.string().default('{}')
   }).unknown(false).required()
 
   async getAll(req, res, next) {
     try {
-      const { page, limit, q } = await this.#getAllSchema.validateAsync(req.query)
+      const { offset, limit, q } = await this.#getAllSchema.validateAsync(req.query)
       const query = { ...JSON.parse(q), user: req.user._id }
       const count = await this.model.countDocuments(query)
-      const messages = await this.model.find(query).skip(page * limit).limit(limit)
+      const messages = await this.model.find(query).skip(offset).limit(limit)
       res.json({
         data: messages,
-        hasMore: count > (page + 1) * limit
+        hasMore: count > offset + limit
       })
     } catch (error) {
       next(error)

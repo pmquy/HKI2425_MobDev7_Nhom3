@@ -1,6 +1,7 @@
 const JOI = require('joi')
 const Message = require('../models/message')
 const Joi = require('joi')
+const Redis = require('../configs/redis')
 
 class Controller {
 
@@ -21,7 +22,7 @@ class Controller {
 
   async getById(req, res, next) {
     try {
-      const group = await this.model.findById(req.params.id)
+      const group = await this.model.findById(req.params.id).select('-_system')
       if (!group) throw new Error('Group not found')
       if (!group.hasMember(req.user._id)) throw new Error('Unauthorized')
       res.json(group)
@@ -37,7 +38,7 @@ class Controller {
       user: JOI.string().required(),
       role: JOI.string().valid('member', 'admin').default('member')
     })).required().min(1),
-    avatar: JOI.string().default("6724e8b3290173e98590e225")
+    avatar: JOI.string().default("67400340428abd4234ad1160")
   }).unknown(false).required()
 
 
@@ -47,6 +48,11 @@ class Controller {
       value.users.push({ user: req.user._id, role: 'admin' })
       const group = await this.model.create(value)
       res.json(group)
+      Redis.client.json.set(`last-message-${group._id}`, '.', {
+        name: req.user.lastName,
+        content: 'Đã tạo nhóm',
+        createdAt: group.createdAt
+      })
     } catch (error) {
       next(error)
     }
@@ -72,20 +78,21 @@ class Controller {
   }
 
   #getAllSchema = JOI.object({
-    page: JOI.number().default(0),
+    offset: JOI.number().default(0),
     limit: JOI.number().default(10),
     q: JOI.string().default('{}')
   }).unknown(false).required()
 
   async getAll(req, res, next) {
     try {
-      const { page, limit, q } = await this.#getAllSchema.validateAsync(req.query)
+      const { offset, limit, q } = await this.#getAllSchema.validateAsync(req.query)
       const query = { ...JSON.parse(q), users: { $elemMatch: { user: req.user._id } } }
       const count = await this.model.countDocuments(query)
-      const groups = await this.model.find(query).skip(page * limit).limit(limit).select('-users')
+      const groups = await this.model.find(query).skip(offset).limit(limit).sort({ "_system.lastMessageTimeStamp": -1 }).select('-users -_system')
+      const data = await Promise.all(groups.map(e => Redis.client.json.get(`last-message-${e._id}`).then(lastMessage => ({ ...e.toObject(), lastMessage }))))
       res.json({
-        data: groups,
-        hasMore: count > (page + 1) * limit
+        data,
+        hasMore: count > offset + limit
       })
     } catch (error) {
       next(error)
@@ -166,21 +173,25 @@ class Controller {
   }
 
   #getMessagesSchema = JOI.object({
-    page: JOI.number().default(0),
+    offset: JOI.number().default(0),
     limit: JOI.number().default(10),
     q: JOI.string().default('{}')
   }).unknown(false).required()
 
   async getMessage(req, res, next) {
     try {
-      const { page, limit, q } = await this.#getMessagesSchema.validateAsync(req.query)
+      const { offset, limit, q } = await this.#getMessagesSchema.validateAsync(req.query)
       if (!await this.model.isMember(req.params.id, req.user._id)) throw new Error('You are not a member of this group')
       const query = { ...JSON.parse(q), chatgroup: req.params.id }
+      if (query.message) {
+        query.$text = { $search: query.message }
+        delete query.message
+      }
       const count = await Message.countDocuments(query)
-      const messages = (await Message.find(query).skip(page * limit).limit(limit).sort({ createdAt: -1 })).reverse()
+      const messages = (await Message.find(query).skip(offset).limit(limit).sort({ createdAt: -1 })).reverse()
       res.json({
         data: messages,
-        hasMore: count > (page + 1) * limit
+        hasMore: count > offset + limit
       })
     } catch (error) {
       next(error)

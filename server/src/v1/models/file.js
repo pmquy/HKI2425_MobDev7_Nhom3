@@ -14,7 +14,8 @@ const File = new mongoose.Schema({
   description: String,
   _system: {
     need_to_delete: Boolean,
-    cloudinary_public_id: String
+    cloudinary_public_id: String,
+    resource_type: String,
   }
 }, { timestamps: true, versionKey: false })
 
@@ -22,8 +23,8 @@ File.statics = {
   async findByIdAndDelete (id) {
     const file = await this.findById(id)
     if (file._system.need_to_delete) {
-      v2.uploader.destroy(file._system.cloudinary_public_id)
-      return file.deleteOne()
+      v2.uploader.destroy(file._system.cloudinary_public_id).catch(console.error)
+      return file.deleteOne().catch(console.error)
     }
   },
 }

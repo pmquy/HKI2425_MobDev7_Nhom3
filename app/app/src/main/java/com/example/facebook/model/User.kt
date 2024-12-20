@@ -13,6 +13,7 @@ data class User(
     val avatar: String = "",
     val createdAt: String = "",
     val updatedAt: String = "",
+    val friendStatus: String = "",
 )
 
 @Serializable
@@ -22,10 +23,13 @@ data class LoginRequest(
 )
 
 @Serializable
-data class RegisterRequest(
-    val phoneNumber: String = "",
-    val email: String = "",
-    val password: String = "",
-    val firstName: String = "",
-    val lastName: String = "",
+data class OtpRequest(
+    val email: String ="",
+    val otp: String= ""
+)
+
+@Serializable
+data class GetUsersResponse(
+    val data: List<User>,
+    val hasMore: Boolean,
 )

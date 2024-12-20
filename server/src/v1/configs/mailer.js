@@ -7,10 +7,10 @@ class Mailer {
     this.#transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "lokikurri@gmail.com",
-        pass: "kzss layx dttj idoo"
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
       },
-      from: "lokikurri@gmail.com"
+      from: process.env.EMAIL_USER
     })
   }
 

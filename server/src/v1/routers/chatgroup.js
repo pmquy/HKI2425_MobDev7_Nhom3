@@ -44,7 +44,7 @@ Response:
 URL: /
 Method: GET
 Query:
-- page: number, mặc định là 0
+- offset: number, mặc định là 0
 - limit: number, mặc định là 10
 - q: string, mặc định là '{}'
 Response:
@@ -170,7 +170,7 @@ Response:
 URL: /:id/message
 Method: GET
 Query:
-- page: number, mặc định là 0
+- offset: number, mặc định là 0
 - limit: number, mặc định là 10
 - q: string, mặc định là '{}'
 Response:

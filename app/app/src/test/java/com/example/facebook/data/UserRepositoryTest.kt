@@ -16,9 +16,11 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
+import okhttp3.ResponseBody
 
 @ExperimentalCoroutinesApi
 class UserRepositoryTest {
@@ -333,6 +335,58 @@ class UserRepositoryTest {
                     it is MultipartBody.Part && it.body.contentType()?.toString() == avatarMimeType
                 }
             )
+        }
+    }
+
+    // ---------------------------------------------------------
+    // Error path tests (merged from UserRepositoryErrorTest)
+    // ---------------------------------------------------------
+    @Test
+    fun `login returns error on 401`() = runTest {
+        val api = mockk<UserApiService>()
+        val repo = NetworkUserRepository(api)
+        coEvery { api.login(any()) } returns Response.error(401, ResponseBody.create(null, "unauthorized"))
+        val result = repo.login("email@example.com", "wrongpass", token = null, socketId = null)
+        assertFalse(result.isSuccessful)
+        assertEquals(401, result.code())
+    }
+
+    @Test
+    fun `getById handles network exception`() = runTest {
+        val api = mockk<UserApiService>()
+        val repo = NetworkUserRepository(api)
+        coEvery { api.getById(any()) } throws RuntimeException("timeout")
+        // Current behavior: exception bubbles up (test passes by returning early). Preferred: map to domain-specific error.
+        val result = try {
+            repo.getById("uid-123")
+        } catch (e: Exception) {
+            assertEquals("timeout", e.message)
+            return@runTest
+        }
+        assertFalse(result.isSuccessful)
+    }
+
+    // ---------------------------------------------------------
+    // Validation (failing) tests (merged from UserRepositoryValidationTest)
+    // These are intentionally failing (TODO fix) until input validation added.
+    // ---------------------------------------------------------
+    @Test
+    fun `login should validate empty email (TODO fix)`() = runTest {
+        val api = mockk<UserApiService>()
+        coEvery { api.login(any()) } returns Response.success(User())
+        val repo = NetworkUserRepository(api)
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.runBlocking { repo.login("", "password", token = null, socketId = null) }
+        }
+    }
+
+    @Test
+    fun `login should validate empty password (TODO fix)`() = runTest {
+        val api = mockk<UserApiService>()
+        coEvery { api.login(any()) } returns Response.success(User())
+        val repo = NetworkUserRepository(api)
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.runBlocking { repo.login("email@example.com", "", token = null, socketId = null) }
         }
     }
 }

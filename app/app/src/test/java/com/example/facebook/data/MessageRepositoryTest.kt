@@ -16,9 +16,11 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertThrows
 import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
+import okhttp3.ResponseBody
 import java.io.File
 
 class MessageRepositoryTest {
@@ -256,6 +258,52 @@ class MessageRepositoryTest {
         assertTrue(response.isSuccessful)
         assertNotNull(response.body())
         assertEquals(message, response.body()?.message)
+    }
+
+    // ---------------------------------------------------------
+    // Error path tests (merged from MessageRepositoryErrorTest)
+    // ---------------------------------------------------------
+    @Test
+    fun `sendMessage fails on 500`() = runTest {
+        coEvery { messageApiService.create(any(), any(), any(), any()) } returns Response.error(500, ResponseBody.create(null, "server error"))
+        val result = messageRepository.create("hi", "cg1", emptyList(), emptyList())
+        assertFalse(result.isSuccessful)
+    }
+
+    @Test
+    fun `getByChatGroup returns failure on malformed response`() = runTest {
+        coEvery { messageApiService.getAll() } throws IllegalStateException("bad json")
+        var threw = false
+        try { messageRepository.getAll() } catch (e: Exception) { threw = true }
+        assertTrue(threw)
+    }
+
+    // ---------------------------------------------------------
+    // Validation (failing) tests (merged from Validation & Update)
+    // These are intentionally failing (TODO fix) to reflect missing input validation.
+    // ---------------------------------------------------------
+    @Test
+    fun `create should reject empty content and files (TODO fix)`() = runTest {
+        coEvery { messageApiService.create(any(), any(), any(), any()) } returns Response.success(
+            Message(_id = "m1", chatgroup = "cg1", message = "", createdAt = "", updatedAt = "", user = "u1")
+        )
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.runBlocking {
+                messageRepository.create("", "cg1", emptyList(), emptyList())
+            }
+        }
+    }
+
+    @Test
+    fun `updateById should reject empty message body (TODO fix)`() = runTest {
+        coEvery { messageApiService.updateById(any(), any()) } returns Response.success(
+            Message(_id = "m1", chatgroup = "cg1", message = "", createdAt = "", updatedAt = "", user = "u1")
+        )
+        assertThrows(IllegalArgumentException::class.java) {
+            kotlinx.coroutines.runBlocking {
+                messageRepository.updateById("m1", Message(_id = "m1", chatgroup = "cg1", message = ""))
+            }
+        }
     }
 }
 

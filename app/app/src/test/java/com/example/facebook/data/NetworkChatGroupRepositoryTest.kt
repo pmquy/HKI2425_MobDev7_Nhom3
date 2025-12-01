@@ -12,10 +12,12 @@ import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody.Companion.toResponseBody
+import okhttp3.ResponseBody
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertThrows
@@ -262,5 +264,37 @@ class NetworkChatGroupRepositoryTest {
 
         assertTrue(result.isSuccessful)
         assertEquals(expectedMembers, result.body())
+    }
+
+    // ---------------------------------------------------------
+    // Error path & validation (merged from NetworkChatGroupRepositoryErrorTest)
+    // ---------------------------------------------------------
+    @Test
+    fun `updateById throws on error response`() = runTest {
+        val api = mockk<ChatgroupApiService>()
+        val repo = NetworkChatGroupRepository(api)
+        val errorResponse = Response.error<com.example.facebook.model.ChatGroup>(
+            400,
+            ResponseBody.create("application/json".toMediaTypeOrNull(), "bad request")
+        )
+        coEvery { api.updateById(any(), any(), any()) } returns errorResponse
+        var threw = false
+        try { repo.updateById("cg1", "new name", null) } catch (e: Exception) { threw = true }
+        assertTrue(threw)
+    }
+
+    @Test
+    fun `updateById should throw domain-specific exception (TODO fix)`() = runTest {
+        val api = mockk<ChatgroupApiService>()
+        val repo = NetworkChatGroupRepository(api)
+        val serverError = Response.error<com.example.facebook.model.ChatGroup>(
+            500,
+            ResponseBody.create("application/json".toMediaTypeOrNull(), "server error")
+        )
+        coEvery { api.updateById(any(), any(), any()) } returns serverError
+        // Preferred behavior: throw IllegalStateException, currently generic Exception -> test fails.
+        assertThrows(IllegalStateException::class.java) {
+            kotlinx.coroutines.runBlocking { repo.updateById("cg1", "name", null) }
+        }
     }
 }
